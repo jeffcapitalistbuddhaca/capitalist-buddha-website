@@ -1,0 +1,16 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  try {
+    const browser = await chromium.launch();
+    const page = await browser.newPage();
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('http://localhost:8000', { waitUntil: 'load' });
+    await page.screenshot({ path: 'sandbox/pending/17-new-botanicals.png' });
+    await browser.close();
+    console.log('Full screenshot saved');
+  } catch (error) {
+    console.error('Failed:', error.message);
+    process.exit(1);
+  }
+})();

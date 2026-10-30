@@ -1,0 +1,25 @@
+name = "capitalist-buddha-workers"
+type = "service"
+account_id = "f23e301eee8ef9bc8625e93b7b5ba58a"
+workers_dev = true
+
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+[build]
+command = ""
+cwd = "."
+watch_paths = ["src"]
+
+[build.upload]
+format = "modules"
+main = "src/index.ts"
+
+# Environment Variables (set these in Cloudflare dashboard before deploying)
+[env.production.vars]
+# Do not commit secrets to git - set these in Cloudflare dashboard instead
+# STRIPE_SECRET_KEY = ""
+# FIREBASE_CREDENTIALS = ""
+# R2_ACCESS_KEY_ID = ""
+# R2_SECRET_ACCESS_KEY = ""
+# BREVO_API_KEY = ""

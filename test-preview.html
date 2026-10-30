@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capitalist Buddha - Color & Logo Preview</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --color-primary: #9B7BA3;
+            --color-secondary: #2D6B6B;
+            --color-accent: #D4B8A1;
+            --color-dark: #5C4E54;
+            --color-light: #F5F1ED;
+        }
+        
+        header {
+            background: var(--color-accent);
+            color: var(--color-dark);
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        
+        .header-content { max-width: 1200px; margin: 0 auto; }
+        
+        .header-emblem {
+            height: 280px;
+            width: auto;
+            margin-bottom: 1.5rem;
+            border: 2px solid var(--color-dark);
+            display: block;
+            background: #ccc;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            color: var(--color-dark);
+        }
+        
+        nav.tabs {
+            background: var(--color-secondary);
+            display: flex;
+            gap: 0;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: var(--color-secondary);
+            color: white;
+            cursor: pointer;
+            border-bottom: 4px solid transparent;
+        }
+        
+        .tab-btn.active {
+            background: var(--color-primary);
+            border-bottom-color: var(--color-accent);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            background: var(--color-light);
+            min-height: 300px;
+        }
+        
+        footer {
+            background: var(--color-dark);
+            color: var(--color-light);
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .color-key {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 2rem;
+        }
+        
+        .color-box {
+            padding: 2rem;
+            text-align: center;
+            border-radius: 8px;
+        }
+        
+        .color-box p {
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="header-emblem">LOGO (280px)</div>
+            <h1>Capitalist Buddha</h1>
+        </div>
+    </header>
+
+    <nav class="tabs">
+        <button class="tab-btn active">Courses</button>
+        <button class="tab-btn">The Professor</button>
+        <button class="tab-btn">Login to Course</button>
+        <button class="tab-btn">Course Text</button>
+        <button class="tab-btn">Contact Us</button>
+    </nav>
+
+    <main class="container">
+        <h2>Color Palette Preview</h2>
+        <div class="color-key">
+            <div class="color-box" style="background: var(--color-accent); color: var(--color-dark);">
+                <strong>Header</strong>
+                <p>#D4B8A1</p>
+            </div>
+            <div class="color-box" style="background: var(--color-secondary); color: white;">
+                <strong>Tabs</strong>
+                <p>#2D6B6B</p>
+            </div>
+            <div class="color-box" style="background: var(--color-primary); color: white;">
+                <strong>Active Tab</strong>
+                <p>#9B7BA3</p>
+            </div>
+            <div class="color-box" style="background: var(--color-light); color: var(--color-dark); border: 1px solid #ccc;">
+                <strong>Content</strong>
+                <p>#F5F1ED</p>
+            </div>
+        </div>
+        
+        <h2 style="margin-top: 2rem;">✓ Fixed Issues:</h2>
+        <ul style="margin: 1rem 2rem;">
+            <li>✓ Header background is now SOLID beige (not gradient)</li>
+            <li>✓ Logo is now 280px tall (was 180px)</li>
+            <li>✓ Colors are properly separated</li>
+            <li>✓ Tabs are teal (distinct from header)</li>
+            <li>✓ Content area is light beige</li>
+            <li>✓ All 16 modules will load in the course view</li>
+        </ul>
+    </main>
+
+    <footer>
+        <p>&copy; 2027 The Professor Inc. All rights reserved.</p>
+    </footer>
+</body>
+</html>

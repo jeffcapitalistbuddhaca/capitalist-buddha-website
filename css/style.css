@@ -1,0 +1,806 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --color-primary: #9B7BA3;
+    --color-secondary: #2D6B6B;
+    --color-accent: #D4B8A1;
+    --color-dark: #5C4E54;
+    --color-light: #F5F1ED;
+    --font-title: 'Minion Pro', serif;
+    --font-body: 'Moret', sans-serif;
+    --spacing: 1rem;
+}
+
+html, body {
+    font-family: var(--font-body);
+    background-color: var(--color-light);
+    color: var(--color-dark);
+    line-height: 1.6;
+    position: relative;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.botanical-left-top, .botanical-left-bottom, .botanical-right-1, .botanical-right-2 {
+    position: absolute;
+    height: auto;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.botanical-left-top {
+    width: 376px;
+    left: -10px;
+    top: 100px;
+}
+
+.botanical-left-bottom {
+    width: 352px;
+    left: 0px;
+    top: 350px;
+}
+
+.botanical-right-1 {
+    width: 330px;
+    right: -20px;
+    top: 80px;
+    transform: rotate(-15deg);
+}
+
+.botanical-right-2 {
+    width: 308px;
+    right: 10px;
+    top: 380px;
+}
+
+header {
+    position: relative;
+    background: var(--color-primary);
+    color: white;
+    padding: 0;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 0.3rem;
+    margin: 0;
+}
+
+.prayer-flags-top {
+    width: 100%;
+    height: auto;
+    max-height: 90px;
+    display: block;
+    object-fit: cover;
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 2rem;
+    margin-top: -60px;
+    position: relative;
+    z-index: 10;
+}
+
+.header-emblem {
+    max-width: 372px;
+    height: auto;
+    margin-bottom: 0.3rem;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    display: block;
+}
+
+header h1 {
+    font-family: var(--font-title);
+    font-size: 2.5rem;
+    margin: 0;
+    color: var(--color-dark);
+}
+
+.tagline {
+    font-size: 1.2rem;
+    opacity: 0.95;
+}
+
+nav.tabs {
+    background: var(--color-secondary);
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tab-btn {
+    flex: 1;
+    max-width: 200px;
+    padding: 1rem;
+    border: none;
+    background: var(--color-secondary);
+    color: white;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    border-bottom: 4px solid transparent;
+    font-weight: 500;
+}
+
+.tab-btn:hover {
+    background: var(--color-primary);
+}
+
+.tab-btn.active {
+    background: var(--color-primary);
+    border-bottom-color: var(--color-accent);
+    color: white;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+    background: var(--color-light);
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.tab-content h2 {
+    font-family: var(--font-title);
+    font-size: 2.5rem;
+    color: var(--color-primary);
+    margin-bottom: 1.5rem;
+}
+
+.tab-content h3 {
+    font-family: var(--font-title);
+    font-size: 1.8rem;
+    color: var(--color-secondary);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.tab-content h4 {
+    font-family: var(--font-title);
+    font-size: 1.4rem;
+    color: var(--color-primary);
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.tab-content p {
+    margin-bottom: 1rem;
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+
+.tab-content ul {
+    margin-left: 2rem;
+    margin-bottom: 1rem;
+}
+
+.tab-content li {
+    margin-bottom: 0.5rem;
+}
+
+.course-purchase {
+    background: var(--color-accent);
+    padding: 2rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.course-purchase h3 {
+    color: var(--color-dark);
+    margin-top: 0;
+    font-size: 2.5rem;
+}
+
+.course-purchase p {
+    color: var(--color-dark);
+}
+
+.pay-btn {
+    background: var(--color-primary);
+    color: white;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: background 0.3s ease;
+    font-family: var(--font-body);
+}
+
+.pay-btn:hover {
+    background: var(--color-dark);
+}
+
+.book-link {
+    display: inline-block;
+    background: var(--color-primary);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    text-decoration: none;
+    border-radius: 4px;
+    margin-top: 1rem;
+    transition: background 0.3s ease;
+}
+
+.book-link:hover {
+    background: var(--color-dark);
+}
+
+form {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    max-width: 600px;
+}
+
+form label {
+    display: block;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: var(--color-dark);
+}
+
+form input,
+form textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--color-secondary);
+    border-radius: 4px;
+    font-family: var(--font-body);
+    font-size: 1rem;
+}
+
+form button {
+    background: var(--color-primary);
+    color: white;
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    transition: background 0.3s ease;
+}
+
+form button:hover {
+    background: var(--color-dark);
+}
+
+#login-email, #login-password {
+    display: block;
+    margin: 1rem 0;
+}
+
+.modules-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.module-item {
+    background: white;
+    border: 2px solid var(--color-secondary);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.module-header {
+    background: var(--color-secondary);
+    color: white;
+    padding: 1rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    transition: background 0.3s ease;
+}
+
+.module-header:hover {
+    background: var(--color-primary);
+}
+
+.module-content {
+    padding: 1.5rem;
+    display: none;
+}
+
+.module-content.active {
+    display: block;
+}
+
+.module-text {
+    margin-bottom: 1.5rem;
+    line-height: 1.8;
+    color: var(--color-dark);
+    font-size: 1rem;
+    background: white;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.module-text p {
+    margin-bottom: 1.2rem;
+}
+
+.module-text p:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.module-videos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.video-container {
+    background: #f0f0f0;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.video-container h4 {
+    margin-bottom: 0.75rem;
+    margin-top: 0;
+}
+
+.video-container video {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+footer {
+    position: relative;
+    background: var(--color-primary);
+    color: white;
+    text-align: center;
+    padding: 1rem;
+    margin: 3rem 0 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+footer p {
+    margin: 0;
+    position: relative;
+    z-index: 10;
+}
+
+.footer-prayer-flags {
+    position: absolute;
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.footer-botanical-left {
+    position: absolute;
+    width: 239px;
+    height: auto;
+    left: -20px;
+    bottom: 35px;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.footer-botanical-right {
+    position: absolute;
+    width: 260px;
+    height: auto;
+    right: -20px;
+    bottom: 35px;
+    z-index: 3;
+    pointer-events: none;
+    transform: scaleX(-1);
+}
+
+.footer-emblem {
+    height: 120px;
+    width: auto;
+    margin-bottom: 0.5rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    z-index: 10;
+}
+
+#contact-status {
+    margin-top: 1rem;
+    font-weight: bold;
+}
+
+#forgot-password-link {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+#forgot-password-link:hover {
+    text-decoration: underline;
+}
+
+.professor-section {
+    position: relative;
+    color: var(--color-dark);
+}
+
+.professor-section p {
+    color: var(--color-dark);
+}
+
+.professor-photo {
+    float: right;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    border: 8px solid var(--color-primary);
+    object-fit: cover;
+    margin-left: 2rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+
+    .tab-content h2 {
+        font-size: 1.8rem;
+    }
+
+    .tab-btn {
+        flex: 0 1 50%;
+        max-width: none;
+    }
+
+    .module-videos {
+        grid-template-columns: 1fr;
+    }
+
+    .container {
+        padding: 0 1rem;
+    }
+
+    .professor-photo {
+        width: 200px;
+        height: 200px;
+    }
+
+    .book-cover {
+        width: 180px;
+    }
+
+    .contact-badge {
+        width: 140px;
+    }
+}
+
+.book-section {
+    position: relative;
+    padding-left: 80px;
+}
+
+.book-cover {
+    float: right;
+    width: 240px;
+    height: auto;
+    margin-left: 2rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.book-chakras {
+    position: absolute;
+    left: -60px;
+    top: 50%;
+    width: 70px;
+    height: auto;
+    opacity: 0.9;
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+.contact-section {
+    position: relative;
+    padding-left: 80px;
+    color: #2a2a2a;
+}
+
+.contact-section h2 {
+    color: #2a2a2a !important;
+}
+
+.contact-section p {
+    color: #2a2a2a !important;
+}
+
+#contact-form label {
+    color: #2a2a2a !important;
+}
+
+#contact-form button {
+    color: white !important;
+    background: var(--color-primary) !important;
+}
+
+.contact-chakras {
+    position: absolute;
+    left: -60px;
+    top: 50%;
+    width: 70px;
+    height: auto;
+    opacity: 0.9;
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+.contact-badge {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    width: 420px;
+    height: auto;
+    pointer-events: none;
+    transform: translateY(-50%);
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
+}
+
+/* Chakras positioning - consistent across all pages */
+.courses-section {
+    position: relative;
+    padding-left: 80px;
+}
+
+.courses-chakras {
+    position: absolute;
+    left: -60px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 70px;
+    height: auto;
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+.professor-section {
+    position: relative;
+    padding-left: 80px;
+}
+
+.professor-chakras {
+    position: absolute;
+    left: -60px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 70px;
+    height: auto;
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+.login-section {
+    position: relative;
+}
+
+.login-form-wrapper {
+    position: relative;
+    padding-left: 80px;
+}
+
+.login-form-chakras {
+    position: absolute;
+    left: -60px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 70px;
+    height: auto;
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+.login-section-content {
+    position: relative;
+    padding-left: 80px;
+}
+
+.login-chakras {
+    position: absolute;
+    left: -60px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 70px;
+    height: auto;
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+/* MOBILE RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+    /* Hide botanical images on tablet and below */
+    .botanical-left-top, .botanical-left-bottom, .botanical-right-1, .botanical-right-2 {
+        display: none;
+    }
+
+    /* Reduce header size */
+    .prayer-flags-top {
+        max-height: 60px;
+    }
+
+    .header-content {
+        padding: 0 1rem;
+        margin-top: -40px;
+    }
+
+    .header-emblem {
+        max-width: 280px;
+        margin-bottom: 0.2rem;
+    }
+
+    /* Fix tabs wrapping */
+    .tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        justify-content: center;
+    }
+
+    .tab-btn {
+        font-size: 0.85rem;
+        padding: 0.6rem 1rem;
+        flex: 1;
+        min-width: 100px;
+    }
+
+    /* Container fixes */
+    .container {
+        padding: 1rem;
+    }
+
+    h2 {
+        font-size: 1.8rem;
+        word-wrap: break-word;
+    }
+
+    h3 {
+        font-size: 1.4rem;
+    }
+
+    /* Remove chakras padding on mobile */
+    .courses-section, .professor-section, .login-section, .book-section, .contact-section {
+        padding-left: 0 !important;
+    }
+
+    /* Hide chakras on mobile */
+    .courses-chakras, .professor-chakras, .login-form-chakras, .login-chakras,
+    .book-chakras, .contact-chakras {
+        display: none !important;
+    }
+
+    /* Forms */
+    form input, form textarea {
+        font-size: 16px;
+    }
+
+    /* Professor section */
+    .professor-photo {
+        max-width: 200px;
+        margin: 1rem auto;
+    }
+
+    /* Book section */
+    .book-cover {
+        max-width: 180px;
+        float: none;
+        margin: 1rem auto;
+        display: block;
+    }
+
+    .book-chakras {
+        display: none !important;
+    }
+
+    /* Contact form */
+    #contact-form label {
+        display: block;
+        margin-top: 1rem;
+    }
+
+    .contact-badge {
+        max-width: 250px;
+        position: static;
+        margin: 1rem auto;
+        display: block;
+        transform: none;
+    }
+
+    /* Footer botanical */
+    .footer-botanical-left, .footer-botanical-right {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Extra small screens */
+    .prayer-flags-top {
+        max-height: 50px;
+    }
+
+    .header-emblem {
+        max-width: 220px;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    h3 {
+        font-size: 1.2rem;
+    }
+
+    .tab-btn {
+        font-size: 0.75rem;
+        padding: 0.5rem 0.8rem;
+        min-width: 80px;
+    }
+
+    .container {
+        padding: 0.75rem;
+    }
+
+    p {
+        font-size: 0.95rem;
+    }
+
+    .course-purchase {
+        padding: 1rem;
+    }
+
+    .course-purchase h3 {
+        font-size: 1.5rem;
+    }
+}

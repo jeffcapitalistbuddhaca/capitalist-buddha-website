@@ -1,0 +1,43 @@
+PROPOSED CHANGES TO WEBSITE
+
+=== COURSES TAB (Line 56-63) ===
+
+CURRENT:
+• 12 live weekly 90-minute sessions that include a lecture, discussion, and Q&A
+• Recorded access to all live sessions
+• 16 individual modules with videos, activities, and guided meditations
+• 6-month access to all materials from the purchase date
+
+PROPOSED:
+• 12 live weekly 90-minute sessions that include a lecture, discussion, and Q&A
+• Recorded access to all live sessions
+• 16 individual modules
+    Comprising:
+    videos
+    activities
+    guided meditations
+    graphic novels to cement content
+• 6-month access to all materials from the purchase date
+
+
+=== LOGIN TO COURSE TAB (After line 108) ===
+
+CURRENT:
+[No course structure section]
+
+PROPOSED:
+Add after the Course Overview paragraph:
+
+Course Structure:
+• 12 live weekly 90-minute sessions that include a lecture, discussion, and Q&A
+• Recorded access to all live sessions
+• 16 individual modules
+    Comprising:
+    videos
+    activities
+    guided meditations
+    graphic novels to cement content
+• 6-month access to all materials from the purchase date
+
+
+Ready to apply when you approve.
