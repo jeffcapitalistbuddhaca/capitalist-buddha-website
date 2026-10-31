@@ -135,6 +135,28 @@
         const errorDiv = document.getElementById('error-message');
         const successDiv = document.getElementById('success-message');
 
+        // Create payment intent on page load so Payment Element shows immediately
+        (async () => {
+            try {
+                const response = await fetch(`${WORKER_URL}/api/create-payment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'temp@example.com' })
+                });
+
+                const data = await response.json();
+                if (data.clientSecret) {
+                    const elements = stripe.elements({
+                        clientSecret: data.clientSecret
+                    });
+                    paymentElement = elements.create('payment');
+                    paymentElement.mount('#payment-element-container');
+                }
+            } catch (err) {
+                console.error('Failed to create payment element:', err);
+            }
+        })();
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -147,7 +169,11 @@
             }
 
             try {
-                // Create payment intent
+                // Get clientSecret from payment element
+                const { error: setupError } = await paymentElement.getElement();
+                if (!paymentElement) throw new Error('Payment form not loaded');
+
+                // Create fresh payment intent with user's email
                 const response = await fetch(`${WORKER_URL}/api/create-payment`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -156,15 +182,6 @@
 
                 const data = await response.json();
                 if (!data.clientSecret) throw new Error('Failed to create payment');
-
-                // Create Payment Element with clientSecret
-                if (!paymentElement) {
-                    const elements = stripe.elements({
-                        clientSecret: data.clientSecret
-                    });
-                    paymentElement = elements.create('payment');
-                    paymentElement.mount('#payment-element-container');
-                }
 
                 // Confirm payment
                 const { error, paymentIntent } = await stripe.confirmPayment({
