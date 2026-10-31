@@ -53,6 +53,7 @@ export async function onRequest(context: any): Promise<Response> {
           },
         ],
         customer_details: {
+          address_source: 'billing',
           address: {
             line1: address.line1 || '',
             line2: address.line2 || '',
