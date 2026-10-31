@@ -27,7 +27,14 @@ export async function onRequest(context: any): Promise<Response> {
       });
     }
 
-    const stripeKey = (context.env as any)?.['Stripe Secret Key'] || '';
+    const stripeKey = (context.env as any)?.['Stripe Secret Key'];
+
+    if (!stripeKey) {
+      return new Response(
+        JSON.stringify({ error: 'Stripe Secret Key not configured in environment' }),
+        { status: 500, headers: corsHeaders }
+      );
+    }
 
     const params = new URLSearchParams({
       amount: '19900',
