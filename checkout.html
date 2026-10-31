@@ -189,6 +189,14 @@ form.addEventListener('submit', async (e) => {
             }
 
             try {
+                // REQUIRED BY STRIPE: Call elements.submit() FIRST - before any async work
+                const {error: submitError} = await elements.submit();
+                if (submitError) {
+                    errorDiv.textContent = submitError.message;
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
                 // Create fresh payment intent with user's email
                 const response = await fetch(`${WORKER_URL}/api/create-payment`, {
                     method: 'POST',
@@ -199,23 +207,19 @@ form.addEventListener('submit', async (e) => {
                 const data = await response.json();
                 if (!data.clientSecret) throw new Error('Failed to create payment');
 
-                // REQUIRED BY STRIPE: Confirm payment with redirect
-                // This follows Stripe's official pattern: confirmPayment with return_url
+                // THEN call confirmPayment (Stripe's official pattern)
                 const { error } = await stripe.confirmPayment({
                     elements,
                     clientSecret: data.clientSecret,
                     confirmParams: {
-                        // Store email in URL for retrieval after redirect
                         return_url: `${window.location.origin}/?payment_success&email=${encodeURIComponent(email)}`
                     }
                 });
 
-                // Only show error if confirmPayment fails immediately
                 if (error) {
                     errorDiv.textContent = `Payment failed: ${error.message}`;
                     errorDiv.style.display = 'block';
                 }
-                // If no error, user will be redirected automatically
             } catch (error) {
                 console.error('Payment error:', error);
                 errorDiv.textContent = `Error: ${error.message}`;
