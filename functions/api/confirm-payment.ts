@@ -95,8 +95,58 @@ export async function onRequest(context: any): Promise<Response> {
 
     console.log('Account created with enrollment:', enrollment);
 
+    // Store enrollment in Firebase Firestore
+    const firebaseKey = (context.env as any)?.['FIREBASE_API_KEY'] || '';
+    const firebaseProject = (context.env as any)?.['FIREBASE_PROJECT_ID'] || '';
+
+    if (firebaseKey && firebaseProject) {
+      try {
+        const enrollmentData = {
+          email,
+          enrollmentDate: enrollment.enrollmentDate,
+          expirationDate: enrollment.expirationDate,
+          transactionId: transactionId,
+          transactionType: isCheckoutSession ? 'checkout_session' : 'payment_intent',
+          createdAt: new Date().toISOString(),
+        };
+
+        // Save to Firestore: /enrollments/{email}
+        const response = await fetch(
+          `https://firestore.googleapis.com/v1/projects/${firebaseProject}/databases/(default)/documents/enrollments?documentId=${encodeURIComponent(email.split('@')[0] + '_' + Date.now())}`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${firebaseKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              fields: {
+                email: { stringValue: email },
+                enrollmentDate: { stringValue: enrollmentData.enrollmentDate },
+                expirationDate: { stringValue: enrollmentData.expirationDate },
+                transactionId: { stringValue: transactionId },
+                transactionType: { stringValue: enrollmentData.transactionType },
+                createdAt: { stringValue: enrollmentData.createdAt },
+              },
+            }),
+          }
+        );
+
+        const fbResult = await response.json();
+        if (response.ok) {
+          console.log('Enrollment stored in Firebase:', fbResult);
+        } else {
+          console.warn('Firebase storage warning:', fbResult);
+        }
+      } catch (err) {
+        console.error('Firebase storage error:', err);
+        // Continue anyway - account is created
+      }
+    } else {
+      console.log('Firebase not configured, enrollment not persisted');
+    }
+
     // Log email for audit trail
-    const stripeKeyForLog = (context.env as any)?.['Stripe Secret Key 2'] || '';
     try {
       await fetch('https://capitalistbuddha.ca/api/email-log', {
         method: 'POST',
@@ -112,12 +162,7 @@ export async function onRequest(context: any): Promise<Response> {
       });
     } catch (err) {
       console.error('Email logging error:', err);
-      // Don't fail the request if logging fails
     }
-
-    // Note: Firebase enrollment storage would go here
-    // For now, account is confirmed and ready
-    // TODO: Implement Firebase Firestore enrollment storage
 
     return new Response(
       JSON.stringify({ success: true, enrollment }),
