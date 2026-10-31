@@ -28,18 +28,58 @@ export async function onRequest(context: any): Promise<Response> {
     }
 
     const stripeKey = (context.env as any)?.['Stripe Secret Key 2'] || '';
-    const paymentResponse = await fetch(`https://api.stripe.com/v1/payment_intents/${paymentIntentId}`, {
-      method: 'GET',
-      headers: { 'Authorization': `Bearer ${stripeKey}` },
-    });
 
-    const paymentIntent = await paymentResponse.json() as any;
+    // Determine if this is a Checkout Session ID (cs_*) or PaymentIntent ID (pi_*)
+    const isCheckoutSession = paymentIntentId.startsWith('cs_');
 
-    if (paymentIntent.status !== 'succeeded') {
-      return new Response(
-        JSON.stringify({ error: 'Payment not completed' }),
-        { status: 400, headers: corsHeaders }
-      );
+    let paymentStatus = null;
+    let transactionId = paymentIntentId;
+
+    if (isCheckoutSession) {
+      // Handle Checkout Session
+      console.log('Confirming Checkout Session:', paymentIntentId);
+      const sessionResponse = await fetch(`https://api.stripe.com/v1/checkout/sessions/${paymentIntentId}`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${stripeKey}` },
+      });
+
+      const session = await sessionResponse.json() as any;
+      console.log('Session response:', session);
+
+      if (!sessionResponse.ok) {
+        return new Response(
+          JSON.stringify({ error: session.error?.message || 'Session not found' }),
+          { status: 400, headers: corsHeaders }
+        );
+      }
+
+      // For Checkout Sessions, check payment_status
+      paymentStatus = session.payment_status;
+      if (session.payment_status !== 'paid') {
+        return new Response(
+          JSON.stringify({ error: `Payment not completed. Status: ${session.payment_status}` }),
+          { status: 400, headers: corsHeaders }
+        );
+      }
+    } else {
+      // Handle PaymentIntent (legacy)
+      console.log('Confirming PaymentIntent:', paymentIntentId);
+      const paymentResponse = await fetch(`https://api.stripe.com/v1/payment_intents/${paymentIntentId}`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${stripeKey}` },
+      });
+
+      const paymentIntent = await paymentResponse.json() as any;
+      console.log('PaymentIntent response:', paymentIntent);
+
+      if (paymentIntent.status !== 'succeeded') {
+        return new Response(
+          JSON.stringify({ error: 'Payment not completed' }),
+          { status: 400, headers: corsHeaders }
+        );
+      }
+
+      paymentStatus = 'succeeded';
     }
 
     const enrollmentDate = new Date();
@@ -49,8 +89,11 @@ export async function onRequest(context: any): Promise<Response> {
       email,
       enrollmentDate: enrollmentDate.toISOString(),
       expirationDate: expirationDate.toISOString(),
-      paymentIntentId,
+      transactionId: transactionId,
+      transactionType: isCheckoutSession ? 'checkout_session' : 'payment_intent',
     };
+
+    console.log('Account created with enrollment:', enrollment);
 
     // Note: Firebase enrollment storage would go here
     // For now, account is confirmed and ready
