@@ -1,5 +1,3 @@
-import { getFirebaseUser, createFirebaseEnrollment, sendConfirmationEmail } from '../../src/lib/firebase';
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -20,7 +18,7 @@ export async function onRequest(context: any): Promise<Response> {
   }
 
   try {
-    const { email, password, action, enrollmentData } = await context.request.json();
+    const { email, password, action } = await context.request.json();
 
     if (!email) {
       return new Response(JSON.stringify({ error: 'Email required' }), {
@@ -30,23 +28,26 @@ export async function onRequest(context: any): Promise<Response> {
     }
 
     if (action === 'login') {
-      const user = await getFirebaseUser(email, password);
-      if (!user) {
-        return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
+      const firebaseApiKey = context.env?.FIREBASE_API_KEY || '';
+      const loginResponse = await fetch(
+        `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${firebaseApiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, returnSecureToken: true }),
+        }
+      );
+
+      const result = await loginResponse.json() as any;
+
+      if (!loginResponse.ok) {
+        return new Response(JSON.stringify({ error: result.error?.message || 'Invalid credentials' }), {
           status: 401,
           headers: corsHeaders,
         });
       }
-      return new Response(JSON.stringify({ success: true, user }), {
-        status: 200,
-        headers: corsHeaders,
-      });
-    }
 
-    if (action === 'enroll') {
-      const enrollment = await createFirebaseEnrollment(enrollmentData);
-      await sendConfirmationEmail(email, enrollmentData.password, enrollmentData.expirationDate);
-      return new Response(JSON.stringify({ success: true, enrollment }), {
+      return new Response(JSON.stringify({ success: true, user: { email, uid: result.localId } }), {
         status: 200,
         headers: corsHeaders,
       });

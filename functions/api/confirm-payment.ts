@@ -1,6 +1,3 @@
-import Stripe from 'stripe';
-import { createFirebaseEnrollment, sendConfirmationEmail } from '../../src/lib/firebase';
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -21,7 +18,6 @@ export async function onRequest(context: any): Promise<Response> {
   }
 
   try {
-    const stripe = new Stripe(context.env?.STRIPE_SECRET_KEY || '');
     const { paymentIntentId, email, password } = await context.request.json();
 
     if (!paymentIntentId || !email || !password) {
@@ -31,7 +27,13 @@ export async function onRequest(context: any): Promise<Response> {
       );
     }
 
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    const stripeKey = context.env?.STRIPE_SECRET_KEY || '';
+    const paymentResponse = await fetch(`https://api.stripe.com/v1/payment_intents/${paymentIntentId}`, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${stripeKey}` },
+    });
+
+    const paymentIntent = await paymentResponse.json() as any;
 
     if (paymentIntent.status !== 'succeeded') {
       return new Response(
@@ -43,15 +45,28 @@ export async function onRequest(context: any): Promise<Response> {
     const enrollmentDate = new Date();
     const expirationDate = new Date(enrollmentDate.getTime() + 6 * 30 * 24 * 60 * 60 * 1000);
 
-    const enrollment = await createFirebaseEnrollment({
+    const firebaseDbUrl = context.env?.FIREBASE_DATABASE_URL || '';
+    const firebaseKey = context.env?.FIREBASE_API_KEY || '';
+
+    const enrollment = {
       email,
-      password,
       enrollmentDate: enrollmentDate.toISOString(),
       expirationDate: expirationDate.toISOString(),
       paymentIntentId,
-    });
+    };
 
-    await sendConfirmationEmail(email, password, expirationDate);
+    const firestoreResponse = await fetch(
+      `${firebaseDbUrl}/documents/enrollments?key=${firebaseKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: { email: { stringValue: email } } }),
+      }
+    );
+
+    if (!firestoreResponse.ok) {
+      console.error('Firestore error:', await firestoreResponse.text());
+    }
 
     return new Response(
       JSON.stringify({ success: true, enrollment }),
