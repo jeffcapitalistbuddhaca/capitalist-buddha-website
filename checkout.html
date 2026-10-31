@@ -26,8 +26,27 @@
             color: #666;
             margin: 0;
         }
-        #address-element-container {
-            margin: 2rem 0;
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #9B7BA3;
+            box-shadow: 0 0 0 2px rgba(155, 123, 163, 0.1);
         }
         #payment-element-container {
             margin: 2rem 0;
@@ -62,6 +81,14 @@
             background: #d5f4e6;
             border-radius: 4px;
         }
+        .section-label {
+            font-weight: 600;
+            color: #9B7BA3;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -81,8 +108,14 @@
         <div id="success-message" class="success" style="display: none;"></div>
 
         <form id="payment-form">
-            <div id="address-element-container"></div>
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" name="email" required placeholder="you@example.com">
+            </div>
+
+            <div class="section-label">Payment Information</div>
             <div id="payment-element-container"></div>
+
             <button type="submit" class="pay-button" id="submit-button">Pay $199</button>
         </form>
     </div>
@@ -94,30 +127,9 @@
         const WORKER_URL = 'https://capitalistbuddha.ca';
 
         let stripe = null;
-        let elements = null;
-        let addressElement = null;
         let paymentElement = null;
 
-        // Initialize Stripe with appearance
         stripe = Stripe(STRIPE_PUBLISHABLE);
-        elements = stripe.elements({
-            appearance: {
-                theme: 'stripe',
-                variables: {
-                    colorPrimary: '#9B7BA3',
-                    colorText: '#32325d',
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
-                    fontSizeBase: '14px'
-                }
-            }
-        });
-
-        // Create Address Element immediately
-        addressElement = elements.create('address', {
-            mode: 'billing',
-            autocomplete: {mode: 'automatic'}
-        });
-        addressElement.mount('#address-element-container');
 
         const form = document.getElementById('payment-form');
         const errorDiv = document.getElementById('error-message');
@@ -126,18 +138,16 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const email = document.getElementById('email').value;
+
+            if (!email) {
+                errorDiv.textContent = 'Please enter your email address';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
             try {
-                // Get address from element
-                const addressValue = await addressElement.getValue();
-                const email = addressValue.value?.email;
-
-                if (!email) {
-                    errorDiv.textContent = 'Please enter your email address';
-                    errorDiv.style.display = 'block';
-                    return;
-                }
-
-                // Create payment intent first
+                // Create payment intent
                 const response = await fetch(`${WORKER_URL}/api/create-payment`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -147,30 +157,21 @@
                 const data = await response.json();
                 if (!data.clientSecret) throw new Error('Failed to create payment');
 
-                // Create Payment Element now that we have clientSecret
+                // Create Payment Element with clientSecret
                 if (!paymentElement) {
-                    const paymentElements = stripe.elements({
-                        clientSecret: data.clientSecret,
-                        appearance: {
-                            theme: 'stripe',
-                            variables: {
-                                colorPrimary: '#9B7BA3',
-                                colorText: '#32325d',
-                                fontFamily: 'system-ui, -apple-system, sans-serif',
-                                fontSizeBase: '14px'
-                            }
-                        }
+                    const elements = stripe.elements({
+                        clientSecret: data.clientSecret
                     });
-                    paymentElement = paymentElements.create('payment', {layout: 'tabs'});
+                    paymentElement = elements.create('payment');
                     paymentElement.mount('#payment-element-container');
                 }
 
                 // Confirm payment
                 const { error, paymentIntent } = await stripe.confirmPayment({
-                    elements,
+                    elements: stripe.elements({clientSecret: data.clientSecret}),
                     clientSecret: data.clientSecret,
                     confirmParams: {
-                        return_url: window.location.origin
+                        return_url: window.location.origin + '/?payment=success'
                     },
                     redirect: 'if_required'
                 });
@@ -179,13 +180,11 @@
                     errorDiv.textContent = `Payment failed: ${error.message}`;
                     errorDiv.style.display = 'block';
                 } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-                    // Payment succeeded
                     successDiv.textContent = 'Payment Complete! Creating your account...';
                     successDiv.style.display = 'block';
                     errorDiv.style.display = 'none';
                     form.style.display = 'none';
 
-                    // Prompt for password
                     const password = prompt('Create a password for your account:');
                     if (!password) {
                         errorDiv.textContent = 'Password creation cancelled';
@@ -195,7 +194,6 @@
                         return;
                     }
 
-                    // Create enrollment
                     const confirmResponse = await fetch(`${WORKER_URL}/api/confirm-payment`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
