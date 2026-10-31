@@ -163,8 +163,13 @@
                     clientSecret: currentClientSecret
                 });
 
-                // Create and mount Payment Element (Stripe's official code)
-                const paymentElement = elements.create('payment');
+                // Create and mount Payment Element with billing address collection
+                const paymentElement = elements.create('payment', {
+                    layout: 'tabs',
+                    fields: {
+                        billingDetails: 'auto'
+                    }
+                });
                 paymentElement.mount('#payment-element');
             } catch (err) {
                 errorDiv.textContent = `Error: ${err.message}`;
