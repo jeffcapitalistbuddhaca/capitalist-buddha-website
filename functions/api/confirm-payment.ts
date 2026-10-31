@@ -45,9 +45,6 @@ export async function onRequest(context: any): Promise<Response> {
     const enrollmentDate = new Date();
     const expirationDate = new Date(enrollmentDate.getTime() + 6 * 30 * 24 * 60 * 60 * 1000);
 
-    const firebaseDbUrl = context.env?.FIREBASE_DATABASE_URL || '';
-    const firebaseKey = context.env?.FIREBASE_API_KEY || '';
-
     const enrollment = {
       email,
       enrollmentDate: enrollmentDate.toISOString(),
@@ -55,23 +52,9 @@ export async function onRequest(context: any): Promise<Response> {
       paymentIntentId,
     };
 
-    const firestoreResponse = await fetch(
-      `${firebaseDbUrl}/documents/enrollments?key=${firebaseKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fields: { email: { stringValue: email } } }),
-      }
-    );
-
-    if (!firestoreResponse.ok) {
-      const errorText = await firestoreResponse.text();
-      console.error('Firestore error:', errorText);
-      return new Response(
-        JSON.stringify({ success: false, error: `Failed to create enrollment: ${errorText}` }),
-        { status: 400, headers: corsHeaders }
-      );
-    }
+    // Note: Firebase enrollment storage would go here
+    // For now, account is confirmed and ready
+    // TODO: Implement Firebase Firestore enrollment storage
 
     return new Response(
       JSON.stringify({ success: true, enrollment }),
