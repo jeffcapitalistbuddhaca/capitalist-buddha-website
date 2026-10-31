@@ -3,7 +3,14 @@ import { createFirebaseEnrollment, sendConfirmationEmail } from '../../src/lib/f
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
 
-export default async (context: any) => {
+export async function onRequest(context: any): Promise<Response> {
+  if (context.request.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   try {
     const { paymentIntentId, email, password } = await context.request.json();
 
@@ -47,4 +54,4 @@ export default async (context: any) => {
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
-};
+}
