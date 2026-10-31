@@ -42,6 +42,7 @@ export async function onRequest(context: any): Promise<Response> {
     const params = new URLSearchParams();
     params.append('amount', String(finalAmount));
     params.append('currency', 'usd');
+    params.append('automatic_tax[enabled]', 'true');
     params.append('metadata[email]', email);
     params.append('description', 'Capitalist Buddha Course - $199 USD + Tax');
 
