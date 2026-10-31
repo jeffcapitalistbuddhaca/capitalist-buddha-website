@@ -1,7 +1,7 @@
 const STRIPE_PUBLISHABLE = 'pk_test_51UVYmmKLvdoBDUk6kEmkKFKv5znaZoWM4WXBB4kyGInGQoj4aYgeUsOYEXqgApfbWF7W9KizCqgEZxKKfNM34tZF00TJ1Mtwve';
 const COURSE_PRICE = 199;
 const ACCESS_DAYS = 180;
-const WORKER_URL = 'https://capitalist-buddha-course.jeff-f23.workers.dev';
+const WORKER_URL = 'https://capitalistbuddha.ca';
 
 let modules = [];
 let currentUser = null;
