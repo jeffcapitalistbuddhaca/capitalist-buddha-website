@@ -67,23 +67,24 @@ if (payBtn) {
 
             const form = document.createElement('form');
             form.style.cssText = `
-                background: white; padding: 2rem; border-radius: 8px;
-                width: 90%; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+                background: white; padding: 1.5rem; border-radius: 8px;
+                width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.2);
             `;
 
             form.innerHTML = `
-                <h3 style="margin-top: 0; color: #9B7BA3;">Complete Payment</h3>
-                <p>Amount: $${COURSE_PRICE} USD</p>
-                <div id="payment-element-container" style="margin: 1rem 0;"></div>
+                <h3 style="margin: 0 0 0.5rem 0; color: #9B7BA3; font-size: 1.3rem;">Complete Payment</h3>
+                <p style="margin: 0 0 0.75rem 0; font-size: 0.95rem;">Amount: $${COURSE_PRICE} USD</p>
+                <div id="payment-element-container" style="margin: 0.75rem 0;"></div>
                 <button type="submit" style="
-                    width: 100%; padding: 0.75rem; background: #9B7BA3;
+                    width: 100%; padding: 0.6rem; background: #9B7BA3;
                     color: white; border: none; border-radius: 4px; cursor: pointer;
-                    font-size: 1rem; margin-top: 1rem;
+                    font-size: 0.95rem; margin-top: 0.75rem; font-weight: 600;
                 ">Pay $${COURSE_PRICE}</button>
                 <button type="button" onclick="document.getElementById('payment-modal').remove();" style="
-                    width: 100%; padding: 0.75rem; background: #ddd;
+                    width: 100%; padding: 0.6rem; background: #ddd;
                     color: #333; border: none; border-radius: 4px; cursor: pointer;
-                    font-size: 1rem; margin-top: 0.5rem;
+                    font-size: 0.95rem; margin-top: 0.5rem;
                 ">Cancel</button>
             `;
 
