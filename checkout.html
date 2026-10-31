@@ -174,9 +174,40 @@
             });
             paymentElement.mount('#payment-element');
 
-            // Stripe's automatic_tax handles tax calculation automatically
-            addressElement.addEventListener('change', () => {
-                console.log('Address updated - Stripe will calculate tax automatically');
+            // When address changes, Stripe recalculates tax automatically
+            addressElement.addEventListener('change', async () => {
+                console.log('Address updated - fetching updated PaymentIntent with tax');
+
+                try {
+                    // Call elements.submit() to validate and send address to Stripe
+                    const { error: submitError } = await elements.submit();
+                    if (submitError) {
+                        console.error('Address validation error:', submitError);
+                        return;
+                    }
+
+                    // Retrieve the PaymentIntent to get the updated tax amount
+                    const { paymentIntent } = await stripe.retrievePaymentIntent(currentClientSecret);
+                    console.log('PaymentIntent updated:', paymentIntent);
+
+                    if (paymentIntent.automatic_tax && paymentIntent.automatic_tax.status === 'complete') {
+                        // Tax calculation is complete - display it
+                        const taxAmount = paymentIntent.automatic_tax.liability?.amount || 0;
+                        const totalAmount = paymentIntent.amount;
+                        const subtotalAmount = totalAmount - taxAmount;
+
+                        const taxUsd = (taxAmount / 100).toFixed(2);
+                        const totalUsd = (totalAmount / 100).toFixed(2);
+                        const subtotalUsd = (subtotalAmount / 100).toFixed(2);
+
+                        console.log(`Tax: $${taxUsd}, Total: $${totalUsd}`);
+                        document.getElementById('tax-display').textContent = `$${taxUsd}`;
+                        document.getElementById('total-display').textContent = `$${totalUsd}`;
+                        document.getElementById('amount-display').textContent = `$${totalUsd}`;
+                    }
+                } catch (err) {
+                    console.error('Error updating tax display:', err);
+                }
             });
         }
 
