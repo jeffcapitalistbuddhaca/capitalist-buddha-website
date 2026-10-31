@@ -27,37 +27,23 @@ export async function onRequest(context: any): Promise<Response> {
       });
     }
 
-    const stripeKey = context.env?.STRIPE_SECRET_KEY || '';
+    // TEST: Hit a public API to verify fetch works
+    const testResponse = await fetch('https://jsonplaceholder.typicode.com/posts/1');
+    const testData = await testResponse.json() as any;
 
-    const response = await fetch('https://api.stripe.com/v1/payment_intents', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${stripeKey}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        amount: '19900',
-        currency: 'usd',
-        'metadata[email]': email,
-        description: 'Capitalist Buddha Course - $199 USD',
-      }).toString(),
-    });
-
-    const paymentIntent = await response.json() as any;
-
-    if (!response.ok) {
-      console.error('Stripe error:', { status: response.status, error: paymentIntent });
-      return new Response(JSON.stringify({ error: paymentIntent.error?.message || 'Payment creation failed', details: paymentIntent }), {
-        status: response.status,
+    if (!testResponse.ok) {
+      return new Response(JSON.stringify({ error: 'Test API call failed', details: testData }), {
+        status: 500,
         headers: corsHeaders,
       });
     }
 
+    // If test passes, return test data
     return new Response(
       JSON.stringify({
         success: true,
-        clientSecret: paymentIntent.client_secret,
-        paymentIntentId: paymentIntent.id,
+        test: 'API calls work',
+        testData: testData,
       }),
       {
         status: 200,
