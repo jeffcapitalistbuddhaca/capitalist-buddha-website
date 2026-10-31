@@ -150,34 +150,48 @@
         const errorDiv = document.getElementById('error-message');
         const successDiv = document.getElementById('success-message');
 
-        // Create payment intent on page load so elements render immediately
-        (async () => {
+        // Create elements and mount when user enters email
+        async function initializePaymentElements(email) {
             try {
+                // Create payment intent with user's email (Stripe requires this)
                 const response = await fetch(`${WORKER_URL}/api/create-payment`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: 'temp@example.com' })
+                    body: JSON.stringify({ email })
                 });
 
                 const data = await response.json();
-                if (data.clientSecret) {
-                    currentClientSecret = data.clientSecret;
-                    elements = stripe.elements({
-                        clientSecret: currentClientSecret
-                    });
+                if (!data.clientSecret) throw new Error('Failed to create payment intent');
 
-                    // Mount Express Checkout Element (Apple Pay, Google Pay, PayPal)
-                    expressCheckoutElement = elements.create('expressCheckout');
-                    expressCheckoutElement.mount('#express-checkout-container');
+                currentClientSecret = data.clientSecret;
 
-                    // Mount Payment Element (Card form)
-                    paymentElement = elements.create('payment');
-                    paymentElement.mount('#payment-element-container');
-                }
+                // Create elements with clientSecret (Stripe's official pattern)
+                elements = stripe.elements({
+                    clientSecret: currentClientSecret
+                });
+
+                // Mount Express Checkout Element (Apple Pay, Google Pay, PayPal)
+                expressCheckoutElement = elements.create('expressCheckout');
+                expressCheckoutElement.mount('#express-checkout-container');
+
+                // Mount Payment Element (Card form)
+                paymentElement = elements.create('payment');
+                paymentElement.mount('#payment-element-container');
             } catch (err) {
+                errorDiv.textContent = `Error loading payment form: ${err.message}`;
+                errorDiv.style.display = 'block';
                 console.error('Failed to create elements:', err);
             }
-        })();
+        }
+
+        // Initialize payment elements when user enters email
+        const emailInput = document.getElementById('email');
+        emailInput.addEventListener('blur', () => {
+            const email = emailInput.value;
+            if (email && !elements) {
+                initializePaymentElements(email);
+            }
+        });
 
 form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -199,10 +213,9 @@ form.addEventListener('submit', async (e) => {
                     return;
                 }
 
-                // THEN call confirmPayment with SAME clientSecret (Stripe's official pattern)
+                // THEN call confirmPayment (Stripe's official pattern - NO clientSecret here)
                 const { error } = await stripe.confirmPayment({
                     elements,
-                    clientSecret: currentClientSecret,
                     confirmParams: {
                         return_url: `${window.location.origin}/?payment_success&email=${encodeURIComponent(email)}`
                     }
