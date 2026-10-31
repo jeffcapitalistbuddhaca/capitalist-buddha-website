@@ -1,8 +1,6 @@
 import Stripe from 'stripe';
 import { createFirebaseEnrollment, sendConfirmationEmail } from '../../src/lib/firebase';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
-
 export async function onRequest(context: any): Promise<Response> {
   if (context.request.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
@@ -12,6 +10,7 @@ export async function onRequest(context: any): Promise<Response> {
   }
 
   try {
+    const stripe = new Stripe(context.env?.STRIPE_SECRET_KEY || '');
     const { paymentIntentId, email, password } = await context.request.json();
 
     if (!paymentIntentId || !email || !password) {

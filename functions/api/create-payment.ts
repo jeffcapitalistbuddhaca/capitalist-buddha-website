@@ -1,7 +1,5 @@
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
-
 export async function onRequest(context: any): Promise<Response> {
   if (context.request.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
@@ -11,6 +9,7 @@ export async function onRequest(context: any): Promise<Response> {
   }
 
   try {
+    const stripe = new Stripe(context.env?.STRIPE_SECRET_KEY || '');
     const { email } = await context.request.json();
 
     if (!email) {
