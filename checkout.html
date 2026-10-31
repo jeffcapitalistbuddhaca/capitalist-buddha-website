@@ -29,6 +29,16 @@
         #payment-element-container {
             margin: 2rem 0;
         }
+        .StripeElement {
+            padding: 8px 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            background: white;
+        }
+        .StripeElement--focus {
+            border-color: #9B7BA3;
+            box-shadow: 0 0 0 2px rgba(155, 123, 163, 0.1);
+        }
         .pay-button {
             width: 100%;
             padding: 1rem;
@@ -104,10 +114,22 @@
                 const data = await response.json();
                 if (!data.clientSecret) throw new Error('Failed to create payment');
 
-                // Create elements and card element
+                // Create elements and card element with compact styling
                 if (!elements) {
                     elements = stripe.elements();
-                    paymentElement = elements.create('card');
+                    paymentElement = elements.create('card', {
+                        style: {
+                            base: {
+                                fontSize: '14px',
+                                lineHeight: '18px',
+                                color: '#32325d',
+                                fontFamily: 'system-ui, -apple-system, sans-serif'
+                            },
+                            invalid: {
+                                color: '#fa755a'
+                            }
+                        }
+                    });
                     paymentElement.mount('#payment-element-container');
                 }
 
