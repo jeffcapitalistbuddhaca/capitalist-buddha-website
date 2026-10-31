@@ -157,19 +157,28 @@
         const STRIPE_PUBLISHABLE = 'pk_test_51UVYmmKLvdoBDUk6kEmkKFKv5znaZoWM4WXBB4kyGInGQoj4aYgeUsOYEXqgApfbWF7W9KizCqgEZxKKfNM34tZF00TJ1Mtwve';
         const WORKER_URL = 'https://capitalistbuddha.ca';
 
-        const errorDiv = document.getElementById('error-message');
-        const form = document.getElementById('account-form');
         let stripe = Stripe(STRIPE_PUBLISHABLE);
 
-        // Get clientSecret from URL (Stripe puts it there automatically)
-        const params = new URLSearchParams(window.location.search);
-        const clientSecret = params.get('payment_intent_client_secret');
+        document.addEventListener('DOMContentLoaded', () => {
+            const errorDiv = document.getElementById('error-message');
+            const form = document.getElementById('account-form');
 
-        if (!clientSecret) {
-            errorDiv.textContent = 'Invalid confirmation link. Please contact support.';
-            errorDiv.style.display = 'block';
-            form.style.display = 'none';
-        } else {
+            if (!errorDiv || !form) {
+                console.error('Required DOM elements not found');
+                return;
+            }
+
+            // Get clientSecret from URL (Stripe puts it there automatically)
+            const params = new URLSearchParams(window.location.search);
+            const clientSecret = params.get('payment_intent_client_secret');
+
+            if (!clientSecret) {
+                errorDiv.textContent = 'Invalid confirmation link. Please contact support.';
+                errorDiv.style.display = 'block';
+                form.style.display = 'none';
+                return;
+            }
+
             // Verify payment succeeded using Stripe's official method
             stripe.retrievePaymentIntent(clientSecret).then(({paymentIntent}) => {
                 if (paymentIntent.status !== 'succeeded') {
@@ -182,54 +191,64 @@
                 errorDiv.style.display = 'block';
                 form.style.display = 'none';
             });
-        }
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
 
-            if (!email || !password || !confirmPassword) {
-                errorDiv.textContent = 'Please fill in all fields';
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            if (password !== confirmPassword) {
-                errorDiv.textContent = 'Passwords do not match';
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            try {
-                // Get payment intent ID from clientSecret
-                const {paymentIntent} = await stripe.retrievePaymentIntent(clientSecret);
-
-                // Create enrollment
-                const response = await fetch(`${WORKER_URL}/api/confirm-payment`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        paymentIntentId: paymentIntent.id,
-                        email,
-                        password
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    // Redirect to login
-                    window.location.href = `/?tab=login&email=${encodeURIComponent(email)}`;
-                } else {
-                    throw new Error(data.error || 'Failed to create account');
+                // Validate all fields are filled
+                if (!email || !password || !confirmPassword) {
+                    errorDiv.textContent = 'Please fill in all fields';
+                    errorDiv.style.display = 'block';
+                    return;
                 }
-            } catch (error) {
-                errorDiv.textContent = `Error: ${error.message}`;
-                errorDiv.style.display = 'block';
-            }
+
+                // Validate passwords match
+                if (password !== confirmPassword) {
+                    errorDiv.textContent = 'Passwords do not match';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
+                // Validate email format
+                if (!email.includes('@')) {
+                    errorDiv.textContent = 'Please enter a valid email address';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
+                try {
+                    // Get payment intent ID from clientSecret
+                    const {paymentIntent} = await stripe.retrievePaymentIntent(clientSecret);
+
+                    // Create enrollment
+                    const response = await fetch(`${WORKER_URL}/api/confirm-payment`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            paymentIntentId: paymentIntent.id,
+                            email,
+                            password
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Clear any previous user session and redirect to login
+                        localStorage.removeItem('currentUser');
+                        window.location.href = `/?tab=login&email=${encodeURIComponent(email)}`;
+                    } else {
+                        throw new Error(data.error || 'Failed to create account');
+                    }
+                } catch (error) {
+                    errorDiv.textContent = `Error: ${error.message}`;
+                    errorDiv.style.display = 'block';
+                }
+            });
         });
     </script>
 </body>

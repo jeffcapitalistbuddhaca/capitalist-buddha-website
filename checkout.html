@@ -176,6 +176,14 @@
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
 
+            // Call elements.submit() first (Stripe requirement)
+            const submitResult = await elements.submit();
+            if (submitResult.error) {
+                errorDiv.textContent = submitResult.error.message;
+                errorDiv.style.display = 'block';
+                return;
+            }
+
             const {error} = await stripe.confirmPayment({
                 elements,
                 confirmParams: {

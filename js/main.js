@@ -26,15 +26,18 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Tab switching
-document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const tabName = btn.getAttribute('data-tab');
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(tabName).classList.add('active');
+function activateTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    const tabEl = document.getElementById(tabName);
+    if (tabEl) {
+        tabEl.classList.add('active');
+    }
+    const btn = document.querySelector(`[data-tab="${tabName}"]`);
+    if (btn) {
         btn.classList.add('active');
-    });
-});
+    }
+}
 
 // Load modules from JSON
 async function loadModulesData() {
@@ -81,6 +84,16 @@ if (contactForm) {
 // Login form - Call Worker to authenticate
 const loginForm = document.getElementById('login-form');
 if (loginForm) {
+    // Prefill email from URL parameter (from account creation redirect)
+    const params = new URLSearchParams(window.location.search);
+    const emailParam = params.get('email');
+    if (emailParam) {
+        const loginEmail = document.getElementById('login-email');
+        if (loginEmail) {
+            loginEmail.value = decodeURIComponent(emailParam);
+        }
+    }
+
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('login-email').value;
@@ -212,8 +225,28 @@ async function loadModules() {
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     loadModulesData();
+
+    // Tab button click handlers
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabName = btn.getAttribute('data-tab');
+            activateTab(tabName);
+        });
+    });
+
+    // Check if URL requests specific tab (from account creation redirect)
+    const params = new URLSearchParams(window.location.search);
+    const requestedTab = params.get('tab');
+
     const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
+
+    // If tab parameter is set, activate that tab
+    if (requestedTab) {
+        activateTab(requestedTab);
+    }
+
+    // Show courses if user is logged in and not explicitly requesting login tab
+    if (savedUser && requestedTab !== 'login') {
         currentUser = JSON.parse(savedUser);
         const loginContainer = document.getElementById('login-form-container');
         const courseOverview = document.getElementById('course-overview');
