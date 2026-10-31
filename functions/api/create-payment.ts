@@ -27,9 +27,9 @@ export async function onRequest(context: any): Promise<Response> {
       });
     }
 
-    // Debug: Check if environment variables exist
+    // Use "Stripe Secret Key 2" which contains the actual test secret key
     const env = context.env;
-    const stripeKey = env?.['Stripe Secret Key'];
+    const stripeKey = env?.['Stripe Secret Key 2'];
 
     if (!stripeKey) {
       return new Response(
