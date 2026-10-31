@@ -142,6 +142,7 @@
         let paymentElement = null;
         let expressCheckoutElement = null;
         let elements = null;
+        let currentClientSecret = null;
 
         stripe = Stripe(STRIPE_PUBLISHABLE);
 
@@ -160,8 +161,9 @@
 
                 const data = await response.json();
                 if (data.clientSecret) {
+                    currentClientSecret = data.clientSecret;
                     elements = stripe.elements({
-                        clientSecret: data.clientSecret
+                        clientSecret: currentClientSecret
                     });
 
                     // Mount Express Checkout Element (Apple Pay, Google Pay, PayPal)
@@ -197,20 +199,10 @@ form.addEventListener('submit', async (e) => {
                     return;
                 }
 
-                // Create fresh payment intent with user's email
-                const response = await fetch(`${WORKER_URL}/api/create-payment`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
-                });
-
-                const data = await response.json();
-                if (!data.clientSecret) throw new Error('Failed to create payment');
-
-                // THEN call confirmPayment (Stripe's official pattern)
+                // THEN call confirmPayment with SAME clientSecret (Stripe's official pattern)
                 const { error } = await stripe.confirmPayment({
                     elements,
-                    clientSecret: data.clientSecret,
+                    clientSecret: currentClientSecret,
                     confirmParams: {
                         return_url: `${window.location.origin}/?payment_success&email=${encodeURIComponent(email)}`
                     }
