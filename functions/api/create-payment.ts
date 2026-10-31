@@ -27,6 +27,11 @@ export async function onRequest(context: any): Promise<Response> {
       });
     }
 
+    // DEBUG: Log available environment variables
+    const availableVars = Object.keys(context.env || {});
+    console.log('Available env vars:', availableVars);
+    console.log('STRIPE_SECRET_KEY value:', context.env?.STRIPE_SECRET_KEY ? 'SET' : 'NOT SET');
+
     const stripeKey = context.env?.STRIPE_SECRET_KEY || '';
 
     const params = new URLSearchParams({
