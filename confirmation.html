@@ -180,19 +180,24 @@
             }
 
             // Verify payment succeeded using Stripe's official method
+            console.log('Verifying payment with clientSecret:', clientSecret);
             try {
                 stripe.retrievePaymentIntent(clientSecret).then(({paymentIntent}) => {
+                    console.log('Payment intent retrieved:', paymentIntent.status);
                     if (paymentIntent.status !== 'succeeded') {
+                        console.log('Payment not succeeded, showing error');
                         errorDiv.textContent = `Payment failed with status: ${paymentIntent.status}`;
                         errorDiv.style.display = 'block';
                         form.style.display = 'none';
                     }
                 }).catch(err => {
+                    console.log('Error in then chain:', err.message);
                     errorDiv.textContent = `Error verifying payment: ${err.message}`;
                     errorDiv.style.display = 'block';
                     form.style.display = 'none';
                 });
             } catch (err) {
+                console.log('Caught error in try block:', err.message);
                 errorDiv.textContent = `Error: ${err.message}`;
                 errorDiv.style.display = 'block';
                 form.style.display = 'none';
