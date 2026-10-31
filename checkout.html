@@ -98,6 +98,7 @@
         stripe = Stripe(STRIPE_PUBLISHABLE);
         elements = stripe.elements();
         paymentElement = elements.create('card', {
+            hidePostalCode: true,
             style: {
                 base: {
                     fontSize: '14px',
