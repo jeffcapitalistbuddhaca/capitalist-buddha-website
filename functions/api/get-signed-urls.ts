@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 async function generateSignedUrl(videoPath: string, env: any): Promise<string> {
-  const r2Endpoint = env?.R2_ENDPOINT || 'https://pub-xxx.r2.dev';
+  const r2Endpoint = 'https://pub-bba51804cea9490d86d3f69e92387c34.r2.dev';
   const r2AccessKey = env?.R2_ACCESS_KEY || '';
   const r2SecretKey = env?.R2_SECRET_ACCESS_KEY || '';
 
