@@ -42,6 +42,7 @@ export async function onRequest(context: any): Promise<Response> {
       currency: 'usd',
       'metadata[email]': email,
       description: 'Capitalist Buddha Course - $199 USD',
+      customer_creation: 'always',
     });
 
     const response = await fetch('https://api.stripe.com/v1/payment_intents', {
