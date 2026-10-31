@@ -27,23 +27,7 @@ export async function onRequest(context: any): Promise<Response> {
       });
     }
 
-    const stripeKey = context.env?.STRIPE_SECRET_KEY || '';
-
-    // If no key, return debug info
-    if (!stripeKey) {
-      const availableVars = Object.keys(context.env || {});
-      return new Response(
-        JSON.stringify({
-          error: 'STRIPE_SECRET_KEY not found in environment',
-          availableVars: availableVars,
-          envObject: context.env ? Object.keys(context.env).reduce((acc: any, key: string) => {
-            acc[key] = typeof context.env[key];
-            return acc;
-          }, {}) : null
-        }),
-        { status: 500, headers: corsHeaders }
-      );
-    }
+    const stripeKey = (context.env as any)?.['Stripe Secret Key'] || '';
 
     const params = new URLSearchParams({
       amount: '19900',

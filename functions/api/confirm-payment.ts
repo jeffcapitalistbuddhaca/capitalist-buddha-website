@@ -27,7 +27,7 @@ export async function onRequest(context: any): Promise<Response> {
       );
     }
 
-    const stripeKey = context.env?.STRIPE_SECRET_KEY || '';
+    const stripeKey = (context.env as any)?.['Stripe Secret Key'] || '';
     const paymentResponse = await fetch(`https://api.stripe.com/v1/payment_intents/${paymentIntentId}`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${stripeKey}` },
