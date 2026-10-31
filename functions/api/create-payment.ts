@@ -27,19 +27,23 @@ export async function onRequest(context: any): Promise<Response> {
       });
     }
 
-    // Try multiple possible variable name formats
-    const stripeKey = (context.env as any)?.['Stripe Secret Key'] ||
-                      (context.env as any)?.STRIPE_SECRET_KEY ||
-                      (context.env as any)?.['STRIPE_SECRET_KEY'] ||
-                      '';
+    const env = context.env as any;
 
-    if (!stripeKey) {
-      const availableKeys = Object.keys(context.env || {});
-      return new Response(
-        JSON.stringify({ error: 'Stripe Secret Key not found', availableKeys }),
-        { status: 500, headers: corsHeaders }
-      );
+    // Debug: return all env values to see what's actually available
+    const envDebug: any = {};
+    for (const key in env) {
+      const val = env[key];
+      if (typeof val === 'string' && val.length > 0) {
+        envDebug[key] = val.substring(0, 30) + (val.length > 30 ? '...' : '');
+      } else {
+        envDebug[key] = typeof val;
+      }
     }
+
+    return new Response(
+      JSON.stringify({ debug: 'environment', env: envDebug }),
+      { status: 500, headers: corsHeaders }
+    );
 
     const params = new URLSearchParams({
       amount: '19900',
