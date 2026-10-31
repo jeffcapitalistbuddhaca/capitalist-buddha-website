@@ -167,12 +167,13 @@
         const errorDiv = document.getElementById('error-message');
         const form = document.getElementById('account-form');
 
-        // Get email and clientSecret from URL
+        // Get email, clientSecret, and paymentIntentId from URL
         const params = new URLSearchParams(window.location.search);
         const email = params.get('email');
         const clientSecret = params.get('client_secret');
+        const paymentIntentId = params.get('payment_intent_id');
 
-        if (!email || !clientSecret) {
+        if (!email || !clientSecret || !paymentIntentId) {
             errorDiv.textContent = 'Invalid confirmation link. Please contact support.';
             errorDiv.style.display = 'block';
             form.style.display = 'none';
@@ -198,10 +199,9 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        paymentIntentId: clientSecret.split('_secret_')[0], // Extract payment intent ID from client secret
+                        paymentIntentId,
                         email,
-                        password,
-                        username
+                        password
                     })
                 });
 
