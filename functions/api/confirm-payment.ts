@@ -28,10 +28,9 @@ export async function onRequest(context: any): Promise<Response> {
     }
 
     const stripeKey = context.env?.STRIPE_SECRET_KEY || '';
-    const auth = btoa(`${stripeKey}:`);
     const paymentResponse = await fetch(`https://api.stripe.com/v1/payment_intents/${paymentIntentId}`, {
       method: 'GET',
-      headers: { 'Authorization': `Basic ${auth}` },
+      headers: { 'Authorization': `Bearer ${stripeKey}` },
     });
 
     const paymentIntent = await paymentResponse.json() as any;
