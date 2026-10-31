@@ -20,8 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const clientSecret = params.get('client_secret');
 
         if (email && clientSecret) {
-            // Redirect to confirmation page
-            window.location.href = `/confirmation.html?email=${encodeURIComponent(email)}&client_secret=${encodeURIComponent(clientSecret)}`;
+            // Redirect to confirmation page (Cloudflare strips .html)
+            window.location.href = `/confirmation?email=${encodeURIComponent(email)}&client_secret=${encodeURIComponent(clientSecret)}`;
         }
     }
 });
