@@ -156,59 +156,75 @@
 
         // Initialize Stripe elements when page loads
         async function initElements(clientSecret) {
-            // Create elements with the PaymentIntent's client secret
-            elements = stripe.elements({
-                clientSecret: clientSecret
-            });
+            try {
+                console.log('Creating Stripe elements with clientSecret:', clientSecret.substring(0, 20) + '...');
 
-            // Create and mount Address Element - simplified to just country and postal code
-            addressElement = elements.create('address', {
-                mode: 'billing',
-                allowedCountries: ['CA', 'US']
-            });
-            addressElement.mount('#address-element');
+                // Create elements with the PaymentIntent's client secret
+                elements = stripe.elements({
+                    clientSecret: clientSecret
+                });
+                console.log('Elements instance created');
 
-            // Create and mount Payment Element
-            paymentElement = elements.create('payment', {
-                layout: 'tabs'
-            });
-            paymentElement.mount('#payment-element');
+                // Create and mount Address Element
+                addressElement = elements.create('address', {
+                    mode: 'billing'
+                });
+                console.log('Address element created, mounting...');
+                addressElement.mount('#address-element');
+                console.log('Address element mounted');
 
-            // When address changes, Stripe recalculates tax automatically
-            addressElement.addEventListener('change', async () => {
-                console.log('Address updated - fetching updated PaymentIntent with tax');
+                // Create and mount Payment Element
+                paymentElement = elements.create('payment', {
+                    layout: 'tabs'
+                });
+                console.log('Payment element created, mounting...');
+                paymentElement.mount('#payment-element');
+                console.log('Payment element mounted');
 
-                try {
-                    // Call elements.submit() to validate and send address to Stripe
-                    const { error: submitError } = await elements.submit();
-                    if (submitError) {
-                        console.error('Address validation error:', submitError);
-                        return;
+                // When address changes, retrieve updated PaymentIntent with tax
+                addressElement.addEventListener('change', async () => {
+                    console.log('Address changed event fired');
+
+                    try {
+                        // Submit address to Stripe
+                        const { error } = await elements.submit();
+                        if (error) {
+                            console.error('Submit error:', error);
+                            return;
+                        }
+
+                        // Wait a moment for Stripe to recalculate tax
+                        await new Promise(resolve => setTimeout(resolve, 500));
+
+                        // Retrieve updated PaymentIntent
+                        const { paymentIntent } = await stripe.retrievePaymentIntent(currentClientSecret);
+                        console.log('Retrieved PaymentIntent:', paymentIntent);
+
+                        // Check if automatic tax calculation is complete
+                        if (paymentIntent.automatic_tax && paymentIntent.automatic_tax.status === 'complete') {
+                            const taxAmount = paymentIntent.automatic_tax.liability?.amount || 0;
+                            const totalAmount = paymentIntent.amount;
+
+                            const taxUsd = (taxAmount / 100).toFixed(2);
+                            const totalUsd = (totalAmount / 100).toFixed(2);
+
+                            console.log(`Updating display: Tax=$${taxUsd}, Total=$${totalUsd}`);
+                            document.getElementById('tax-display').textContent = `$${taxUsd}`;
+                            document.getElementById('total-display').textContent = `$${totalUsd}`;
+                            document.getElementById('amount-display').textContent = `$${totalUsd}`;
+                        } else {
+                            console.log('Tax not ready yet, status:', paymentIntent.automatic_tax?.status);
+                        }
+                    } catch (err) {
+                        console.error('Address change handler error:', err);
                     }
+                });
 
-                    // Retrieve the PaymentIntent to get the updated tax amount
-                    const { paymentIntent } = await stripe.retrievePaymentIntent(currentClientSecret);
-                    console.log('PaymentIntent updated:', paymentIntent);
-
-                    if (paymentIntent.automatic_tax && paymentIntent.automatic_tax.status === 'complete') {
-                        // Tax calculation is complete - display it
-                        const taxAmount = paymentIntent.automatic_tax.liability?.amount || 0;
-                        const totalAmount = paymentIntent.amount;
-                        const subtotalAmount = totalAmount - taxAmount;
-
-                        const taxUsd = (taxAmount / 100).toFixed(2);
-                        const totalUsd = (totalAmount / 100).toFixed(2);
-                        const subtotalUsd = (subtotalAmount / 100).toFixed(2);
-
-                        console.log(`Tax: $${taxUsd}, Total: $${totalUsd}`);
-                        document.getElementById('tax-display').textContent = `$${taxUsd}`;
-                        document.getElementById('total-display').textContent = `$${totalUsd}`;
-                        document.getElementById('amount-display').textContent = `$${totalUsd}`;
-                    }
-                } catch (err) {
-                    console.error('Error updating tax display:', err);
-                }
-            });
+            } catch (err) {
+                console.error('initElements error:', err);
+                errorDiv.textContent = `Elements error: ${err.message}`;
+                errorDiv.style.display = 'block';
+            }
         }
 
         // On page load, create PaymentIntent and initialize elements
