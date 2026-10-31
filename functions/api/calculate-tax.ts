@@ -37,10 +37,9 @@ export async function onRequest(context: any): Promise<Response> {
       );
     }
 
-    // Call Stripe Tax Calculation API with form-urlencoded
+    // Call Stripe Tax Calculation API - test without line_items
     const params = new URLSearchParams();
     params.append('currency', 'usd');
-    params.append('line_items[0][amount_in_cents]', '19900');
     params.append('customer_details[address_source]', 'billing');
     params.append('customer_details[address][line1]', address.line1 || '');
     params.append('customer_details[address][line2]', address.line2 || '');
