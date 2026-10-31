@@ -102,7 +102,7 @@
         stripe = Stripe(STRIPE_PUBLISHABLE);
         elements = stripe.elements({
             appearance: {
-                theme: 'light',
+                theme: 'stripe',
                 variables: {
                     colorPrimary: '#9B7BA3',
                     colorText: '#32325d',
@@ -115,7 +115,7 @@
         // Create Address Element
         addressElement = elements.create('address', {
             mode: 'billing',
-            autocomplete: {enabled: true}
+            autocomplete: {mode: 'automatic'}
         });
         addressElement.mount('#address-element-container');
 
