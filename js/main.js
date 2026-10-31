@@ -75,7 +75,7 @@ if (payBtn) {
             form.innerHTML = `
                 <h3 style="margin: 0 0 0.3rem 0; color: #9B7BA3; font-size: 1.2rem;">Complete Payment</h3>
                 <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Amount: $${COURSE_PRICE} USD</p>
-                <div id="payment-element-container" style="margin: 0.5rem 0;"></div>
+                <div id="payment-element-container" style="margin: 0.5rem 0; max-height: 300px; overflow-y: auto;"></div>
                 <button type="submit" style="
                     width: 100%; padding: 0.6rem; background: #9B7BA3;
                     color: white; border: none; border-radius: 4px; cursor: pointer;
