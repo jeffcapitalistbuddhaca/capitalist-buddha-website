@@ -36,7 +36,6 @@ export async function onRequest(context: any): Promise<Response> {
     params.append('line_items[0][price_data][currency]', 'usd');
     params.append('line_items[0][price_data][unit_amount]', '19900'); // $199.00 USD in cents
     params.append('line_items[0][price_data][product_data][name]', 'Capitalist Buddha Course');
-    params.append('line_items[0][price_data][product_data][tax_code]', 'txcd_100000'); // Educational Services tax code
     params.append('line_items[0][quantity]', '1');
     params.append('automatic_tax[enabled]', 'true');
     params.append('billing_address_collection', 'required');
