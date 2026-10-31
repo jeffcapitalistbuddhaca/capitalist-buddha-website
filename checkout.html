@@ -161,9 +161,10 @@
                 clientSecret: clientSecret
             });
 
-            // Create and mount Address Element
+            // Create and mount Address Element - simplified to just country and postal code
             addressElement = elements.create('address', {
-                mode: 'billing'
+                mode: 'billing',
+                allowedCountries: ['CA', 'US']
             });
             addressElement.mount('#address-element');
 

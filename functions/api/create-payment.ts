@@ -39,12 +39,12 @@ export async function onRequest(context: any): Promise<Response> {
 
     const finalAmount = amount || 19900;
 
-    const params = new URLSearchParams();
-    params.append('amount', String(finalAmount));
-    params.append('currency', 'usd');
-    params.append('automatic_tax[enabled]', 'true');
-    params.append('metadata[email]', email);
-    params.append('description', 'Capitalist Buddha Course - $199 USD + Tax');
+    const params = new URLSearchParams({
+      amount: String(finalAmount),
+      currency: 'usd',
+      'metadata[email]': email,
+      description: 'Capitalist Buddha Course - $199 USD + Tax',
+    });
 
     const response = await fetch('https://api.stripe.com/v1/payment_intents', {
       method: 'POST',
