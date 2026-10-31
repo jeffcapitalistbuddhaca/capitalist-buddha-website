@@ -37,21 +37,20 @@ export async function onRequest(context: any): Promise<Response> {
       );
     }
 
-    const paymentData = {
-      amount: 19900,
+    const params = new URLSearchParams({
+      amount: '19900',
       currency: 'usd',
+      'metadata[email]': email,
       description: 'Capitalist Buddha Course - $199 USD',
-      metadata: { email },
-      automatic_tax: { enabled: true },
-    };
+    });
 
     const response = await fetch('https://api.stripe.com/v1/payment_intents', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${stripeKey}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: JSON.stringify(paymentData),
+      body: params.toString(),
     });
 
     const paymentIntent = await response.json() as any;
