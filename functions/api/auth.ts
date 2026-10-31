@@ -1,6 +1,6 @@
 import { getFirebaseUser, createFirebaseEnrollment, sendConfirmationEmail } from '../../src/lib/firebase';
 
-export const onRequest: PagesFunction = async (context) => {
+export default async (context: any) => {
   try {
     const { email, password, action, enrollmentData } = await context.request.json();
 

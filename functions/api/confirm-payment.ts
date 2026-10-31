@@ -3,7 +3,7 @@ import { createFirebaseEnrollment, sendConfirmationEmail } from '../../src/lib/f
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
 
-export const onRequest: PagesFunction = async (context) => {
+export default async (context: any) => {
   try {
     const { paymentIntentId, email, password } = await context.request.json();
 

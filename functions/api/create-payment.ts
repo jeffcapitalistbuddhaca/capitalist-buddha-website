@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
 
-export const onRequest: PagesFunction = async (context) => {
+export default async (context: any) => {
   try {
     const { email } = await context.request.json();
 

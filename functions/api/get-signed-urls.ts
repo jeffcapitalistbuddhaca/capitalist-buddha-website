@@ -1,6 +1,6 @@
 import { generateSignedUrl } from '../../src/lib/r2-signed-urls';
 
-export const onRequest: PagesFunction = async (context) => {
+export default async (context: any) => {
   try {
     const { videoPaths } = await context.request.json();
 
