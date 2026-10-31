@@ -112,18 +112,12 @@
             }
         });
 
-        // Create Address Element
+        // Create Address Element immediately
         addressElement = elements.create('address', {
             mode: 'billing',
             autocomplete: {mode: 'automatic'}
         });
         addressElement.mount('#address-element-container');
-
-        // Create Payment Element
-        paymentElement = elements.create('payment', {
-            layout: 'tabs'
-        });
-        paymentElement.mount('#payment-element-container');
 
         const form = document.getElementById('payment-form');
         const errorDiv = document.getElementById('error-message');
@@ -143,7 +137,7 @@
                     return;
                 }
 
-                // Create payment intent
+                // Create payment intent first
                 const response = await fetch(`${WORKER_URL}/api/create-payment`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -152,6 +146,24 @@
 
                 const data = await response.json();
                 if (!data.clientSecret) throw new Error('Failed to create payment');
+
+                // Create Payment Element now that we have clientSecret
+                if (!paymentElement) {
+                    const paymentElements = stripe.elements({
+                        clientSecret: data.clientSecret,
+                        appearance: {
+                            theme: 'stripe',
+                            variables: {
+                                colorPrimary: '#9B7BA3',
+                                colorText: '#32325d',
+                                fontFamily: 'system-ui, -apple-system, sans-serif',
+                                fontSizeBase: '14px'
+                            }
+                        }
+                    });
+                    paymentElement = paymentElements.create('payment', {layout: 'tabs'});
+                    paymentElement.mount('#payment-element-container');
+                }
 
                 // Confirm payment
                 const { error, paymentIntent } = await stripe.confirmPayment({
