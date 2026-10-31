@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="css/style.css">
     <style>
         .checkout-container {
-            max-width: 500px;
+            max-width: 600px;
             margin: 3rem auto;
             padding: 2rem;
             background: white;
@@ -26,73 +26,8 @@
             color: #666;
             margin: 0;
         }
-        .price-breakdown {
-            font-weight: bold;
-            font-size: 1.2rem;
-            margin-top: 1rem;
-        }
-        .price-row {
-            margin-bottom: 0.5rem;
-            display: flex;
-            justify-content: space-between;
-        }
-        .price-total {
-            font-size: 1.5rem;
-            color: #9B7BA3;
-            border-top: 2px solid #9B7BA3;
-            padding-top: 0.5rem;
-            margin-top: 0.5rem;
-        }
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #333;
-            font-weight: 500;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-        .form-group input:focus {
-            outline: none;
-            border-color: #9B7BA3;
-            box-shadow: 0 0 0 2px rgba(155, 123, 163, 0.1);
-        }
-        .pay-button {
-            width: 100%;
-            padding: 1rem;
-            background: #9B7BA3;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 2rem;
-        }
-        .pay-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        .error {
-            color: #e74c3c;
-            margin: 1rem 0;
-            padding: 1rem;
-            background: #fadbd8;
-            border-radius: 4px;
-        }
-        #address-element {
-            margin: 1.5rem 0;
-        }
-        #payment-element {
-            margin: 1.5rem 0;
+        #checkout {
+            min-height: 600px;
         }
     </style>
 </head>
@@ -105,38 +40,10 @@
     <div class="checkout-container">
         <div class="checkout-header">
             <h1>Complete Payment</h1>
-            <p>Capitalist Buddha Course</p>
-            <div class="price-breakdown">
-                <div class="price-row">
-                    <span>Subtotal:</span>
-                    <span>$199.00</span>
-                </div>
-                <div class="price-row">
-                    <span>Tax:</span>
-                    <span id="tax-display">$0.00</span>
-                </div>
-                <div class="price-total">
-                    <div class="price-row">
-                        <span>Total:</span>
-                        <span id="total-display">$199.00</span>
-                    </div>
-                </div>
-            </div>
+            <p>Capitalist Buddha Course - $199 USD</p>
         </div>
 
-        <div id="error-message" class="error" style="display: none;"></div>
-
-        <form id="payment-form">
-            <div class="form-group">
-                <label for="email">Email Address *</label>
-                <input type="email" id="email" name="email" required placeholder="you@example.com">
-            </div>
-
-            <div id="address-element"></div>
-            <div id="payment-element"></div>
-
-            <button type="submit" class="pay-button" id="submit-button">Pay <span id="amount-display">$199.00</span></button>
-        </form>
+        <div id="checkout"></div>
     </div>
 
     <script src="https://js.stripe.com/v3/"></script>
@@ -144,160 +51,42 @@
         const STRIPE_PUBLISHABLE = 'pk_test_51UVYmmKLvdoBDUk6kEmkKFKv5znaZoWM4WXBB4kyGInGQoj4aYgeUsOYEXqgApfbWF7W9KizCqgEZxKKfNM34tZF00TJ1Mtwve';
         const WORKER_URL = 'https://capitalistbuddha.ca';
 
-        let stripe = Stripe(STRIPE_PUBLISHABLE);
-        let elements = null;
-        let addressElement = null;
-        let paymentElement = null;
-        let currentClientSecret = null;
-        let currentPaymentIntentId = null;
+        const stripe = Stripe(STRIPE_PUBLISHABLE);
 
-        const form = document.getElementById('payment-form');
-        const errorDiv = document.getElementById('error-message');
-
-        // Initialize Stripe elements when page loads
-        async function initElements(clientSecret) {
-            try {
-                console.log('Creating Stripe elements with clientSecret:', clientSecret.substring(0, 20) + '...');
-
-                // Create elements with the PaymentIntent's client secret
-                elements = stripe.elements({
-                    clientSecret: clientSecret
-                });
-                console.log('Elements instance created');
-
-                // Create and mount Address Element
-                addressElement = elements.create('address', {
-                    mode: 'billing'
-                });
-                console.log('Address element created, mounting...');
-                addressElement.mount('#address-element');
-                console.log('Address element mounted');
-
-                // Create and mount Payment Element
-                paymentElement = elements.create('payment', {
-                    layout: 'tabs'
-                });
-                console.log('Payment element created, mounting...');
-                paymentElement.mount('#payment-element');
-                console.log('Payment element mounted');
-
-                // When address changes, retrieve updated PaymentIntent with tax
-                addressElement.addEventListener('change', async () => {
-                    console.log('Address changed event fired');
-
-                    try {
-                        // Submit address to Stripe
-                        const { error } = await elements.submit();
-                        if (error) {
-                            console.error('Submit error:', error);
-                            return;
-                        }
-
-                        // Wait a moment for Stripe to recalculate tax
-                        await new Promise(resolve => setTimeout(resolve, 500));
-
-                        // Retrieve updated PaymentIntent
-                        const { paymentIntent } = await stripe.retrievePaymentIntent(currentClientSecret);
-                        console.log('Retrieved PaymentIntent:', paymentIntent);
-
-                        // Check if automatic tax calculation is complete
-                        if (paymentIntent.automatic_tax && paymentIntent.automatic_tax.status === 'complete') {
-                            const taxAmount = paymentIntent.automatic_tax.liability?.amount || 0;
-                            const totalAmount = paymentIntent.amount;
-
-                            const taxUsd = (taxAmount / 100).toFixed(2);
-                            const totalUsd = (totalAmount / 100).toFixed(2);
-
-                            console.log(`Updating display: Tax=$${taxUsd}, Total=$${totalUsd}`);
-                            document.getElementById('tax-display').textContent = `$${taxUsd}`;
-                            document.getElementById('total-display').textContent = `$${totalUsd}`;
-                            document.getElementById('amount-display').textContent = `$${totalUsd}`;
-                        } else {
-                            console.log('Tax not ready yet, status:', paymentIntent.automatic_tax?.status);
-                        }
-                    } catch (err) {
-                        console.error('Address change handler error:', err);
-                    }
-                });
-
-            } catch (err) {
-                console.error('initElements error:', err);
-                errorDiv.textContent = `Elements error: ${err.message}`;
-                errorDiv.style.display = 'block';
-            }
-        }
-
-        // On page load, create PaymentIntent and initialize elements
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                console.log('Creating PaymentIntent...');
-                const res = await fetch(`${WORKER_URL}/api/create-payment`, {
+                console.log('Fetching checkout session...');
+
+                // Fetch clientSecret from server
+                const response = await fetch(`${WORKER_URL}/api/create-checkout-session`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: 'checkout@temp.com' })
+                    body: JSON.stringify({ email: 'user@example.com' })
                 });
 
-                const data = await res.json();
-                console.log('PaymentIntent creation response:', data);
+                const data = await response.json();
+                console.log('Checkout session response:', data);
 
-                if (!data.clientSecret) throw new Error('Failed to create payment intent');
-
-                currentClientSecret = data.clientSecret;
-                currentPaymentIntentId = data.paymentIntentId;
-                console.log('PaymentIntent ID:', currentPaymentIntentId);
-
-                await initElements(currentClientSecret);
-                console.log('Elements initialized');
-            } catch (err) {
-                console.error('Initialization error:', err);
-                errorDiv.textContent = `Initialization error: ${err.message}`;
-                errorDiv.style.display = 'block';
-            }
-        });
-
-        // Handle form submission
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            errorDiv.style.display = 'none';
-
-            // Validate email
-            const email = document.getElementById('email').value.trim();
-            if (!email) {
-                errorDiv.textContent = 'Please enter your email';
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            // Validate address was entered
-            const { value: address } = await addressElement.getValue();
-            if (!address || !address.line1) {
-                errorDiv.textContent = 'Please enter your complete address';
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            // Call elements.submit() to collect all form data (Stripe requirement)
-            const { error: submitError } = await elements.submit();
-            if (submitError) {
-                errorDiv.textContent = submitError.message;
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            // Confirm payment with the PaymentIntent that now has the correct amount
-            const { error } = await stripe.confirmPayment({
-                elements,
-                confirmParams: {
-                    return_url: window.location.origin + '/?payment_success'
+                if (!data.clientSecret) {
+                    throw new Error('Failed to create checkout session');
                 }
-            });
 
-            if (error) {
-                errorDiv.textContent = error.message;
-                errorDiv.style.display = 'block';
+                // Initialize embedded checkout with the client secret
+                console.log('Creating embedded checkout...');
+                const checkout = await stripe.createEmbeddedCheckout({
+                    clientSecret: data.clientSecret,
+                });
+
+                console.log('Mounting checkout...');
+                // Mount the checkout
+                checkout.mount('#checkout');
+                console.log('Checkout mounted successfully');
+
+            } catch (err) {
+                console.error('Checkout error:', err);
+                document.getElementById('checkout').innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
             }
         });
     </script>
 </body>
 </html>
-
