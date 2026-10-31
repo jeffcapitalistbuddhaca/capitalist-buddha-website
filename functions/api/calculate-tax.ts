@@ -40,7 +40,7 @@ export async function onRequest(context: any): Promise<Response> {
     // Call Stripe Tax Calculation API - MUST use application/x-www-form-urlencoded
     const params = new URLSearchParams({
       'currency': 'usd',
-      'line_items': '{"amount_in_cents": 19900}',
+      'line_items[amount_in_cents]': '19900',
       'customer_details[address_source]': 'billing',
       'customer_details[address][line1]': address.line1 || '',
       'customer_details[address][line2]': address.line2 || '',
