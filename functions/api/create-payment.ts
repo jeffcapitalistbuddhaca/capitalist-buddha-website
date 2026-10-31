@@ -27,11 +27,16 @@ export async function onRequest(context: any): Promise<Response> {
       });
     }
 
-    const stripeKey = (context.env as any)?.['Stripe Secret Key'];
+    // Try multiple possible variable name formats
+    const stripeKey = (context.env as any)?.['Stripe Secret Key'] ||
+                      (context.env as any)?.STRIPE_SECRET_KEY ||
+                      (context.env as any)?.['STRIPE_SECRET_KEY'] ||
+                      '';
 
     if (!stripeKey) {
+      const availableKeys = Object.keys(context.env || {});
       return new Response(
-        JSON.stringify({ error: 'Stripe Secret Key not configured in environment' }),
+        JSON.stringify({ error: 'Stripe Secret Key not found', availableKeys }),
         { status: 500, headers: corsHeaders }
       );
     }
