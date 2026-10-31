@@ -28,6 +28,15 @@ export async function onRequest(context: any): Promise<Response> {
     }
 
     const stripeKey = context.env?.STRIPE_SECRET_KEY || '';
+
+    // DEBUG: Log if key is present
+    if (!stripeKey) {
+      return new Response(JSON.stringify({ error: 'STRIPE_SECRET_KEY environment variable not set', envKeys: Object.keys(context.env || {}) }), {
+        status: 500,
+        headers: corsHeaders,
+      });
+    }
+
     const auth = btoa(`${stripeKey}:`);
     const response = await fetch('https://api.stripe.com/v1/payment_intents', {
       method: 'POST',
