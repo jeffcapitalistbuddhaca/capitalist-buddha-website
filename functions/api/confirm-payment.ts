@@ -1,11 +1,22 @@
 import Stripe from 'stripe';
 import { createFirebaseEnrollment, sendConfirmationEmail } from '../../src/lib/firebase';
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Content-Type': 'application/json',
+};
+
 export async function onRequest(context: any): Promise<Response> {
+  if (context.request.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
   if (context.request.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
-      headers: { 'Content-Type': 'application/json' },
+      headers: corsHeaders,
     });
   }
 
@@ -16,7 +27,7 @@ export async function onRequest(context: any): Promise<Response> {
     if (!paymentIntentId || !email || !password) {
       return new Response(
         JSON.stringify({ error: 'paymentIntentId, email, and password required' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -25,7 +36,7 @@ export async function onRequest(context: any): Promise<Response> {
     if (paymentIntent.status !== 'succeeded') {
       return new Response(
         JSON.stringify({ error: 'Payment not completed' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -44,13 +55,13 @@ export async function onRequest(context: any): Promise<Response> {
 
     return new Response(
       JSON.stringify({ success: true, enrollment }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
+      { status: 200, headers: corsHeaders }
     );
   } catch (error) {
     console.error('Payment confirmation error:', error);
     return new Response(
       JSON.stringify({ error: String(error) }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

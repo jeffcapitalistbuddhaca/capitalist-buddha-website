@@ -1,10 +1,21 @@
 import { generateSignedUrl } from '../../src/lib/r2-signed-urls';
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Content-Type': 'application/json',
+};
+
 export async function onRequest(context: any): Promise<Response> {
+  if (context.request.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
   if (context.request.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
-      headers: { 'Content-Type': 'application/json' },
+      headers: corsHeaders,
     });
   }
 
@@ -14,7 +25,7 @@ export async function onRequest(context: any): Promise<Response> {
     if (!Array.isArray(videoPaths)) {
       return new Response(JSON.stringify({ error: 'videoPaths must be an array' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: corsHeaders,
       });
     }
 
@@ -31,7 +42,7 @@ export async function onRequest(context: any): Promise<Response> {
 
     return new Response(JSON.stringify({ signedUrls }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: corsHeaders,
     });
   } catch (error) {
     console.error('Signed URL generation error:', error);
@@ -39,7 +50,7 @@ export async function onRequest(context: any): Promise<Response> {
       JSON.stringify({ error: String(error) }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: corsHeaders,
       }
     );
   }

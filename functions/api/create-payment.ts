@@ -1,10 +1,21 @@
 import Stripe from 'stripe';
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Content-Type': 'application/json',
+};
+
 export async function onRequest(context: any): Promise<Response> {
+  if (context.request.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
   if (context.request.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
-      headers: { 'Content-Type': 'application/json' },
+      headers: corsHeaders,
     });
   }
 
@@ -34,7 +45,7 @@ export async function onRequest(context: any): Promise<Response> {
       }),
       {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: corsHeaders,
       }
     );
   } catch (error) {
@@ -43,7 +54,7 @@ export async function onRequest(context: any): Promise<Response> {
       JSON.stringify({ error: String(error) }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: corsHeaders,
       }
     );
   }

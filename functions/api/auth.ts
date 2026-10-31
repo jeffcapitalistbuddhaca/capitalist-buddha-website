@@ -1,10 +1,21 @@
 import { getFirebaseUser, createFirebaseEnrollment, sendConfirmationEmail } from '../../src/lib/firebase';
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Content-Type': 'application/json',
+};
+
 export async function onRequest(context: any): Promise<Response> {
+  if (context.request.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
   if (context.request.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
-      headers: { 'Content-Type': 'application/json' },
+      headers: corsHeaders,
     });
   }
 
@@ -14,7 +25,7 @@ export async function onRequest(context: any): Promise<Response> {
     if (!email) {
       return new Response(JSON.stringify({ error: 'Email required' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: corsHeaders,
       });
     }
 
@@ -23,12 +34,12 @@ export async function onRequest(context: any): Promise<Response> {
       if (!user) {
         return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
           status: 401,
-          headers: { 'Content-Type': 'application/json' },
+          headers: corsHeaders,
         });
       }
       return new Response(JSON.stringify({ success: true, user }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: corsHeaders,
       });
     }
 
@@ -37,13 +48,13 @@ export async function onRequest(context: any): Promise<Response> {
       await sendConfirmationEmail(email, enrollmentData.password, enrollmentData.expirationDate);
       return new Response(JSON.stringify({ success: true, enrollment }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: corsHeaders,
       });
     }
 
     return new Response(JSON.stringify({ error: 'Unknown action' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: corsHeaders,
     });
   } catch (error) {
     console.error('Auth error:', error);
@@ -51,7 +62,7 @@ export async function onRequest(context: any): Promise<Response> {
       JSON.stringify({ error: String(error) }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        headers: corsHeaders,
       }
     );
   }
