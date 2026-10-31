@@ -48,8 +48,17 @@
             border-color: #9B7BA3;
             box-shadow: 0 0 0 2px rgba(155, 123, 163, 0.1);
         }
+        #express-checkout-container {
+            margin: 2rem 0 1.5rem 0;
+        }
         #payment-element-container {
-            margin: 2rem 0;
+            margin: 1.5rem 0;
+        }
+        .divider {
+            text-align: center;
+            color: #999;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
         }
         .pay-button {
             width: 100%;
@@ -108,12 +117,15 @@
         <div id="success-message" class="success" style="display: none;"></div>
 
         <form id="payment-form">
+            <div id="express-checkout-container"></div>
+
+            <div class="divider">Or pay with card</div>
+
             <div class="form-group">
                 <label for="email">Email Address *</label>
                 <input type="email" id="email" name="email" required placeholder="you@example.com">
             </div>
 
-            <div class="section-label">Payment Information</div>
             <div id="payment-element-container"></div>
 
             <button type="submit" class="pay-button" id="submit-button">Pay $199</button>
@@ -128,6 +140,8 @@
 
         let stripe = null;
         let paymentElement = null;
+        let expressCheckoutElement = null;
+        let elements = null;
 
         stripe = Stripe(STRIPE_PUBLISHABLE);
 
@@ -135,7 +149,7 @@
         const errorDiv = document.getElementById('error-message');
         const successDiv = document.getElementById('success-message');
 
-        // Create payment intent on page load so Payment Element shows immediately
+        // Create payment intent on page load so elements render immediately
         (async () => {
             try {
                 const response = await fetch(`${WORKER_URL}/api/create-payment`, {
@@ -146,16 +160,84 @@
 
                 const data = await response.json();
                 if (data.clientSecret) {
-                    const elements = stripe.elements({
+                    elements = stripe.elements({
                         clientSecret: data.clientSecret
                     });
+
+                    // Mount Express Checkout Element (Apple Pay, Google Pay, PayPal)
+                    expressCheckoutElement = elements.create('expressCheckout');
+                    expressCheckoutElement.mount('#express-checkout-container');
+
+                    // Mount Payment Element (Card form)
                     paymentElement = elements.create('payment');
                     paymentElement.mount('#payment-element-container');
+
+                    // Handle express checkout completion
+                    expressCheckoutElement.addEventListener('change', (event) => {
+                        if (event.complete) {
+                            form.style.display = 'none';
+                            successDiv.textContent = 'Payment Complete! Creating your account...';
+                            successDiv.style.display = 'block';
+                            handleExpressCheckoutSuccess(data.clientSecret);
+                        }
+                    });
                 }
             } catch (err) {
-                console.error('Failed to create payment element:', err);
+                console.error('Failed to create elements:', err);
             }
         })();
+
+        // Helper function to complete payment flow
+        async function completePayment(email, paymentIntentId) {
+            const password = prompt('Create a password for your account:');
+            if (!password) {
+                errorDiv.textContent = 'Password creation cancelled';
+                errorDiv.style.display = 'block';
+                successDiv.style.display = 'none';
+                form.style.display = 'block';
+                return;
+            }
+
+            try {
+                const confirmResponse = await fetch(`${WORKER_URL}/api/confirm-payment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        paymentIntentId,
+                        email,
+                        password
+                    })
+                });
+
+                const confirmData = await confirmResponse.json();
+                if (confirmData.success) {
+                    window.location.href = `/?tab=login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+                } else {
+                    throw new Error('Failed to create account');
+                }
+            } catch (error) {
+                console.error('Confirmation error:', error);
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.style.display = 'block';
+                successDiv.style.display = 'none';
+                form.style.display = 'block';
+            }
+        }
+
+        // Handle express checkout success (called when Apple Pay/Google Pay/PayPal completes)
+        async function handleExpressCheckoutSuccess(clientSecret) {
+            try {
+                const { paymentIntent } = await stripe.retrievePaymentIntent(clientSecret);
+                if (paymentIntent && paymentIntent.status === 'succeeded') {
+                    const email = document.getElementById('email').value || paymentIntent.charges?.data?.[0]?.billing_details?.email || '';
+                    completePayment(email, paymentIntent.id);
+                }
+            } catch (error) {
+                console.error('Express checkout error:', error);
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.style.display = 'block';
+            }
+        }
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -169,10 +251,6 @@
             }
 
             try {
-                // Get clientSecret from payment element
-                const { error: setupError } = await paymentElement.getElement();
-                if (!paymentElement) throw new Error('Payment form not loaded');
-
                 // Create fresh payment intent with user's email
                 const response = await fetch(`${WORKER_URL}/api/create-payment`, {
                     method: 'POST',
@@ -183,9 +261,9 @@
                 const data = await response.json();
                 if (!data.clientSecret) throw new Error('Failed to create payment');
 
-                // Confirm payment
+                // Confirm payment with card form
                 const { error, paymentIntent } = await stripe.confirmPayment({
-                    elements: stripe.elements({clientSecret: data.clientSecret}),
+                    elements,
                     clientSecret: data.clientSecret,
                     confirmParams: {
                         return_url: window.location.origin + '/?payment=success'
@@ -201,32 +279,7 @@
                     successDiv.style.display = 'block';
                     errorDiv.style.display = 'none';
                     form.style.display = 'none';
-
-                    const password = prompt('Create a password for your account:');
-                    if (!password) {
-                        errorDiv.textContent = 'Password creation cancelled';
-                        errorDiv.style.display = 'block';
-                        successDiv.style.display = 'none';
-                        form.style.display = 'block';
-                        return;
-                    }
-
-                    const confirmResponse = await fetch(`${WORKER_URL}/api/confirm-payment`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            paymentIntentId: paymentIntent.id,
-                            email,
-                            password
-                        })
-                    });
-
-                    const confirmData = await confirmResponse.json();
-                    if (confirmData.success) {
-                        window.location.href = `/?tab=login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
-                    } else {
-                        throw new Error('Failed to create account');
-                    }
+                    completePayment(email, paymentIntent.id);
                 }
             } catch (error) {
                 console.error('Payment error:', error);
