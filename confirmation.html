@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Confirmed - Capitalist Buddha</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .confirmation-container {
+            max-width: 500px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .confirmation-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .confirmation-header h1 {
+            color: #27ae60;
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+        }
+        .confirmation-header p {
+            color: #666;
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        .confirmation-details {
+            background: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+            border-left: 4px solid #9B7BA3;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+        .detail-row:last-child {
+            margin-bottom: 0;
+        }
+        .detail-label {
+            color: #666;
+            font-weight: 500;
+        }
+        .detail-value {
+            color: #333;
+            font-weight: 600;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #9B7BA3;
+            box-shadow: 0 0 0 2px rgba(155, 123, 163, 0.1);
+        }
+        .section-label {
+            font-weight: 600;
+            color: #9B7BA3;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 0.5rem;
+        }
+        .confirm-button {
+            width: 100%;
+            padding: 1rem;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 2rem;
+        }
+        .confirm-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .confirm-button:hover:not(:disabled) {
+            background: #229954;
+        }
+        .error {
+            color: #e74c3c;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #fadbd8;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <img src="images/botanical-left.png" alt="Botanical" class="botanical-left-top">
+    <img src="images/botanical-left-bottom.png" alt="Botanical" class="botanical-left-bottom">
+    <img src="images/botanical-right-1.png" alt="Botanical" class="botanical-right-1">
+    <img src="images/botanical-right-2.png" alt="Botanical" class="botanical-right-2">
+
+    <div class="confirmation-container">
+        <div class="confirmation-header">
+            <h1>✓ Payment Confirmed</h1>
+            <p>Welcome to Capitalist Buddha</p>
+        </div>
+
+        <div class="confirmation-details">
+            <div class="detail-row">
+                <span class="detail-label">Course:</span>
+                <span class="detail-value">Capitalist Buddha</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Amount Paid:</span>
+                <span class="detail-value">$199.00 USD</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Access Duration:</span>
+                <span class="detail-value">6 Months</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Email:</span>
+                <span class="detail-value" id="display-email">-</span>
+            </div>
+        </div>
+
+        <div id="error-message" class="error" style="display: none;"></div>
+
+        <form id="account-form">
+            <div class="section-label">Create Your Account</div>
+
+            <div class="form-group">
+                <label for="username">Username *</label>
+                <input type="text" id="username" name="username" required placeholder="Choose a username">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password *</label>
+                <input type="password" id="password" name="password" required placeholder="Create a secure password">
+            </div>
+
+            <button type="submit" class="confirm-button">Complete Setup & Access Course</button>
+        </form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+    <script>
+        const WORKER_URL = 'https://capitalistbuddha.ca';
+        const errorDiv = document.getElementById('error-message');
+        const form = document.getElementById('account-form');
+
+        // Get email and clientSecret from URL
+        const params = new URLSearchParams(window.location.search);
+        const email = params.get('email');
+        const clientSecret = params.get('client_secret');
+
+        if (!email || !clientSecret) {
+            errorDiv.textContent = 'Invalid confirmation link. Please contact support.';
+            errorDiv.style.display = 'block';
+            form.style.display = 'none';
+        } else {
+            document.getElementById('display-email').textContent = email;
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (!username || !password) {
+                errorDiv.textContent = 'Please enter both username and password';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                // Create enrollment in Firebase
+                const confirmResponse = await fetch(`${WORKER_URL}/api/confirm-payment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        paymentIntentId: clientSecret.split('_secret_')[0], // Extract payment intent ID from client secret
+                        email,
+                        password,
+                        username
+                    })
+                });
+
+                const confirmData = await confirmResponse.json();
+                if (confirmData.success) {
+                    // Redirect to login
+                    window.location.href = `/?tab=login&email=${encodeURIComponent(email)}&username=${encodeURIComponent(username)}`;
+                } else {
+                    throw new Error(confirmData.error || 'Failed to create account');
+                }
+            } catch (error) {
+                console.error('Confirmation error:', error);
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

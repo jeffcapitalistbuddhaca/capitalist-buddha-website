@@ -16,59 +16,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle payment success redirect from Stripe
     const params = new URLSearchParams(window.location.search);
     if (params.has('payment_success')) {
-        handlePaymentSuccess(params.get('email'));
+        const email = params.get('email');
+        const clientSecret = params.get('client_secret');
+
+        if (email && clientSecret) {
+            // Redirect to confirmation page
+            window.location.href = `/confirmation.html?email=${encodeURIComponent(email)}&client_secret=${encodeURIComponent(clientSecret)}`;
+        }
     }
 });
-
-// Handle successful payment redirect from Stripe
-async function handlePaymentSuccess(email) {
-    try {
-        // Get Stripe client secret from URL
-        const params = new URLSearchParams(window.location.search);
-        const clientSecret = params.get('payment_intent_client_secret');
-
-        if (!clientSecret) {
-            console.log('No client secret in URL, skipping payment verification');
-            return;
-        }
-
-        // Retrieve payment intent to verify it succeeded
-        const {paymentIntent} = await stripe.retrievePaymentIntent(clientSecret);
-
-        if (paymentIntent.status === 'succeeded') {
-            // Payment succeeded, prompt for password
-            const password = prompt(`Payment successful! Create a password for your account (email: ${email}):`);
-            if (!password) {
-                alert('Account creation cancelled');
-                return;
-            }
-
-            // Create enrollment in Firebase
-            const confirmResponse = await fetch(`${WORKER_URL}/api/confirm-payment`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    paymentIntentId: paymentIntent.id,
-                    email,
-                    password
-                })
-            });
-
-            const confirmData = await confirmResponse.json();
-            if (confirmData.success) {
-                // Clear URL and redirect to login
-                window.location.href = `/?tab=login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
-            } else {
-                alert(`Error creating account: ${confirmData.error}`);
-            }
-        } else {
-            alert(`Payment status: ${paymentIntent.status}`);
-        }
-    } catch (error) {
-        console.error('Payment verification error:', error);
-        alert(`Error: ${error.message}`);
-    }
-}
 
 // Tab switching
 document.querySelectorAll('.tab-btn').forEach(btn => {
