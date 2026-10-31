@@ -122,6 +122,7 @@
                 <input type="email" id="email" name="email" required placeholder="you@example.com">
             </div>
 
+            <div id="address-element"></div>
             <div id="payment-element"></div>
 
             <button type="submit" class="pay-button" id="submit-button">Pay $199</button>
@@ -163,12 +164,15 @@
                     clientSecret: currentClientSecret
                 });
 
-                // Create and mount Payment Element with billing address collection
+                // Create and mount Address Element (Stripe's official address collection)
+                const addressElement = elements.create('address', {
+                    mode: 'billing'
+                });
+                addressElement.mount('#address-element');
+
+                // Create and mount Payment Element
                 const paymentElement = elements.create('payment', {
-                    layout: 'tabs',
-                    fields: {
-                        billingDetails: 'auto'
-                    }
+                    layout: 'tabs'
                 });
                 paymentElement.mount('#payment-element');
             } catch (err) {
@@ -181,7 +185,40 @@
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
 
-            // Call elements.submit() first (Stripe requirement)
+            // Get address from Address Element
+            const { value: address } = await addressElement.getValue();
+
+            if (!address) {
+                errorDiv.textContent = 'Please enter your address';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Calculate tax based on address
+            errorDiv.style.display = 'none';
+            try {
+                const taxResponse = await fetch(`${WORKER_URL}/api/calculate-tax`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ address })
+                });
+
+                const taxData = await taxResponse.json();
+
+                if (!taxData.success) {
+                    errorDiv.textContent = `Tax calculation error: ${taxData.error}`;
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
+                console.log(`Tax calculated: $${(taxData.taxAmount / 100).toFixed(2)}`);
+            } catch (err) {
+                errorDiv.textContent = `Error calculating tax: ${err.message}`;
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Call elements.submit() (Stripe requirement)
             const submitResult = await elements.submit();
             if (submitResult.error) {
                 errorDiv.textContent = submitResult.error.message;
