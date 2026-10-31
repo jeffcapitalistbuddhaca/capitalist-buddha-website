@@ -136,6 +136,7 @@
 
         let stripe = null;
         let elements = null;
+        let currentClientSecret = null;
 
         stripe = Stripe(STRIPE_PUBLISHABLE);
 
@@ -154,9 +155,11 @@
                 const data = await response.json();
                 if (!data.clientSecret) throw new Error('Failed to create payment intent');
 
+                currentClientSecret = data.clientSecret;
+
                 // Create elements with clientSecret (Stripe's official pattern)
                 elements = stripe.elements({
-                    clientSecret: data.clientSecret
+                    clientSecret: currentClientSecret
                 });
 
                 // Create and mount Payment Element (Stripe's official code)
@@ -175,7 +178,7 @@
             const {error} = await stripe.confirmPayment({
                 elements,
                 confirmParams: {
-                    return_url: window.location.origin + '/?payment_success',
+                    return_url: window.location.origin + '/?payment_success&client_secret=' + currentClientSecret,
                 },
             });
 
