@@ -28,10 +28,11 @@ export async function onRequest(context: any): Promise<Response> {
     }
 
     const stripeKey = context.env?.STRIPE_SECRET_KEY || '';
+    const auth = btoa(`${stripeKey}:`);
     const response = await fetch('https://api.stripe.com/v1/payment_intents', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${stripeKey}`,
+        'Authorization': `Basic ${auth}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
