@@ -18,7 +18,7 @@ export async function onRequest(context: any): Promise<Response> {
   }
 
   try {
-    const { email, password, action } = await context.request.json();
+    const { email, password, action = 'login' } = await context.request.json();
 
     if (!email) {
       return new Response(JSON.stringify({ error: 'Email required' }), {
