@@ -62,14 +62,15 @@ if (payBtn) {
             modal.style.cssText = `
                 position: fixed; top: 0; left: 0; width: 100%; height: 100%;
                 background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;
-                z-index: 1000;
+                z-index: 1000; overflow-y: auto;
             `;
 
             const form = document.createElement('form');
             form.style.cssText = `
                 background: white; padding: 1.5rem; border-radius: 8px;
-                width: 90%; max-width: 450px;
+                width: 90%; max-width: 450px; max-height: 100vh; overflow-y: auto;
                 box-shadow: 0 4px 20px rgba(0,0,0,0.2); box-sizing: border-box;
+                margin: auto;
             `;
 
             form.innerHTML = `
