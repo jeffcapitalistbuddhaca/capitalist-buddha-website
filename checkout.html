@@ -94,8 +94,23 @@
         let elements = null;
         let paymentElement = null;
 
-        // Initialize Stripe
+        // Initialize Stripe and create card element immediately on page load
         stripe = Stripe(STRIPE_PUBLISHABLE);
+        elements = stripe.elements();
+        paymentElement = elements.create('card', {
+            style: {
+                base: {
+                    fontSize: '14px',
+                    lineHeight: '18px',
+                    color: '#32325d',
+                    fontFamily: 'system-ui, -apple-system, sans-serif'
+                },
+                invalid: {
+                    color: '#fa755a'
+                }
+            }
+        });
+        paymentElement.mount('#payment-element-container');
 
         const form = document.getElementById('payment-form');
         const errorDiv = document.getElementById('error-message');
@@ -113,25 +128,6 @@
 
                 const data = await response.json();
                 if (!data.clientSecret) throw new Error('Failed to create payment');
-
-                // Create elements and card element with compact styling
-                if (!elements) {
-                    elements = stripe.elements();
-                    paymentElement = elements.create('card', {
-                        style: {
-                            base: {
-                                fontSize: '14px',
-                                lineHeight: '18px',
-                                color: '#32325d',
-                                fontFamily: 'system-ui, -apple-system, sans-serif'
-                            },
-                            invalid: {
-                                color: '#fa755a'
-                            }
-                        }
-                    });
-                    paymentElement.mount('#payment-element-container');
-                }
 
                 // Confirm card payment
                 const { paymentIntent, error } = await stripe.confirmCardPayment(data.clientSecret, {
