@@ -51,10 +51,10 @@ if (payBtn) {
             const data = await response.json();
             if (!data.clientSecret) throw new Error('Failed to create payment');
 
-            // Step 2: Show payment form
+            // Step 2: Show payment form (use Card element - much more compact than Payment element)
             if (!elements) {
-                elements = stripe.elements({ clientSecret: data.clientSecret });
-                paymentElement = elements.create('payment');
+                elements = stripe.elements();
+                paymentElement = elements.create('card');
             }
 
             const modal = document.createElement('div');
@@ -67,24 +67,24 @@ if (payBtn) {
 
             const form = document.createElement('form');
             form.style.cssText = `
-                background: white; padding: 1rem; border-radius: 8px;
-                width: 85%; max-width: 420px; max-height: 70vh; overflow-y: auto;
+                background: white; padding: 1.5rem; border-radius: 8px;
+                width: 90%; max-width: 450px;
                 box-shadow: 0 4px 20px rgba(0,0,0,0.2); box-sizing: border-box;
             `;
 
             form.innerHTML = `
-                <h3 style="margin: 0 0 0.3rem 0; color: #9B7BA3; font-size: 1.2rem;">Complete Payment</h3>
-                <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Amount: $${COURSE_PRICE} USD</p>
-                <div id="payment-element-container" style="margin: 0.5rem 0; max-height: 300px; overflow-y: auto;"></div>
+                <h3 style="margin: 0 0 0.5rem 0; color: #9B7BA3;">Complete Payment</h3>
+                <p style="margin: 0 0 1rem 0;">Amount: $${COURSE_PRICE} USD</p>
+                <div id="payment-element-container" style="margin: 1rem 0;"></div>
                 <button type="submit" style="
-                    width: 100%; padding: 0.6rem; background: #9B7BA3;
+                    width: 100%; padding: 0.75rem; background: #9B7BA3;
                     color: white; border: none; border-radius: 4px; cursor: pointer;
-                    font-size: 0.95rem; margin-top: 0.75rem; font-weight: 600;
+                    font-size: 1rem; margin-top: 1rem; font-weight: 600;
                 ">Pay $${COURSE_PRICE}</button>
                 <button type="button" onclick="document.getElementById('payment-modal').remove();" style="
-                    width: 100%; padding: 0.6rem; background: #ddd;
+                    width: 100%; padding: 0.75rem; background: #ddd;
                     color: #333; border: none; border-radius: 4px; cursor: pointer;
-                    font-size: 0.95rem; margin-top: 0.5rem;
+                    font-size: 1rem; margin-top: 0.5rem;
                 ">Cancel</button>
             `;
 
@@ -96,17 +96,15 @@ if (payBtn) {
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                const { error } = await stripe.confirmPayment({
-                    elements,
-                    clientSecret: data.clientSecret,
-                    confirmParams: {
-                        return_url: window.location.origin
+                const { paymentIntent, error } = await stripe.confirmCardPayment(data.clientSecret, {
+                    payment_method: {
+                        card: paymentElement
                     }
                 });
 
                 if (error) {
                     alert(`Payment failed: ${error.message}`);
-                } else {
+                } else if (paymentIntent && paymentIntent.status === 'succeeded') {
                     // Step 4: AFTER payment succeeds, prompt for email + password
                     modal.remove();
 
@@ -121,7 +119,7 @@ if (payBtn) {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            paymentIntentId: data.paymentIntentId,
+                            paymentIntentId: paymentIntent.id,
                             email,
                             password
                         })
@@ -133,6 +131,8 @@ if (payBtn) {
                         document.getElementById('login-email').value = email;
                         document.getElementById('login-password').value = password;
                     }
+                } else {
+                    alert('Payment processing. Please wait...');
                 }
             });
         } catch (error) {
