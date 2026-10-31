@@ -36,30 +36,105 @@ async function loadModulesData() {
     }
 }
 
-// Payment button - Redirect to Stripe Checkout (simplest, most reliable)
+// Payment button - Open embedded payment form
 const payBtn = document.getElementById('pay-button');
 if (payBtn) {
     payBtn.addEventListener('click', async () => {
         try {
-            const email = prompt('Enter your email address:');
-            if (!email) return;
-
-            const password = prompt('Create a password:');
-            if (!password) return;
-
-            // Create checkout session
-            const response = await fetch(`${WORKER_URL}/api/checkout`, {
+            // Step 1: Create PaymentIntent (no email needed yet)
+            const response = await fetch(`${WORKER_URL}/api/create-payment`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ email: 'temp@example.com' })
             });
 
             const data = await response.json();
-            if (data.url) {
-                window.location.href = data.url;
-            } else {
-                alert('Failed to start payment. Please try again.');
+            if (!data.clientSecret) throw new Error('Failed to create payment');
+
+            // Step 2: Show payment form (use Card element - much more compact than Payment element)
+            if (!elements) {
+                elements = stripe.elements();
+                paymentElement = elements.create('card');
             }
+
+            const modal = document.createElement('div');
+            modal.id = 'payment-modal';
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;
+                z-index: 1000;
+            `;
+
+            const form = document.createElement('form');
+            form.style.cssText = `
+                background: white; padding: 1.5rem; border-radius: 8px;
+                width: 90%; max-width: 450px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.2); box-sizing: border-box;
+            `;
+
+            form.innerHTML = `
+                <h3 style="margin: 0 0 0.5rem 0; color: #9B7BA3;">Complete Payment</h3>
+                <p style="margin: 0 0 1rem 0;">Amount: $${COURSE_PRICE} USD</p>
+                <div id="payment-element-container" style="margin: 1rem 0;"></div>
+                <button type="submit" style="
+                    width: 100%; padding: 0.75rem; background: #9B7BA3;
+                    color: white; border: none; border-radius: 4px; cursor: pointer;
+                    font-size: 1rem; margin-top: 1rem; font-weight: 600;
+                ">Pay $${COURSE_PRICE}</button>
+                <button type="button" onclick="document.getElementById('payment-modal').remove();" style="
+                    width: 100%; padding: 0.75rem; background: #ddd;
+                    color: #333; border: none; border-radius: 4px; cursor: pointer;
+                    font-size: 1rem; margin-top: 0.5rem;
+                ">Cancel</button>
+            `;
+
+            modal.appendChild(form);
+            document.body.appendChild(modal);
+            paymentElement.mount('#payment-element-container');
+
+            // Step 3: Handle payment submission
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const { paymentIntent, error } = await stripe.confirmCardPayment(data.clientSecret, {
+                    payment_method: {
+                        card: paymentElement
+                    }
+                });
+
+                if (error) {
+                    alert(`Payment failed: ${error.message}`);
+                } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+                    // Step 4: AFTER payment succeeds, prompt for email + password
+                    modal.remove();
+
+                    const email = prompt('Enter your email address:');
+                    if (!email) return;
+
+                    const password = prompt('Create a password:');
+                    if (!password) return;
+
+                    // Step 5: Create enrollment with student-provided credentials
+                    const confirmResponse = await fetch(`${WORKER_URL}/api/confirm-payment`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            paymentIntentId: paymentIntent.id,
+                            email,
+                            password
+                        })
+                    });
+
+                    const confirmData = await confirmResponse.json();
+                    if (confirmData.success) {
+                        alert(`Payment successful! Check your email for login details.`);
+                        document.getElementById('login-email').value = email;
+                        document.getElementById('login-password').value = password;
+                    }
+                } else {
+                    alert('Payment processing. Please wait...');
+                }
+            });
         } catch (error) {
             console.error('Payment error:', error);
             alert('An error occurred. Please try again.');
