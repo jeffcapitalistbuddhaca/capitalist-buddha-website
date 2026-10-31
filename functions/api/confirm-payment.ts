@@ -65,7 +65,12 @@ export async function onRequest(context: any): Promise<Response> {
     );
 
     if (!firestoreResponse.ok) {
-      console.error('Firestore error:', await firestoreResponse.text());
+      const errorText = await firestoreResponse.text();
+      console.error('Firestore error:', errorText);
+      return new Response(
+        JSON.stringify({ success: false, error: `Failed to create enrollment: ${errorText}` }),
+        { status: 400, headers: corsHeaders }
+      );
     }
 
     return new Response(
