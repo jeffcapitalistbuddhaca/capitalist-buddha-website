@@ -173,10 +173,10 @@
             });
             paymentElement.mount('#payment-element');
 
-            // Listen for address changes to calculate and update tax in real-time
-            addressElement.addEventListener('change', async (event) => {
-                const { value: address } = event;
-                console.log('Address changed (raw):', JSON.stringify(address, null, 2));
+            // Function to calculate and update tax
+            async function calculateAndUpdateTax() {
+                const { value: address } = await addressElement.getValue();
+                console.log('Getting address value:', JSON.stringify(address, null, 2));
 
                 if (!address || !address.line1) {
                     console.log('Address incomplete, skipping tax calculation');
@@ -193,7 +193,6 @@
                         country: address.country || ''
                     };
                     console.log('Normalized address:', JSON.stringify(normalizedAddress, null, 2));
-                    console.log('Calculating tax for:', normalizedAddress);
 
                     // Calculate tax for this address
                     const taxRes = await fetch(`${WORKER_URL}/api/calculate-tax`, {
@@ -202,17 +201,13 @@
                         body: JSON.stringify({ address: normalizedAddress })
                     });
 
-                    console.log('Tax API response status:', taxRes.status);
                     const taxData = await taxRes.json();
-                    console.log('Tax API response (raw):', JSON.stringify(taxData, null, 2));
+                    console.log('Tax API response:', JSON.stringify(taxData, null, 2));
 
                     if (!taxData.success) {
-                        console.error('Tax calculation failed - error:', taxData.error);
-                        console.log('Full error response:', taxData);
+                        console.error('Tax calculation failed:', taxData.error);
                         return;
                     }
-
-                    console.log('Tax calculation succeeded - amount:', taxData.taxAmount, 'USD:', (taxData.taxAmount / 100).toFixed(2));
 
                     if (!currentPaymentIntentId) {
                         console.error('No payment intent ID set');
@@ -244,15 +239,19 @@
                     const taxUsd = (taxData.taxAmount / 100).toFixed(2);
                     const totalUsd = (finalAmount / 100).toFixed(2);
 
-                    console.log('Updating display - Tax:', taxUsd, 'Total:', totalUsd);
+                    console.log('Updating display - Tax: $' + taxUsd + ', Total: $' + totalUsd);
                     document.getElementById('tax-display').textContent = `$${taxUsd}`;
                     document.getElementById('total-display').textContent = `$${totalUsd}`;
                     document.getElementById('amount-display').textContent = `$${totalUsd}`;
-                    console.log('Display updated successfully');
+                    console.log('Display updated');
                 } catch (err) {
                     console.error('Tax calculation error:', err);
                 }
-            });
+            }
+
+            // Listen for address blur (when user leaves the field) and change events
+            addressElement.addEventListener('blur', calculateAndUpdateTax);
+            addressElement.addEventListener('change', calculateAndUpdateTax);
         }
 
         // On page load, create PaymentIntent and initialize elements
