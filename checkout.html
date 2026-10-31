@@ -173,82 +173,9 @@
             });
             paymentElement.mount('#payment-element');
 
-            // Listen for address changes and debug what event data we get
-            addressElement.addEventListener('change', async (event) => {
-                console.log('Address element fired change event');
-                console.log('Event object:', event);
-                console.log('Event value:', event.value);
-
-                const address = event.value;
-
-                if (!address || !address.line1) {
-                    console.log('Address incomplete, skipping tax calculation');
-                    return;
-                }
-
-                try {
-                    // Normalize address object to handle both camelCase and snake_case
-                    const normalizedAddress = {
-                        line1: address.line1 || '',
-                        city: address.city || '',
-                        state: address.state || '',
-                        postal_code: address.postal_code || address.postalCode || '',
-                        country: address.country || ''
-                    };
-                    console.log('Calculating tax for address:', normalizedAddress);
-
-                    // Calculate tax for this address
-                    const taxRes = await fetch(`${WORKER_URL}/api/calculate-tax`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ address: normalizedAddress })
-                    });
-
-                    const taxData = await taxRes.json();
-                    console.log('Tax response:', taxData);
-
-                    if (!taxData.success) {
-                        console.error('Tax calculation failed:', taxData.error);
-                        return;
-                    }
-
-                    if (!currentPaymentIntentId) {
-                        console.error('No payment intent ID set');
-                        return;
-                    }
-
-                    // Update the PaymentIntent with the new amount (base + tax)
-                    const finalAmount = 19900 + (taxData.taxAmount || 0);
-                    console.log('Updating PaymentIntent amount to:', finalAmount);
-
-                    const updateRes = await fetch(`${WORKER_URL}/api/update-payment`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            paymentIntentId: currentPaymentIntentId,
-                            amount: finalAmount
-                        })
-                    });
-
-                    const updateData = await updateRes.json();
-                    console.log('PaymentIntent updated:', updateData);
-
-                    if (!updateData.success) {
-                        console.error('PaymentIntent update failed');
-                        return;
-                    }
-
-                    // Update display with new tax and total
-                    const taxUsd = (taxData.taxAmount / 100).toFixed(2);
-                    const totalUsd = (finalAmount / 100).toFixed(2);
-
-                    console.log('Updating display: tax=$' + taxUsd + ', total=$' + totalUsd);
-                    document.getElementById('tax-display').textContent = `$${taxUsd}`;
-                    document.getElementById('total-display').textContent = `$${totalUsd}`;
-                    document.getElementById('amount-display').textContent = `$${totalUsd}`;
-                } catch (err) {
-                    console.error('Tax error:', err);
-                }
+            // Stripe's automatic_tax handles tax calculation automatically
+            addressElement.addEventListener('change', () => {
+                console.log('Address updated - Stripe will calculate tax automatically');
             });
         }
 
