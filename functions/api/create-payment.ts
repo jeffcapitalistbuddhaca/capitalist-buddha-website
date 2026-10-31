@@ -76,11 +76,15 @@ export async function onRequest(context: any): Promise<Response> {
     );
   } catch (error) {
     console.error('Payment creation error:', error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
     return new Response(
-      JSON.stringify({ error: String(error) }),
+      JSON.stringify({ error: errorMsg, stack: error instanceof Error ? error.stack : '' }),
       {
         status: 500,
-        headers: corsHeaders,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
       }
     );
   }
