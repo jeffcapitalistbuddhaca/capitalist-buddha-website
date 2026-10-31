@@ -176,9 +176,14 @@
             // Listen for address changes to calculate and update tax in real-time
             addressElement.addEventListener('change', async (event) => {
                 const { value: address } = event;
-                if (!address || !address.line1) return;
+                console.log('Address changed:', address);
+                if (!address || !address.line1) {
+                    console.log('Address incomplete, skipping tax calculation');
+                    return;
+                }
 
                 try {
+                    console.log('Calculating tax for:', address);
                     // Calculate tax for this address
                     const taxRes = await fetch(`${WORKER_URL}/api/calculate-tax`, {
                         method: 'POST',
@@ -187,30 +192,48 @@
                     });
 
                     const taxData = await taxRes.json();
-                    if (taxData.success && currentPaymentIntentId) {
-                        // Update the PaymentIntent with the new amount (base + tax)
-                        const finalAmount = 19900 + (taxData.taxAmount || 0);
+                    console.log('Tax calculation response:', taxData);
 
-                        const updateRes = await fetch(`${WORKER_URL}/api/update-payment`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                paymentIntentId: currentPaymentIntentId,
-                                amount: finalAmount
-                            })
-                        });
-
-                        const updateData = await updateRes.json();
-                        if (updateData.success) {
-                            // Update display with new tax and total
-                            const taxUsd = (taxData.taxAmount / 100).toFixed(2);
-                            const totalUsd = (finalAmount / 100).toFixed(2);
-
-                            document.getElementById('tax-display').textContent = `$${taxUsd}`;
-                            document.getElementById('total-display').textContent = `$${totalUsd}`;
-                            document.getElementById('amount-display').textContent = `$${totalUsd}`;
-                        }
+                    if (!taxData.success) {
+                        console.error('Tax calculation failed:', taxData.error);
+                        return;
                     }
+
+                    if (!currentPaymentIntentId) {
+                        console.error('No payment intent ID set');
+                        return;
+                    }
+
+                    // Update the PaymentIntent with the new amount (base + tax)
+                    const finalAmount = 19900 + (taxData.taxAmount || 0);
+                    console.log('Updating PaymentIntent to:', finalAmount);
+
+                    const updateRes = await fetch(`${WORKER_URL}/api/update-payment`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            paymentIntentId: currentPaymentIntentId,
+                            amount: finalAmount
+                        })
+                    });
+
+                    const updateData = await updateRes.json();
+                    console.log('PaymentIntent update response:', updateData);
+
+                    if (!updateData.success) {
+                        console.error('PaymentIntent update failed:', updateData.error);
+                        return;
+                    }
+
+                    // Update display with new tax and total
+                    const taxUsd = (taxData.taxAmount / 100).toFixed(2);
+                    const totalUsd = (finalAmount / 100).toFixed(2);
+
+                    console.log('Updating display - Tax:', taxUsd, 'Total:', totalUsd);
+                    document.getElementById('tax-display').textContent = `$${taxUsd}`;
+                    document.getElementById('total-display').textContent = `$${totalUsd}`;
+                    document.getElementById('amount-display').textContent = `$${totalUsd}`;
+                    console.log('Display updated successfully');
                 } catch (err) {
                     console.error('Tax calculation error:', err);
                 }
@@ -220,6 +243,7 @@
         // On page load, create PaymentIntent and initialize elements
         document.addEventListener('DOMContentLoaded', async () => {
             try {
+                console.log('Creating PaymentIntent...');
                 const res = await fetch(`${WORKER_URL}/api/create-payment`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -227,13 +251,18 @@
                 });
 
                 const data = await res.json();
+                console.log('PaymentIntent creation response:', data);
+
                 if (!data.clientSecret) throw new Error('Failed to create payment intent');
 
                 currentClientSecret = data.clientSecret;
                 currentPaymentIntentId = data.paymentIntentId;
+                console.log('PaymentIntent ID:', currentPaymentIntentId);
 
                 await initElements(currentClientSecret);
+                console.log('Elements initialized');
             } catch (err) {
+                console.error('Initialization error:', err);
                 errorDiv.textContent = `Initialization error: ${err.message}`;
                 errorDiv.style.display = 'block';
             }
