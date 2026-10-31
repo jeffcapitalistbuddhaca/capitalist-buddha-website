@@ -67,15 +67,15 @@ if (payBtn) {
 
             const form = document.createElement('form');
             form.style.cssText = `
-                background: white; padding: 1.5rem; border-radius: 8px;
-                width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+                background: white; padding: 1rem; border-radius: 8px;
+                width: 85%; max-width: 420px; max-height: 70vh; overflow-y: auto;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.2); box-sizing: border-box;
             `;
 
             form.innerHTML = `
-                <h3 style="margin: 0 0 0.5rem 0; color: #9B7BA3; font-size: 1.3rem;">Complete Payment</h3>
-                <p style="margin: 0 0 0.75rem 0; font-size: 0.95rem;">Amount: $${COURSE_PRICE} USD</p>
-                <div id="payment-element-container" style="margin: 0.75rem 0;"></div>
+                <h3 style="margin: 0 0 0.3rem 0; color: #9B7BA3; font-size: 1.2rem;">Complete Payment</h3>
+                <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Amount: $${COURSE_PRICE} USD</p>
+                <div id="payment-element-container" style="margin: 0.5rem 0;"></div>
                 <button type="submit" style="
                     width: 100%; padding: 0.6rem; background: #9B7BA3;
                     color: white; border: none; border-radius: 4px; cursor: pointer;
