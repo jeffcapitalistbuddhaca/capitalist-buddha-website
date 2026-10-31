@@ -27,7 +27,6 @@ export async function onRequest(context: any): Promise<Response> {
       });
     }
 
-    // Use "Stripe Secret Key 2" which contains the actual test secret key
     const env = context.env;
     const stripeKey = env?.['Stripe Secret Key 2'];
 
@@ -76,15 +75,11 @@ export async function onRequest(context: any): Promise<Response> {
     );
   } catch (error) {
     console.error('Payment creation error:', error);
-    const errorMsg = error instanceof Error ? error.message : String(error);
     return new Response(
-      JSON.stringify({ error: errorMsg, stack: error instanceof Error ? error.stack : '' }),
+      JSON.stringify({ error: String(error) }),
       {
         status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
+        headers: corsHeaders,
       }
     );
   }
