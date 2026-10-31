@@ -26,6 +26,28 @@
             color: #666;
             margin: 0;
         }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #9B7BA3;
+            box-shadow: 0 0 0 2px rgba(155, 123, 163, 0.1);
+        }
         #payment-element-container {
             margin: 2rem 0;
         }
@@ -62,6 +84,21 @@
             background: #fadbd8;
             border-radius: 4px;
         }
+        .success {
+            color: #27ae60;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #d5f4e6;
+            border-radius: 4px;
+        }
+        .section-label {
+            font-weight: 600;
+            color: #9B7BA3;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -78,8 +115,45 @@
         </div>
 
         <div id="error-message" class="error" style="display: none;"></div>
+        <div id="success-message" class="success" style="display: none;"></div>
+
         <form id="payment-form">
+            <div class="section-label">Billing Information</div>
+
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" name="email" required placeholder="you@example.com">
+            </div>
+
+            <div class="form-group">
+                <label for="address">Street Address *</label>
+                <input type="text" id="address" name="address" required placeholder="123 Main St">
+            </div>
+
+            <div class="form-group">
+                <label for="city">City *</label>
+                <input type="text" id="city" name="city" required placeholder="New York">
+            </div>
+
+            <div class="form-group">
+                <label for="state">State/Province *</label>
+                <input type="text" id="state" name="state" required placeholder="NY">
+            </div>
+
+            <div class="form-group">
+                <label for="zip">Postal Code *</label>
+                <input type="text" id="zip" name="zip" required placeholder="10001">
+            </div>
+
+            <div class="form-group">
+                <label for="country">Country *</label>
+                <input type="text" id="country" name="country" required placeholder="United States">
+            </div>
+
+            <div class="section-label">Payment Information</div>
+
             <div id="payment-element-container"></div>
+
             <button type="submit" class="pay-button" id="submit-button">Pay $199</button>
         </form>
     </div>
@@ -94,7 +168,7 @@
         let elements = null;
         let paymentElement = null;
 
-        // Initialize Stripe and create card element immediately on page load
+        // Initialize Stripe and create card element on page load
         stripe = Stripe(STRIPE_PUBLISHABLE);
         elements = stripe.elements();
         paymentElement = elements.create('card', {
@@ -115,16 +189,30 @@
 
         const form = document.getElementById('payment-form');
         const errorDiv = document.getElementById('error-message');
+        const successDiv = document.getElementById('success-message');
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const address = document.getElementById('address').value;
+            const city = document.getElementById('city').value;
+            const state = document.getElementById('state').value;
+            const zip = document.getElementById('zip').value;
+            const country = document.getElementById('country').value;
+
+            if (!email || !address || !city || !state || !zip || !country) {
+                errorDiv.textContent = 'Please fill in all billing information';
+                errorDiv.style.display = 'block';
+                return;
+            }
 
             try {
                 // Create payment intent
                 const response = await fetch(`${WORKER_URL}/api/create-payment`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: 'temp@example.com' })
+                    body: JSON.stringify({ email })
                 });
 
                 const data = await response.json();
@@ -133,7 +221,17 @@
                 // Confirm card payment
                 const { paymentIntent, error } = await stripe.confirmCardPayment(data.clientSecret, {
                     payment_method: {
-                        card: paymentElement
+                        card: paymentElement,
+                        billing_details: {
+                            email: email,
+                            address: {
+                                line1: address,
+                                city: city,
+                                state: state,
+                                postal_code: zip,
+                                country: country
+                            }
+                        }
                     }
                 });
 
@@ -141,12 +239,21 @@
                     errorDiv.textContent = `Payment failed: ${error.message}`;
                     errorDiv.style.display = 'block';
                 } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-                    // Payment succeeded - prompt for email and password
-                    const email = prompt('Enter your email address:');
-                    if (!email) return;
+                    // Payment succeeded - show confirmation
+                    successDiv.textContent = 'Payment Complete! Creating your account...';
+                    successDiv.style.display = 'block';
+                    errorDiv.style.display = 'none';
+                    form.style.display = 'none';
 
-                    const password = prompt('Create a password:');
-                    if (!password) return;
+                    // Prompt for password
+                    const password = prompt('Create a password for your account:');
+                    if (!password) {
+                        errorDiv.textContent = 'Password creation cancelled';
+                        errorDiv.style.display = 'block';
+                        successDiv.style.display = 'none';
+                        form.style.display = 'block';
+                        return;
+                    }
 
                     // Create enrollment
                     const confirmResponse = await fetch(`${WORKER_URL}/api/confirm-payment`, {
@@ -161,8 +268,10 @@
 
                     const confirmData = await confirmResponse.json();
                     if (confirmData.success) {
-                        // Redirect to login with email/password pre-filled
+                        // Redirect to login with credentials
                         window.location.href = `/?tab=login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+                    } else {
+                        throw new Error('Failed to create account');
                     }
                 }
             } catch (error) {
