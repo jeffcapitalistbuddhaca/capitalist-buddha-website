@@ -40,7 +40,7 @@ async function loadModulesData() {
 const payBtn = document.getElementById('pay-button');
 if (payBtn) {
     payBtn.addEventListener('click', () => {
-        window.location.href = '/checkout.html';
+        window.location.href = '/checkout';
     });
 }
 
