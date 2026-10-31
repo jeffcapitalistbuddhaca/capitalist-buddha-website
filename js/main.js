@@ -10,18 +10,37 @@ let elements = null;
 let paymentElement = null;
 
 // Initialize Stripe
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     stripe = Stripe(STRIPE_PUBLISHABLE);
 
-    // Handle payment success redirect from Stripe (Stripe's official pattern)
+    // Handle payment success redirect from Stripe Checkout Session
     const params = new URLSearchParams(window.location.search);
-    if (params.has('payment_success')) {
-        const clientSecret = params.get('payment_intent_client_secret');
+    if (params.has('session_id')) {
+        const sessionId = params.get('session_id');
+        console.log('Payment returned with session_id:', sessionId);
 
-        if (clientSecret) {
-            // Stripe automatically adds payment_intent_client_secret to return_url
-            window.location.href = `/confirmation?payment_intent_client_secret=${encodeURIComponent(clientSecret)}`;
+        // Check session status
+        try {
+            const response = await fetch(`${WORKER_URL}/api/session-status?session_id=${encodeURIComponent(sessionId)}`);
+            const data = await response.json();
+            console.log('Session status:', data);
+
+            if (data.status === 'complete') {
+                // Payment succeeded, go to account creation
+                console.log('Payment complete, redirecting to account setup');
+                window.location.href = `/confirmation?session_id=${encodeURIComponent(sessionId)}&email=${encodeURIComponent(data.customer_email || '')}`;
+                return;
+            } else if (data.status === 'open') {
+                // Payment not completed, show error
+                console.log('Payment not completed');
+                alert('Payment was not completed. Please try again.');
+            }
+        } catch (err) {
+            console.error('Error checking session status:', err);
         }
+
+        // Remove the session_id from URL so we don't keep redirecting
+        window.history.replaceState({}, document.title, window.location.pathname);
     }
 });
 

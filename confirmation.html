@@ -162,40 +162,56 @@
         document.addEventListener('DOMContentLoaded', () => {
             const errorDiv = document.getElementById('error-message');
             const form = document.getElementById('account-form');
+            const emailInput = document.getElementById('email');
 
             if (!errorDiv || !form) {
                 console.error('Required DOM elements not found');
                 return;
             }
 
-            // Get clientSecret from URL (Stripe puts it there automatically)
+            // Get session_id or clientSecret from URL
             const params = new URLSearchParams(window.location.search);
+            const sessionId = params.get('session_id');
             const clientSecret = params.get('payment_intent_client_secret');
+            const prefillEmail = params.get('email');
 
-            if (!clientSecret) {
+            // Prefill email if provided
+            if (prefillEmail && emailInput) {
+                emailInput.value = decodeURIComponent(prefillEmail);
+            }
+
+            // Payment verification depends on flow type
+            if (!sessionId && !clientSecret) {
                 errorDiv.textContent = 'Invalid confirmation link. Please contact support.';
                 errorDiv.style.display = 'block';
                 form.style.display = 'none';
                 return;
             }
 
-            // Verify payment succeeded using Stripe's official method
-            try {
-                stripe.retrievePaymentIntent(clientSecret).then(({paymentIntent}) => {
-                    if (paymentIntent.status !== 'succeeded') {
-                        errorDiv.textContent = `Payment failed with status: ${paymentIntent.status}`;
+            // For Checkout Session flow: payment is already verified by session status
+            if (sessionId) {
+                console.log('Checkout Session payment confirmed, ready for account creation');
+            }
+
+            // For Payment Intent flow (legacy): verify with Stripe
+            if (clientSecret) {
+                try {
+                    stripe.retrievePaymentIntent(clientSecret).then(({paymentIntent}) => {
+                        if (paymentIntent.status !== 'succeeded') {
+                            errorDiv.textContent = `Payment failed with status: ${paymentIntent.status}`;
+                            errorDiv.style.display = 'block';
+                            form.style.display = 'none';
+                        }
+                    }).catch(err => {
+                        errorDiv.textContent = `Error verifying payment: ${err.message}`;
                         errorDiv.style.display = 'block';
                         form.style.display = 'none';
-                    }
-                }).catch(err => {
-                    errorDiv.textContent = `Error verifying payment: ${err.message}`;
+                    });
+                } catch (err) {
+                    errorDiv.textContent = `Error: ${err.message}`;
                     errorDiv.style.display = 'block';
                     form.style.display = 'none';
-                });
-            } catch (err) {
-                errorDiv.textContent = `Error: ${err.message}`;
-                errorDiv.style.display = 'block';
-                form.style.display = 'none';
+                }
             }
 
             form.addEventListener('submit', async (e) => {
@@ -227,15 +243,28 @@
                 }
 
                 try {
-                    // Get payment intent ID from clientSecret
-                    const {paymentIntent} = await stripe.retrievePaymentIntent(clientSecret);
+                    let paymentId = null;
+
+                    // Get payment ID based on flow type
+                    if (sessionId) {
+                        // For Checkout Session: use sessionId
+                        paymentId = sessionId;
+                    } else if (clientSecret) {
+                        // For Payment Intent: retrieve from Stripe
+                        const {paymentIntent} = await stripe.retrievePaymentIntent(clientSecret);
+                        paymentId = paymentIntent.id;
+                    }
+
+                    if (!paymentId) {
+                        throw new Error('Payment ID not found');
+                    }
 
                     // Create enrollment
                     const response = await fetch(`${WORKER_URL}/api/confirm-payment`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            paymentIntentId: paymentIntent.id,
+                            paymentIntentId: paymentId,
                             email,
                             password
                         })
