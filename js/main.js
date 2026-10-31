@@ -13,15 +13,14 @@ let paymentElement = null;
 document.addEventListener('DOMContentLoaded', () => {
     stripe = Stripe(STRIPE_PUBLISHABLE);
 
-    // Handle payment success redirect from Stripe
+    // Handle payment success redirect from Stripe (Stripe's official pattern)
     const params = new URLSearchParams(window.location.search);
     if (params.has('payment_success')) {
-        const email = params.get('email');
-        const clientSecret = params.get('client_secret');
+        const clientSecret = params.get('payment_intent_client_secret');
 
-        if (email && clientSecret) {
-            // Redirect to confirmation page (Cloudflare strips .html)
-            window.location.href = `/confirmation?email=${encodeURIComponent(email)}&client_secret=${encodeURIComponent(clientSecret)}`;
+        if (clientSecret) {
+            // Stripe automatically adds payment_intent_client_secret to return_url
+            window.location.href = `/confirmation?payment_intent_client_secret=${encodeURIComponent(clientSecret)}`;
         }
     }
 });

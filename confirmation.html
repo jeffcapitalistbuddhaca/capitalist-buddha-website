@@ -23,11 +23,6 @@
             margin: 0 0 0.5rem 0;
             font-size: 2rem;
         }
-        .confirmation-header p {
-            color: #666;
-            margin: 0;
-            font-size: 1.1rem;
-        }
         .confirmation-details {
             background: #f9f9f9;
             padding: 1.5rem;
@@ -39,7 +34,6 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 1rem;
-            font-size: 0.95rem;
         }
         .detail-row:last-child {
             margin-bottom: 0;
@@ -98,9 +92,6 @@
             opacity: 0.6;
             cursor: not-allowed;
         }
-        .confirm-button:hover:not(:disabled) {
-            background: #229954;
-        }
         .error {
             color: #e74c3c;
             margin: 1rem 0;
@@ -135,10 +126,6 @@
                 <span class="detail-label">Access Duration:</span>
                 <span class="detail-value">6 Months</span>
             </div>
-            <div class="detail-row">
-                <span class="detail-label">Email:</span>
-                <span class="detail-value" id="display-email">-</span>
-            </div>
         </div>
 
         <div id="error-message" class="error" style="display: none;"></div>
@@ -147,8 +134,8 @@
             <div class="section-label">Create Your Account</div>
 
             <div class="form-group">
-                <label for="username">Username *</label>
-                <input type="text" id="username" name="username" required placeholder="Choose a username">
+                <label for="email">Email *</label>
+                <input type="email" id="email" name="email" required placeholder="Enter your email">
             </div>
 
             <div class="form-group">
@@ -160,60 +147,74 @@
         </form>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
     <script>
+        const STRIPE_PUBLISHABLE = 'pk_test_51UVYmmKLvdoBDUk6kEmkKFKv5znaZoWM4WXBB4kyGInGQoj4aYgeUsOYEXqgApfbWF7W9KizCqgEZxKKfNM34tZF00TJ1Mtwve';
         const WORKER_URL = 'https://capitalistbuddha.ca';
+
         const errorDiv = document.getElementById('error-message');
         const form = document.getElementById('account-form');
+        let stripe = Stripe(STRIPE_PUBLISHABLE);
 
-        // Get email, clientSecret, and paymentIntentId from URL
+        // Get clientSecret from URL (Stripe puts it there automatically)
         const params = new URLSearchParams(window.location.search);
-        const email = params.get('email');
-        const clientSecret = params.get('client_secret');
-        const paymentIntentId = params.get('payment_intent_id');
+        const clientSecret = params.get('payment_intent_client_secret');
 
-        if (!email || !clientSecret || !paymentIntentId) {
+        if (!clientSecret) {
             errorDiv.textContent = 'Invalid confirmation link. Please contact support.';
             errorDiv.style.display = 'block';
             form.style.display = 'none';
         } else {
-            document.getElementById('display-email').textContent = email;
+            // Verify payment succeeded using Stripe's official method
+            stripe.retrievePaymentIntent(clientSecret).then(({paymentIntent}) => {
+                if (paymentIntent.status !== 'succeeded') {
+                    errorDiv.textContent = `Payment failed with status: ${paymentIntent.status}`;
+                    errorDiv.style.display = 'block';
+                    form.style.display = 'none';
+                }
+            }).catch(err => {
+                errorDiv.textContent = `Error verifying payment: ${err.message}`;
+                errorDiv.style.display = 'block';
+                form.style.display = 'none';
+            });
         }
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            if (!username || !password) {
-                errorDiv.textContent = 'Please enter both username and password';
+            if (!email || !password) {
+                errorDiv.textContent = 'Please enter both email and password';
                 errorDiv.style.display = 'block';
                 return;
             }
 
             try {
-                // Create enrollment in Firebase
-                const confirmResponse = await fetch(`${WORKER_URL}/api/confirm-payment`, {
+                // Get payment intent ID from clientSecret
+                const {paymentIntent} = await stripe.retrievePaymentIntent(clientSecret);
+
+                // Create enrollment
+                const response = await fetch(`${WORKER_URL}/api/confirm-payment`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        paymentIntentId,
+                        paymentIntentId: paymentIntent.id,
                         email,
                         password
                     })
                 });
 
-                const confirmData = await confirmResponse.json();
-                if (confirmData.success) {
+                const data = await response.json();
+
+                if (data.success) {
                     // Redirect to login
-                    window.location.href = `/?tab=login&email=${encodeURIComponent(email)}&username=${encodeURIComponent(username)}`;
+                    window.location.href = `/?tab=login&email=${encodeURIComponent(email)}`;
                 } else {
-                    throw new Error(confirmData.error || 'Failed to create account');
+                    throw new Error(data.error || 'Failed to create account');
                 }
             } catch (error) {
-                console.error('Confirmation error:', error);
                 errorDiv.textContent = `Error: ${error.message}`;
                 errorDiv.style.display = 'block';
             }

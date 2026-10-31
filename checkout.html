@@ -137,7 +137,6 @@
         let stripe = null;
         let elements = null;
         let currentClientSecret = null;
-        let currentPaymentIntentId = null;
 
         stripe = Stripe(STRIPE_PUBLISHABLE);
 
@@ -177,12 +176,10 @@
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
 
-            const email = document.getElementById('email').value;
-
             const {error} = await stripe.confirmPayment({
                 elements,
                 confirmParams: {
-                    return_url: window.location.origin + '/?payment_success&email=' + encodeURIComponent(email) + '&client_secret=' + encodeURIComponent(currentClientSecret) + '&payment_intent_id=' + encodeURIComponent(currentPaymentIntentId),
+                    return_url: window.location.origin + '/?payment_success',
                 },
             });
 
