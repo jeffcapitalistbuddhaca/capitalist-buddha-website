@@ -251,6 +251,14 @@
             }
 
             try {
+                // REQUIRED: Submit the payment element form FIRST
+                const submitResult = await elements.submit();
+                if (submitResult.error) {
+                    errorDiv.textContent = submitResult.error.message;
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
                 // Create fresh payment intent with user's email
                 const response = await fetch(`${WORKER_URL}/api/create-payment`, {
                     method: 'POST',
