@@ -95,6 +95,26 @@ export async function onRequest(context: any): Promise<Response> {
 
     console.log('Account created with enrollment:', enrollment);
 
+    // Log email for audit trail
+    const stripeKeyForLog = (context.env as any)?.['Stripe Secret Key 2'] || '';
+    try {
+      await fetch('https://capitalistbuddha.ca/api/email-log', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(context.env as any)?.['EMAIL_LOG_SECRET'] || 'dev-secret'}`,
+        },
+        body: JSON.stringify({
+          email,
+          type: 'account_created',
+          sessionId: transactionId,
+        }),
+      });
+    } catch (err) {
+      console.error('Email logging error:', err);
+      // Don't fail the request if logging fails
+    }
+
     // Note: Firebase enrollment storage would go here
     // For now, account is confirmed and ready
     // TODO: Implement Firebase Firestore enrollment storage

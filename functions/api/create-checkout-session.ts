@@ -61,6 +61,27 @@ export async function onRequest(context: any): Promise<Response> {
       });
     }
 
+    // Log email capture for audit trail
+    if (email) {
+      try {
+        await fetch('https://capitalistbuddha.ca/api/email-log', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${env?.['EMAIL_LOG_SECRET'] || 'dev-secret'}`,
+          },
+          body: JSON.stringify({
+            email,
+            type: 'checkout',
+            sessionId: session.id,
+          }),
+        });
+      } catch (err) {
+        console.error('Email logging error:', err);
+        // Don't fail the request if logging fails
+      }
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
