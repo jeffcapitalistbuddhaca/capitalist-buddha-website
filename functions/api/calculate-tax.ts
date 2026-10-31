@@ -49,12 +49,11 @@ export async function onRequest(context: any): Promise<Response> {
         line_items: [
           {
             amount_in_cents: 19900,
-            reference: 'course_enrollment',
           },
         ],
         customer_details: {
-          address_source: 'billing',
           address: {
+            address_source: 'billing',
             line1: address.line1 || '',
             line2: address.line2 || '',
             city: address.city || '',
