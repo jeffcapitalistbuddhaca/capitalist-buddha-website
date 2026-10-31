@@ -117,20 +117,12 @@
         <div id="success-message" class="success" style="display: none;"></div>
 
         <form id="payment-form">
-            <div id="express-checkout-container"></div>
-
-            <div class="divider">Or pay with card</div>
-
-            <div id="express-checkout-container"></div>
-
-            <div class="divider">Or pay with card</div>
-
             <div class="form-group">
                 <label for="email">Email Address *</label>
                 <input type="email" id="email" name="email" required placeholder="you@example.com">
             </div>
 
-            <div id="payment-element-container"></div>
+            <div id="payment-element"></div>
 
             <button type="submit" class="pay-button" id="submit-button">Pay $199</button>
         </form>
@@ -143,95 +135,52 @@
         const WORKER_URL = 'https://capitalistbuddha.ca';
 
         let stripe = null;
-        let paymentElement = null;
-        let expressCheckoutElement = null;
         let elements = null;
-        let currentClientSecret = null;
 
         stripe = Stripe(STRIPE_PUBLISHABLE);
 
         const form = document.getElementById('payment-form');
         const errorDiv = document.getElementById('error-message');
-        const successDiv = document.getElementById('success-message');
 
-        // Create elements and mount when user enters email
-        async function initializePaymentElements(email) {
+        // Fetch client secret and initialize payment elements (Stripe's official pattern)
+        (async () => {
             try {
-                // Create payment intent with user's email (Stripe requires this)
                 const response = await fetch(`${WORKER_URL}/api/create-payment`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
+                    body: JSON.stringify({ email: 'temp@example.com' })
                 });
 
                 const data = await response.json();
                 if (!data.clientSecret) throw new Error('Failed to create payment intent');
 
-                currentClientSecret = data.clientSecret;
-
                 // Create elements with clientSecret (Stripe's official pattern)
                 elements = stripe.elements({
-                    clientSecret: currentClientSecret
+                    clientSecret: data.clientSecret
                 });
 
-                // Mount Express Checkout Element (Apple Pay, Google Pay, PayPal)
-                expressCheckoutElement = elements.create('expressCheckout');
-                expressCheckoutElement.mount('#express-checkout-container');
-
-                // Mount Payment Element (Card form)
-                paymentElement = elements.create('payment');
-                paymentElement.mount('#payment-element-container');
+                // Create and mount Payment Element (Stripe's official code)
+                const paymentElement = elements.create('payment');
+                paymentElement.mount('#payment-element');
             } catch (err) {
-                errorDiv.textContent = `Error loading payment form: ${err.message}`;
+                errorDiv.textContent = `Error: ${err.message}`;
                 errorDiv.style.display = 'block';
-                console.error('Failed to create elements:', err);
+                console.error('Failed to initialize:', err);
             }
-        }
+        })();
 
-        // Initialize payment elements when user enters email
-        const emailInput = document.getElementById('email');
-        emailInput.addEventListener('blur', () => {
-            const email = emailInput.value;
-            if (email && !elements) {
-                initializePaymentElements(email);
-            }
-        });
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
 
-form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+            const {error} = await stripe.confirmPayment({
+                elements,
+                confirmParams: {
+                    return_url: window.location.origin + '/?payment=success',
+                },
+            });
 
-            const email = document.getElementById('email').value;
-
-            if (!email) {
-                errorDiv.textContent = 'Please enter your email address';
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            try {
-                // REQUIRED BY STRIPE: Call elements.submit() FIRST - before any async work
-                const {error: submitError} = await elements.submit();
-                if (submitError) {
-                    errorDiv.textContent = submitError.message;
-                    errorDiv.style.display = 'block';
-                    return;
-                }
-
-                // THEN call confirmPayment (Stripe's official pattern - NO clientSecret here)
-                const { error } = await stripe.confirmPayment({
-                    elements,
-                    confirmParams: {
-                        return_url: `${window.location.origin}/?payment_success&email=${encodeURIComponent(email)}`
-                    }
-                });
-
-                if (error) {
-                    errorDiv.textContent = `Payment failed: ${error.message}`;
-                    errorDiv.style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Payment error:', error);
-                errorDiv.textContent = `Error: ${error.message}`;
+            if (error) {
+                errorDiv.textContent = error.message;
                 errorDiv.style.display = 'block';
             }
         });
