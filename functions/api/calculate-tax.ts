@@ -47,7 +47,7 @@ export async function onRequest(context: any): Promise<Response> {
       body: new URLSearchParams({
         'currency': 'usd',
         'line_items[0][amount_in_cents]': '19900',
-        'address_source': 'billing',
+        'customer_details[address_source]': 'billing',
         'customer_details[address][line1]': address.line1 || '',
         'customer_details[address][city]': address.city || '',
         'customer_details[address][state]': address.state || '',
