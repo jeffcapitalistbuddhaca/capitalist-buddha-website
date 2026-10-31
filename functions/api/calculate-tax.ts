@@ -41,6 +41,7 @@ export async function onRequest(context: any): Promise<Response> {
     const params = new URLSearchParams();
     params.append('currency', 'usd');
     params.append('line_items[0][amount]', '19900');
+    params.append('line_items[0][reference]', 'course');
     params.append('customer_details[address_source]', 'billing');
     params.append('customer_details[address][line1]', address.line1 || '');
     params.append('customer_details[address][line2]', address.line2 || '');
