@@ -6,18 +6,18 @@ const corsHeaders = {
 };
 
 export async function onRequest(context: any): Promise<Response> {
-  if (context.request.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: corsHeaders });
-  }
-
-  if (context.request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: corsHeaders,
-    });
-  }
-
   try {
+    if (context.request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: corsHeaders });
+    }
+
+    if (context.request.method !== 'POST') {
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+        status: 405,
+        headers: corsHeaders,
+      });
+    }
+
     const { email } = await context.request.json();
 
     if (!email) {
@@ -27,23 +27,16 @@ export async function onRequest(context: any): Promise<Response> {
       });
     }
 
-    const env = context.env as any;
+    // Debug: Check if environment variables exist
+    const env = context.env;
+    const stripeKey = env?.['Stripe Secret Key'];
 
-    // Debug: return all env values to see what's actually available
-    const envDebug: any = {};
-    for (const key in env) {
-      const val = env[key];
-      if (typeof val === 'string' && val.length > 0) {
-        envDebug[key] = val.substring(0, 30) + (val.length > 30 ? '...' : '');
-      } else {
-        envDebug[key] = typeof val;
-      }
+    if (!stripeKey) {
+      return new Response(
+        JSON.stringify({ error: 'Stripe Secret Key not found', keys: Object.keys(env || {}) }),
+        { status: 500, headers: corsHeaders }
+      );
     }
-
-    return new Response(
-      JSON.stringify({ debug: 'environment', env: envDebug }),
-      { status: 500, headers: corsHeaders }
-    );
 
     const params = new URLSearchParams({
       amount: '19900',
