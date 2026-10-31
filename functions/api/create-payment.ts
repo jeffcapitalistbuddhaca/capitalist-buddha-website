@@ -46,7 +46,8 @@ export async function onRequest(context: any): Promise<Response> {
     const paymentIntent = await response.json() as any;
 
     if (!response.ok) {
-      return new Response(JSON.stringify({ error: paymentIntent.error?.message || 'Payment creation failed' }), {
+      console.error('Stripe error:', { status: response.status, error: paymentIntent });
+      return new Response(JSON.stringify({ error: paymentIntent.error?.message || 'Payment creation failed', details: paymentIntent }), {
         status: response.status,
         headers: corsHeaders,
       });
