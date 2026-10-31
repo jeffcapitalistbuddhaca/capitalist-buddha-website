@@ -31,7 +31,7 @@ export async function onRequest(context: any): Promise<Response> {
     }
 
     const params = new URLSearchParams();
-    params.append('ui_mode', 'embedded');
+    params.append('ui_mode', 'embedded_page');
     params.append('mode', 'payment');
     params.append('line_items[0][price_data][currency]', 'usd');
     params.append('line_items[0][price_data][unit_amount]', '19900'); // $199.00 USD in cents

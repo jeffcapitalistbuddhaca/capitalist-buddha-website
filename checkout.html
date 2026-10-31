@@ -71,9 +71,9 @@
                     throw new Error('Failed to create checkout session');
                 }
 
-                // Initialize embedded checkout with the client secret
-                console.log('Creating embedded checkout...');
-                const checkout = await stripe.createEmbeddedCheckout({
+                // Initialize embedded checkout page with the client secret
+                console.log('Creating embedded checkout page...');
+                const checkout = await stripe.createEmbeddedCheckoutPage({
                     clientSecret: data.clientSecret,
                 });
 
