@@ -37,24 +37,32 @@ export async function onRequest(context: any): Promise<Response> {
       );
     }
 
-    // Call Stripe Tax Calculation API
+    // Call Stripe Tax Calculation API (uses JSON, not form-encoded)
     const taxResponse = await fetch('https://api.stripe.com/v1/tax/calculations', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${stripeKey}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: new URLSearchParams({
-        'currency': 'usd',
-        'line_items[0][amount_in_cents]': String(19900),
-        'line_items[0][reference]': 'course',
-        'customer_details[address][line1]': String(address.line1 || ''),
-        'customer_details[address][line2]': String(address.line2 || ''),
-        'customer_details[address][city]': String(address.city || ''),
-        'customer_details[address][state]': String(address.state || ''),
-        'customer_details[address][postal_code]': String(address.postal_code || ''),
-        'customer_details[address][country]': String(address.country || 'US'),
-      }).toString(),
+      body: JSON.stringify({
+        currency: 'usd',
+        line_items: [
+          {
+            amount_in_cents: 19900,
+            reference: 'course_enrollment',
+          },
+        ],
+        customer_details: {
+          address: {
+            line1: address.line1 || '',
+            line2: address.line2 || '',
+            city: address.city || '',
+            state: address.state || '',
+            postal_code: address.postal_code || '',
+            country: address.country || 'US',
+          },
+        },
+      }),
     });
 
     const taxData = await taxResponse.json() as any;
