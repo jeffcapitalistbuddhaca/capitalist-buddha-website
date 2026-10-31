@@ -41,13 +41,13 @@ export async function onRequest(context: any): Promise<Response> {
     const params = new URLSearchParams({
       'currency': 'usd',
       'line_items[0][amount_in_cents]': '19900',
+      'customer_details[address_source]': 'billing',
       'customer_details[address][line1]': address.line1 || '',
       'customer_details[address][line2]': address.line2 || '',
       'customer_details[address][city]': address.city || '',
       'customer_details[address][state]': address.state || '',
       'customer_details[address][postal_code]': address.postal_code || '',
       'customer_details[address][country]': address.country || 'US',
-      'customer_details[address][address_source]': 'billing',
     });
 
     const bodyString = params.toString();
