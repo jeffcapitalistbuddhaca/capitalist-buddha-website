@@ -18,7 +18,7 @@ export async function onRequest(context: any): Promise<Response> {
       });
     }
 
-    const { email } = await context.request.json();
+    const { email, amount } = await context.request.json();
 
     if (!email) {
       return new Response(JSON.stringify({ error: 'Email required' }), {
@@ -37,11 +37,13 @@ export async function onRequest(context: any): Promise<Response> {
       );
     }
 
+    const finalAmount = amount || 19900;
+
     const params = new URLSearchParams({
-      amount: '19900',
+      amount: String(finalAmount),
       currency: 'usd',
       'metadata[email]': email,
-      description: 'Capitalist Buddha Course - $199 USD',
+      description: 'Capitalist Buddha Course - $199 USD + Tax',
     });
 
     const response = await fetch('https://api.stripe.com/v1/payment_intents', {
