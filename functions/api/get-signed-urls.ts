@@ -8,7 +8,8 @@ const corsHeaders = {
 const R2_ENDPOINT = 'https://pub-bba51804cea9490d86d3f69e92387c34.r2.dev';
 
 function generateSignedUrl(videoPath: string): string {
-  return `${R2_ENDPOINT}/${videoPath}`;
+  const encodedPath = videoPath.split('/').map(part => encodeURIComponent(part)).join('/');
+  return `${R2_ENDPOINT}/${encodedPath}`;
 }
 
 export async function onRequest(context: any): Promise<Response> {
