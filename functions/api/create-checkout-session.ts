@@ -21,7 +21,7 @@ export async function onRequest(context: any): Promise<Response> {
     const { email } = await context.request.json();
 
     const env = context.env;
-    const stripeKey = env?.STRIPE_SECRET_KEY_LIVE;
+    const stripeKey = env?.['Stripe Secret Key 2'];
 
     if (!stripeKey) {
       return new Response(
@@ -33,8 +33,8 @@ export async function onRequest(context: any): Promise<Response> {
     const params = new URLSearchParams();
     params.append('ui_mode', 'embedded_page');
     params.append('mode', 'payment');
-    const priceId = env?.COURSE_PRICE_ID || 'price_1UX1O6KLvdoBDUk6XgfDKxZh'; // Uses env var, defaults to $1 test
-    params.append('line_items[0][price]', priceId);
+    // TEMPORARY: Using $1 CAD test price for verification. Switch to COURSE_PRICE_ID after testing.
+    params.append('line_items[0][price]', 'price_1UX1O6KLvdoBDUk6XgfDKxZh'); // $1 CAD test
     params.append('line_items[0][quantity]', '1');
     params.append('automatic_tax[enabled]', 'true');
     params.append('billing_address_collection', 'required');
