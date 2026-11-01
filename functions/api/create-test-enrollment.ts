@@ -27,11 +27,12 @@ export async function onRequest(context: any): Promise<Response> {
       });
     }
 
-    const firebaseProject = (context.env as any)?.['FIREBASE_PROJECT_ID'] || '';
-    const firebaseKey = (context.env as any)?.['FIREBASE_API_KEY'] || '';
+    const firebaseProject = (context.env as any)?.['FIREBASE_PROJECT_ID_CORRECT'] || '';
+    const privateKeyPem = (context.env as any)?.['FIREBASE_PRIVATE_KEY'] || '';
+    const clientEmail = (context.env as any)?.['FIREBASE_CLIENT_EMAIL'] || '';
 
-    if (!firebaseProject || !firebaseKey) {
-      return new Response(JSON.stringify({ error: 'Firebase not configured' }), {
+    if (!firebaseProject || !privateKeyPem || !clientEmail) {
+      return new Response(JSON.stringify({ error: 'Firebase service account not configured' }), {
         status: 500,
         headers: corsHeaders,
       });
@@ -61,17 +62,66 @@ export async function onRequest(context: any): Promise<Response> {
       },
     };
 
-    const createUrl = `https://firestore.googleapis.com/v1/projects/${firebaseProject}/databases/(default)/documents/enrollments?documentId=${encodeURIComponent(documentId)}&key=${firebaseKey}`;
+    try {
+      // Create JWT token signed with service account private key
+      const header = { alg: 'RS256', typ: 'JWT' };
+      const now = Math.floor(Date.now() / 1000);
+      const payload = {
+        iss: clientEmail,
+        scope: 'https://www.googleapis.com/auth/cloud-platform',
+        aud: 'https://oauth2.googleapis.com/token',
+        exp: now + 3600,
+        iat: now,
+      };
 
-    const createResponse = await fetch(createUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(enrollmentData),
-    });
+      const headerEncoded = btoa(JSON.stringify(header));
+      const payloadEncoded = btoa(JSON.stringify(payload));
+      const signatureInput = `${headerEncoded}.${payloadEncoded}`;
 
-    if (!createResponse.ok) {
-      const error = await createResponse.json();
-      return new Response(JSON.stringify({ error: 'Firebase creation failed', details: error }), {
+      // Sign the JWT with the private key
+      const crypto = require('crypto');
+      const sign = crypto.createSign('RSA-SHA256');
+      sign.update(signatureInput);
+      const signature = sign.sign(privateKeyPem, 'base64');
+      const jwt = `${signatureInput}.${signature}`;
+
+      // Exchange JWT for access token
+      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+          assertion: jwt,
+        }).toString(),
+      });
+
+      const tokenData = await tokenResponse.json() as any;
+      if (!tokenData.access_token) {
+        throw new Error('Failed to get access token');
+      }
+
+      // Create document in Firestore with access token
+      const createUrl = `https://firestore.googleapis.com/v1/projects/${firebaseProject}/databases/(default)/documents/enrollments?documentId=${encodeURIComponent(documentId)}`;
+
+      const createResponse = await fetch(createUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${tokenData.access_token}`,
+        },
+        body: JSON.stringify(enrollmentData),
+      });
+
+      if (!createResponse.ok) {
+        const error = await createResponse.json();
+        return new Response(JSON.stringify({ error: 'Firebase creation failed', details: error }), {
+          status: 500,
+          headers: corsHeaders,
+        });
+      }
+    } catch (firebaseError) {
+      console.error('Firebase creation error:', firebaseError);
+      return new Response(JSON.stringify({ error: 'Firebase creation failed', details: String(firebaseError) }), {
         status: 500,
         headers: corsHeaders,
       });
