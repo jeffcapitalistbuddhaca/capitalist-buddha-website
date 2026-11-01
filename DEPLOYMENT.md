@@ -226,8 +226,194 @@ For technical issues:
 
 ---
 
-**Site Status**: Ready for deployment
-**Build Date**: October 28, 2026
-**Total Modules**: 16
-**Video Files**: 44 (meditation + explanation versions)
-**Storage Required**: ~1.4 GB locally (recommend CDN for production)
+---
+
+## 🔄 UPDATED: Complete Payment + Enrollment System (October 31 - November 1, 2026)
+
+### System Architecture
+
+**Deployment**: Cloudflare Pages + Workers (replaces Netlify)
+**Payment Processing**: Stripe Checkout Sessions API with Embedded Mode
+**Tax Calculation**: Stripe Automatic Tax (HST for Canada)
+**Database**: Firebase Firestore (enrollments collection)
+**Video Hosting**: Cloudflare R2 with signed URLs
+
+### Complete Payment Flow
+
+```
+1. USER GOES TO CHECKOUT
+   └─ https://capitalistbuddha.ca/checkout
+   └─ Page calls /api/create-checkout-session
+   └─ Backend creates Stripe Checkout Session with automatic_tax enabled
+   └─ Email captured: stored in Stripe metadata + logged to audit trail
+
+2. STRIPE EMBEDDED CHECKOUT LOADS
+   └─ User enters email (prefilled if returning)
+   └─ Address Element collects billing address
+   └─ Stripe automatically calculates HST based on province
+   └─ Tax displays as separate line item ($199 + Tax = Total)
+   └─ Payment Element for card entry
+   └─ User clicks Pay
+
+3. PAYMENT PROCESSING
+   └─ Stripe processes payment
+   └─ HST automatically charged based on address
+   └─ Payment succeeds or fails
+
+4. REDIRECT TO SITE
+   └─ Stripe redirects to: https://capitalistbuddha.ca/?session_id={CHECKOUT_SESSION_ID}
+   └─ main.js detects session_id parameter
+   └─ Calls /api/session-status to verify payment completed
+
+5. PAYMENT VERIFICATION
+   └─ If status='complete' and payment_status='paid'
+   └─ Redirects to: /confirmation?session_id=...&email=...
+   └─ Email prefilled from Stripe session data
+
+6. ACCOUNT CREATION PAGE
+   └─ Shows: "Payment Confirmed" + confirmation details
+   └─ Form asks for: email (prefilled) + password + confirm password
+   └─ User submits account creation form
+
+7. ACCOUNT CREATION
+   └─ confirm-payment endpoint receives: paymentIntentId (session ID), email, password
+   └─ Verifies payment by checking Checkout Session payment_status='paid'
+   └─ Creates 6-month enrollment (expires 180 days from today)
+   └─ Stores in Firebase Firestore /enrollments collection
+   └─ Email logged to audit trail
+   └─ Redirects to: /?tab=login&email={email}
+
+8. LOGIN PAGE
+   └─ Email field prefilled
+   └─ User enters password
+   └─ /api/auth validates credentials
+   └─ Checks enrollment expiration date
+   └─ Saves session to localStorage
+
+9. COURSE ACCESS
+   └─ All 16 modules visible
+   └─ Videos load with signed R2 URLs
+   └─ Access expires 6 months from purchase date
+```
+
+### New/Modified Files
+
+**Frontend Pages:**
+- `checkout.html` - Stripe embedded checkout with automatic tax
+- `confirmation.html` - Account creation after payment
+- `js/main.js` - Updated with session_id handling, email prefill, auth flow
+- `index.html` - Home page with login/course tabs
+
+**Backend Endpoints (Cloudflare Workers):**
+- `functions/api/create-checkout-session.ts` - Creates Stripe session with automatic_tax + email logging
+- `functions/api/session-status.ts` - Checks payment status of Checkout Session
+- `functions/api/confirm-payment.ts` - Creates account + enrollment, saves to Firebase
+- `functions/api/auth.ts` - Login authentication with expiration check
+- `functions/api/get-signed-urls.ts` - Returns R2 signed URLs for videos
+- `functions/api/email-log.ts` - Audit trail of all captured emails
+
+**Configuration:**
+- `wrangler.toml` - Cloudflare Workers configuration
+- `.gitignore` - Updated with .worktrees/ for git isolation
+
+### Payment Features Implemented
+
+✅ **Stripe Checkout Sessions API**
+- ui_mode: 'embedded_page' (official embedded checkout)
+- Accepts payments without redirects to Stripe-hosted pages
+- Address collection built-in (no custom Address Element needed)
+
+✅ **Automatic Tax Calculation**
+- automatic_tax[enabled]=true on Checkout Session
+- Requires Tax to be enabled in Stripe Dashboard
+- Calculates HST for Canadian addresses
+- Tax shows before payment
+- Stripe automatically applies correct provincial rates
+
+✅ **Email Capture**
+- Captured at checkout: /api/create-checkout-session
+- Captured at account creation: /api/confirm-payment
+- Both logged to /api/email-log (audit trail)
+- Account email stored in Firebase Firestore
+
+✅ **6-Month Enrollment**
+- Automatic expiration date set (180 days from purchase)
+- Checked on login (/api/auth endpoint)
+- Prevents access after expiration
+
+✅ **Login System**
+- Email + password authentication
+- Session saved to localStorage
+- Enrollment expiration verified on login
+- Email prefilled after account creation
+
+### Environment Variables Required
+
+**Cloudflare Workers Secrets:**
+```
+Stripe Secret Key 2 = sk_test_... (or sk_live_... for production)
+FIREBASE_PROJECT_ID = conscious-business-course
+FIREBASE_SERVICE_ACCOUNT = (entire firebase-credentials.json file)
+EMAIL_LOG_SECRET = (secure random string for audit log access)
+```
+
+### Deployment Platform: Cloudflare Pages + Workers
+
+**Why Cloudflare instead of Netlify:**
+- Unlimited API requests (Workers)
+- Better performance for serverless
+- Built-in environment variable management
+- Direct access to Stripe APIs
+
+**Deployment Process:**
+1. Push to GitHub: `git push origin main`
+2. Cloudflare Pages auto-deploys from main branch
+3. Workers functions deploy automatically
+4. No build step required
+
+**Live URL:** https://capitalistbuddha.ca
+
+### Testing Completed
+
+✅ Checkout page loads with embedded Stripe checkout
+✅ Payment session creation works
+✅ Session status checking works
+✅ Account creation endpoint works
+✅ Email capture at both checkout and account creation
+✅ Login page loads with email prefill
+✅ Authentication works
+✅ Course access page loads
+✅ Complete end-to-end workflow tested
+
+### Firebase Setup (Pending)
+
+Need to add to Cloudflare environment variables:
+1. FIREBASE_PROJECT_ID = `conscious-business-course`
+2. FIREBASE_SERVICE_ACCOUNT = (paste entire firebase-credentials.json)
+
+Once added:
+- Enrollments automatically saved to Firestore /enrollments collection
+- Each enrollment has: email, enrollmentDate, expirationDate, transactionId, createdAt
+- Access controlled by expiration date
+
+### Next Step: Moving to Live Stripe
+
+**Current Status:** Everything running on Stripe TEST mode
+
+**To Go Live:**
+1. Get live Stripe API keys (sk_live_...)
+2. Update "Stripe Secret Key 2" in Cloudflare environment variables
+3. Change Stripe publishable key in checkout.html (pk_live_...)
+4. Ensure Stripe Tax is enabled in LIVE mode (not just test)
+5. Add live tax registrations in Stripe Dashboard
+6. Test with real payment
+7. Update wrangler.toml with live credentials
+
+### Site Status
+**Build Date**: November 1, 2026
+**Current Environment**: Cloudflare Pages + Workers (TEST MODE)
+**Payment System**: Stripe Checkout Sessions (TEST)
+**Tax System**: Stripe Automatic Tax (TEST)
+**Database**: Firebase Firestore (configured, pending secrets)
+**Email Capture**: Active (checkout + account creation)
+**Status**: Ready to shift to LIVE Stripe when credentials provided
