@@ -66,17 +66,21 @@ export async function onRequest(context: any): Promise<Response> {
     const privateKey = (context.env as any)?.['FIREBASE_PRIVATE_KEY'];
     const clientEmail = (context.env as any)?.['FIREBASE_CLIENT_EMAIL'];
 
+    console.log('Env vars - Project:', firebaseProject ? 'SET' : 'MISSING');
+    console.log('Env vars - Email:', clientEmail ? 'SET' : 'MISSING');
+    console.log('Env vars - PrivateKey:', privateKey ? `SET (${privateKey.length} chars)` : 'MISSING');
+
     if (!firebaseProject || !privateKey || !clientEmail) {
-      return new Response(JSON.stringify({ error: 'Firebase service account not configured' }), {
+      return new Response(JSON.stringify({ error: 'Firebase service account not configured', missing: { firebaseProject: !firebaseProject, privateKey: !privateKey, clientEmail: !clientEmail } }), {
         status: 500,
         headers: corsHeaders,
       });
     }
 
     try {
-      const rawKey = (context.env as any)?.['FIREBASE_PRIVATE_KEY'] || '';
-      console.log('Private key starts with:', rawKey.substring(0, 50));
-      console.log('Private key ends with:', rawKey.substring(rawKey.length - 50));
+      const rawKey = privateKey;
+      console.log('Private key starts with:', rawKey.substring(0, 80));
+      console.log('Private key ends with:', rawKey.substring(Math.max(0, rawKey.length - 80)));
       console.log('Key length:', rawKey.length);
 
       const database = initializeFirebase(context);
