@@ -111,9 +111,14 @@ async function verifyStripeSignature(body: string, signature: string, secret: st
 
     const signed = `${timestamp}.${body}`;
     const encoder = new TextEncoder();
+
+    // Decode the whsec_... secret (base64-encoded)
+    const secretWithoutPrefix = secret.replace('whsec_', '');
+    const secretBytes = Uint8Array.from(atob(secretWithoutPrefix), c => c.charCodeAt(0));
+
     const key = await crypto.subtle.importKey(
       'raw',
-      encoder.encode(secret),
+      secretBytes,
       { name: 'HMAC', hash: 'SHA-256' },
       false,
       ['sign']
