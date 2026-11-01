@@ -52,16 +52,24 @@ export async function onRequest(context: any): Promise<Response> {
           iat: now,
         };
 
-        const headerEncoded = btoa(JSON.stringify(header));
-        const payloadEncoded = btoa(JSON.stringify(payload));
+        const headerEncoded = btoa(JSON.stringify(header)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+        const payloadEncoded = btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
         const signatureInput = `${headerEncoded}.${payloadEncoded}`;
 
-        // Sign the JWT with the private key
-        const crypto = require('crypto');
-        const sign = crypto.createSign('RSA-SHA256');
-        sign.update(signatureInput);
-        const signature = sign.sign(privateKeyPem, 'base64');
-        const jwt = `${signatureInput}.${signature}`;
+        // Sign JWT with Web Crypto API
+        const encoder = new TextEncoder();
+        const keyData = new TextEncoder().encode(privateKeyPem);
+        const key = await crypto.subtle.importKey(
+          'pkcs8',
+          keyData,
+          { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+          false,
+          ['sign']
+        );
+
+        const signatureBytes = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, encoder.encode(signatureInput));
+        const signatureB64 = btoa(String.fromCharCode(...new Uint8Array(signatureBytes))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+        const jwt = `${signatureInput}.${signatureB64}`;
 
         // Exchange JWT for access token
         const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
