@@ -74,6 +74,11 @@ export async function onRequest(context: any): Promise<Response> {
     }
 
     try {
+      const rawKey = (context.env as any)?.['FIREBASE_PRIVATE_KEY'] || '';
+      console.log('Private key starts with:', rawKey.substring(0, 50));
+      console.log('Private key ends with:', rawKey.substring(rawKey.length - 50));
+      console.log('Key length:', rawKey.length);
+
       const database = initializeFirebase(context);
 
       // Create enrollment date
