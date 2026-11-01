@@ -1,9 +1,36 @@
+import * as admin from 'firebase-admin';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
   'Content-Type': 'application/json',
 };
+
+let db: any = null;
+
+function initializeFirebase(context: any) {
+  if (db) return db;
+
+  const serviceAccount = {
+    type: 'service_account',
+    project_id: (context.env as any)?.['FIREBASE_PROJECT_ID_CORRECT'],
+    private_key_id: 'key-id',
+    private_key: (context.env as any)?.['FIREBASE_PRIVATE_KEY']?.replace(/\\n/g, '\n'),
+    client_email: (context.env as any)?.['FIREBASE_CLIENT_EMAIL'],
+    client_id: 'client-id',
+    auth_uri: 'https://accounts.google.com/o/oauth2/auth',
+    token_uri: 'https://oauth2.googleapis.com/token',
+    auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
+  };
+
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount as any),
+  });
+
+  db = admin.firestore();
+  return db;
+}
 
 export async function onRequest(context: any): Promise<Response> {
   if (context.request.method === 'OPTIONS') {
@@ -28,11 +55,11 @@ export async function onRequest(context: any): Promise<Response> {
     }
 
     if (action === 'login') {
-      const firebaseProject = (context.env as any)?.['FIREBASE_PROJECT_ID_CORRECT'] || '';
-      const privateKeyPem = (context.env as any)?.['FIREBASE_PRIVATE_KEY'] || '';
-      const clientEmail = (context.env as any)?.['FIREBASE_CLIENT_EMAIL'] || '';
+      const firebaseProject = (context.env as any)?.['FIREBASE_PROJECT_ID_CORRECT'];
+      const privateKey = (context.env as any)?.['FIREBASE_PRIVATE_KEY'];
+      const clientEmail = (context.env as any)?.['FIREBASE_CLIENT_EMAIL'];
 
-      if (!firebaseProject || !privateKeyPem || !clientEmail) {
+      if (!firebaseProject || !privateKey || !clientEmail) {
         console.warn('Firebase service account not configured, allowing login');
         return new Response(JSON.stringify({ success: true, user: { email, uid: 'test-user-' + email } }), {
           status: 200,
@@ -41,99 +68,35 @@ export async function onRequest(context: any): Promise<Response> {
       }
 
       try {
-        // Create JWT token signed with service account private key
-        const header = { alg: 'RS256', typ: 'JWT' };
-        const now = Math.floor(Date.now() / 1000);
-        const payload = {
-          iss: clientEmail,
-          scope: 'https://www.googleapis.com/auth/cloud-platform',
-          aud: 'https://oauth2.googleapis.com/token',
-          exp: now + 3600,
-          iat: now,
-        };
+        const database = initializeFirebase(context);
 
-        const headerEncoded = btoa(JSON.stringify(header)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-        const payloadEncoded = btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-        const signatureInput = `${headerEncoded}.${payloadEncoded}`;
+        // Query enrollments collection for this email
+        const enrollmentsRef = database.collection('enrollments');
+        const snapshot = await enrollmentsRef.where('email', '==', email).get();
 
-        // Sign JWT with Web Crypto API
-        const encoder = new TextEncoder();
-        const keyData = new TextEncoder().encode(privateKeyPem);
-        const key = await crypto.subtle.importKey(
-          'pkcs8',
-          keyData,
-          { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
-          false,
-          ['sign']
-        );
-
-        const signatureBytes = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, encoder.encode(signatureInput));
-        const signatureB64 = btoa(String.fromCharCode(...new Uint8Array(signatureBytes))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-        const jwt = `${signatureInput}.${signatureB64}`;
-
-        // Exchange JWT for access token
-        const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({
-            grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-            assertion: jwt,
-          }).toString(),
-        });
-
-        const tokenData = await tokenResponse.json() as any;
-        console.log('Token response status:', tokenResponse.status);
-        console.log('Token response:', tokenData);
-
-        if (!tokenData.access_token) {
-          throw new Error(`Failed to get access token: ${JSON.stringify(tokenData)}`);
-        }
-
-        // Query Firestore with access token
-        const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${firebaseProject}/databases/(default)/documents/enrollments`;
-        const firestoreResponse = await fetch(firestoreUrl, {
-          headers: { 'Authorization': `Bearer ${tokenData.access_token}` },
-        });
-
-        const firestoreData = await firestoreResponse.json() as any;
-
-        if (!firestoreData.documents) {
-          return new Response(JSON.stringify({ error: 'No enrollment found' }), {
-            status: 400,
-            headers: corsHeaders,
-          });
-        }
-
-        // Find enrollment for this email
-        let enrollment = null;
-        for (const doc of firestoreData.documents) {
-          const fields = doc.fields;
-          if (fields.email?.stringValue === email) {
-            enrollment = fields;
-            break;
-          }
-        }
-
-        if (!enrollment) {
+        if (snapshot.empty) {
           return new Response(JSON.stringify({ error: 'No enrollment found for this email' }), {
             status: 400,
             headers: corsHeaders,
           });
         }
 
+        const doc = snapshot.docs[0];
+        const enrollment = doc.data();
+
         // Check expiration date
-        const expirationDateStr = enrollment.expirationDate?.stringValue;
-        if (!expirationDateStr) {
+        const expirationDate = enrollment.expirationDate;
+        if (!expirationDate) {
           return new Response(JSON.stringify({ error: 'Invalid enrollment data' }), {
             status: 400,
             headers: corsHeaders,
           });
         }
 
-        const expirationDate = new Date(expirationDateStr);
-        const now_check = new Date();
+        const expirationTime = expirationDate instanceof Date ? expirationDate : expirationDate.toDate?.() || new Date(expirationDate);
+        const now = new Date();
 
-        if (now_check > expirationDate) {
+        if (now > expirationTime) {
           return new Response(JSON.stringify({ error: 'Your course access has expired. Please purchase again to regain access.' }), {
             status: 403,
             headers: corsHeaders,
@@ -141,13 +104,13 @@ export async function onRequest(context: any): Promise<Response> {
         }
 
         // Access is valid
-        return new Response(JSON.stringify({ success: true, user: { email, uid: 'user-' + email }, expirationDate: expirationDateStr }), {
+        return new Response(JSON.stringify({ success: true, user: { email, uid: 'user-' + email }, expirationDate: expirationTime.toISOString() }), {
           status: 200,
           headers: corsHeaders,
         });
       } catch (firebaseError) {
         console.error('Firebase lookup error:', firebaseError);
-        return new Response(JSON.stringify({ error: 'Authentication service error' }), {
+        return new Response(JSON.stringify({ error: 'Authentication service error', details: String(firebaseError) }), {
           status: 500,
           headers: corsHeaders,
         });
