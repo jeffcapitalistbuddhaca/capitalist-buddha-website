@@ -1,5 +1,3 @@
-import * as admin from 'firebase-admin';
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -7,55 +5,71 @@ const corsHeaders = {
   'Content-Type': 'application/json',
 };
 
-let db: any = null;
+// Base64 URL encode without padding
+function base64UrlEncode(data: string): string {
+  return btoa(data)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+}
 
-function initializeFirebase(context: any) {
-  if (db) return db;
+async function getAccessToken(context: any): Promise<string> {
+  const privateKeyPem = (context.env as any)?.['FIREBASE_PRIVATE_KEY'] || '';
+  const clientEmail = (context.env as any)?.['FIREBASE_CLIENT_EMAIL'] || '';
 
-  let privateKey = (context.env as any)?.['FIREBASE_PRIVATE_KEY'] || '';
-
-  // Clean up the private key - handle various escaping formats
-  // First, handle if it has quotes around it (from copying)
-  if ((privateKey.startsWith('"') && privateKey.endsWith('"')) ||
-      (privateKey.startsWith("'") && privateKey.endsWith("'"))) {
-    privateKey = privateKey.slice(1, -1);
+  if (!privateKeyPem || !clientEmail) {
+    throw new Error('Firebase credentials missing');
   }
 
-  // Replace escaped newlines in order of likelihood
-  privateKey = privateKey
-    .replace(/\\n/g, '\n')           // Replace \\n with actual newlines
-    .replace(/\\t/g, '\t')           // Replace \\t with tabs
-    .replace(/\\r/g, '\r')           // Replace \\r with carriage returns
-    .trim();
+  const header = base64UrlEncode(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+  const now = Math.floor(Date.now() / 1000);
+  const payload = base64UrlEncode(JSON.stringify({
+    iss: clientEmail,
+    scope: 'https://www.googleapis.com/auth/datastore',
+    aud: 'https://oauth2.googleapis.com/token',
+    exp: now + 3600,
+    iat: now,
+  }));
 
-  console.log('Processed key starts with:', privateKey.substring(0, 30));
-  console.log('Processed key contains BEGIN PRIVATE KEY:', privateKey.includes('BEGIN PRIVATE KEY'));
-  console.log('Processed key contains END PRIVATE KEY:', privateKey.includes('END PRIVATE KEY'));
+  const message = `${header}.${payload}`;
 
-  const serviceAccount = {
-    type: 'service_account',
-    project_id: (context.env as any)?.['FIREBASE_PROJECT_ID_CORRECT'],
-    private_key_id: 'key-id',
-    private_key: privateKey,
-    client_email: (context.env as any)?.['FIREBASE_CLIENT_EMAIL'],
-    client_id: 'client-id',
-    auth_uri: 'https://accounts.google.com/o/oauth2/auth',
-    token_uri: 'https://oauth2.googleapis.com/token',
-    auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
-  };
+  // Convert PEM to PKCS8 DER format for Web Crypto API
+  const keyLines = privateKeyPem
+    .replace('-----BEGIN PRIVATE KEY-----', '')
+    .replace('-----END PRIVATE KEY-----', '')
+    .replace(/\s+/g, '');
 
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount as any),
-    });
-    console.log('Firebase initialized successfully');
-  } catch (initError: any) {
-    console.error('Firebase init error:', initError.message);
-    throw new Error(`Firebase init failed: ${initError.message}`);
+  const keyBuffer = Uint8Array.from(atob(keyLines), c => c.charCodeAt(0));
+
+  const key = await crypto.subtle.importKey(
+    'pkcs8',
+    keyBuffer,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+
+  const signatureBuffer = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(message));
+  const signature = base64UrlEncode(String.fromCharCode(...new Uint8Array(signatureBuffer)));
+
+  const jwt = `${message}.${signature}`;
+
+  // Exchange JWT for access token
+  const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion: jwt,
+    }).toString(),
+  });
+
+  const tokenData = await tokenResponse.json() as any;
+  if (!tokenData.access_token) {
+    throw new Error(`Failed to get token: ${JSON.stringify(tokenData)}`);
   }
 
-  db = admin.firestore();
-  return db;
+  return tokenData.access_token;
 }
 
 export async function onRequest(context: any): Promise<Response> {
@@ -81,32 +95,17 @@ export async function onRequest(context: any): Promise<Response> {
     }
 
     const firebaseProject = (context.env as any)?.['FIREBASE_PROJECT_ID_CORRECT'];
-    const privateKey = (context.env as any)?.['FIREBASE_PRIVATE_KEY'];
-    const clientEmail = (context.env as any)?.['FIREBASE_CLIENT_EMAIL'];
-
-    console.log('Env vars - Project:', firebaseProject ? 'SET' : 'MISSING');
-    console.log('Env vars - Email:', clientEmail ? 'SET' : 'MISSING');
-    console.log('Env vars - PrivateKey:', privateKey ? `SET (${privateKey.length} chars)` : 'MISSING');
-
-    if (!firebaseProject || !privateKey || !clientEmail) {
-      return new Response(JSON.stringify({ error: 'Firebase service account not configured', missing: { firebaseProject: !firebaseProject, privateKey: !privateKey, clientEmail: !clientEmail } }), {
+    if (!firebaseProject) {
+      return new Response(JSON.stringify({ error: 'Firebase project not configured' }), {
         status: 500,
         headers: corsHeaders,
       });
     }
 
     try {
-      const rawKey = privateKey;
-      console.log('Private key starts with:', rawKey.substring(0, 80));
-      console.log('Private key ends with:', rawKey.substring(Math.max(0, rawKey.length - 80)));
-      console.log('Key length:', rawKey.length);
+      const accessToken = await getAccessToken(context);
 
-      const database = initializeFirebase(context);
-
-      // Create enrollment date
       const enrollmentDate = new Date();
-
-      // Set expiration date - either yesterday (if expiredNow=true) or 180 days from now
       const expirationDate = new Date();
       if (expiredNow) {
         expirationDate.setDate(expirationDate.getDate() - 1);
@@ -114,47 +113,66 @@ export async function onRequest(context: any): Promise<Response> {
         expirationDate.setDate(expirationDate.getDate() + 180);
       }
 
-      // Create document in Firestore
-      const enrollmentsRef = database.collection('enrollments');
-      const docId = `test_${email.split('@')[0]}_${Date.now()}`;
+      const documentId = `test_${email.split('@')[0]}_${Date.now()}`;
 
-      await enrollmentsRef.doc(docId).set({
-        email: email,
-        enrollmentDate: enrollmentDate,
-        expirationDate: expirationDate,
-        transactionId: `test_${Date.now()}`,
-        transactionType: 'test_enrollment',
-        password: password,
+      const enrollmentData = {
+        fields: {
+          email: { stringValue: email },
+          enrollmentDate: { stringValue: enrollmentDate.toISOString() },
+          expirationDate: { stringValue: expirationDate.toISOString() },
+          transactionId: { stringValue: `test_${Date.now()}` },
+          transactionType: { stringValue: 'test_enrollment' },
+          password: { stringValue: password },
+        },
+      };
+
+      const createUrl = `https://firestore.googleapis.com/v1/projects/${firebaseProject}/databases/(default)/documents/enrollments?documentId=${encodeURIComponent(documentId)}`;
+
+      const createResponse = await fetch(createUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(enrollmentData),
       });
+
+      if (!createResponse.ok) {
+        const error = await createResponse.json();
+        return new Response(JSON.stringify({ error: 'Firebase creation failed', details: error }), {
+          status: 500,
+          headers: corsHeaders,
+        });
+      }
 
       const status = expiredNow ? 'ALREADY EXPIRED' : 'VALID (180 days)';
 
       return new Response(
         JSON.stringify({
           success: true,
-          email: email,
-          password: password,
+          email,
+          password,
           enrollmentDate: enrollmentDate.toISOString(),
           expirationDate: expirationDate.toISOString(),
-          status: status,
+          status,
           testInstruction: expiredNow
             ? 'Try to log in - you should immediately get "access expired" error'
-            : 'Log in normally (access valid). Then call test-expire to expire it and test the error.',
+            : 'Log in normally (access valid).',
         }),
         { status: 200, headers: corsHeaders }
       );
-    } catch (firebaseError) {
-      console.error('Firebase creation error:', firebaseError);
-      return new Response(JSON.stringify({ error: 'Firebase creation failed', details: String(firebaseError) }), {
+    } catch (error) {
+      console.error('Test enrollment error:', error);
+      return new Response(JSON.stringify({ error: String(error) }), {
         status: 500,
         headers: corsHeaders,
       });
     }
   } catch (error) {
-    console.error('Create test enrollment error:', error);
-    return new Response(
-      JSON.stringify({ error: String(error) }),
-      { status: 500, headers: corsHeaders }
-    );
+    console.error('Request error:', error);
+    return new Response(JSON.stringify({ error: String(error) }), {
+      status: 500,
+      headers: corsHeaders,
+    });
   }
 }

@@ -1,5 +1,3 @@
-import * as admin from 'firebase-admin';
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -7,50 +5,71 @@ const corsHeaders = {
   'Content-Type': 'application/json',
 };
 
-let db: any = null;
+// Base64 URL encode without padding
+function base64UrlEncode(data: string): string {
+  return btoa(data)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+}
 
-function initializeFirebase(context: any) {
-  if (db) return db;
+async function getAccessToken(context: any): Promise<string> {
+  const privateKeyPem = (context.env as any)?.['FIREBASE_PRIVATE_KEY'] || '';
+  const clientEmail = (context.env as any)?.['FIREBASE_CLIENT_EMAIL'] || '';
 
-  let privateKey = (context.env as any)?.['FIREBASE_PRIVATE_KEY'] || '';
-
-  // Clean up the private key - handle various escaping formats
-  // First, handle if it has quotes around it (from copying)
-  if ((privateKey.startsWith('"') && privateKey.endsWith('"')) ||
-      (privateKey.startsWith("'") && privateKey.endsWith("'"))) {
-    privateKey = privateKey.slice(1, -1);
+  if (!privateKeyPem || !clientEmail) {
+    throw new Error('Firebase credentials missing');
   }
 
-  // Replace escaped newlines in order of likelihood
-  privateKey = privateKey
-    .replace(/\\n/g, '\n')           // Replace \\n with actual newlines
-    .replace(/\\t/g, '\t')           // Replace \\t with tabs
-    .replace(/\\r/g, '\r')           // Replace \\r with carriage returns
-    .trim();
+  const header = base64UrlEncode(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+  const now = Math.floor(Date.now() / 1000);
+  const payload = base64UrlEncode(JSON.stringify({
+    iss: clientEmail,
+    scope: 'https://www.googleapis.com/auth/datastore',
+    aud: 'https://oauth2.googleapis.com/token',
+    exp: now + 3600,
+    iat: now,
+  }));
 
-  const serviceAccount = {
-    type: 'service_account',
-    project_id: (context.env as any)?.['FIREBASE_PROJECT_ID_CORRECT'],
-    private_key_id: 'key-id',
-    private_key: privateKey,
-    client_email: (context.env as any)?.['FIREBASE_CLIENT_EMAIL'],
-    client_id: 'client-id',
-    auth_uri: 'https://accounts.google.com/o/oauth2/auth',
-    token_uri: 'https://oauth2.googleapis.com/token',
-    auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
-  };
+  const message = `${header}.${payload}`;
 
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount as any),
-    });
-  } catch (initError: any) {
-    console.error('Firebase init error:', initError.message);
-    throw new Error(`Firebase init failed: ${initError.message}`);
+  // Convert PEM to PKCS8 DER format for Web Crypto API
+  const keyLines = privateKeyPem
+    .replace('-----BEGIN PRIVATE KEY-----', '')
+    .replace('-----END PRIVATE KEY-----', '')
+    .replace(/\s+/g, '');
+
+  const keyBuffer = Uint8Array.from(atob(keyLines), c => c.charCodeAt(0));
+
+  const key = await crypto.subtle.importKey(
+    'pkcs8',
+    keyBuffer,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+
+  const signatureBuffer = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(message));
+  const signature = base64UrlEncode(String.fromCharCode(...new Uint8Array(signatureBuffer)));
+
+  const jwt = `${message}.${signature}`;
+
+  // Exchange JWT for access token
+  const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion: jwt,
+    }).toString(),
+  });
+
+  const tokenData = await tokenResponse.json() as any;
+  if (!tokenData.access_token) {
+    throw new Error(`Failed to get token: ${JSON.stringify(tokenData)}`);
   }
 
-  db = admin.firestore();
-  return db;
+  return tokenData.access_token;
 }
 
 export async function onRequest(context: any): Promise<Response> {
@@ -89,35 +108,53 @@ export async function onRequest(context: any): Promise<Response> {
       }
 
       try {
-        const database = initializeFirebase(context);
+        const accessToken = await getAccessToken(context);
 
-        // Query enrollments collection for this email
-        const enrollmentsRef = database.collection('enrollments');
-        const snapshot = await enrollmentsRef.where('email', '==', email).get();
+        // Query Firestore REST API for enrollment
+        const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${firebaseProject}/databases/(default)/documents/enrollments`;
+        const firestoreResponse = await fetch(firestoreUrl, {
+          headers: { 'Authorization': `Bearer ${accessToken}` },
+        });
 
-        if (snapshot.empty) {
+        const firestoreData = await firestoreResponse.json() as any;
+
+        if (!firestoreData.documents) {
+          return new Response(JSON.stringify({ error: 'No enrollment found' }), {
+            status: 400,
+            headers: corsHeaders,
+          });
+        }
+
+        // Find enrollment for this email
+        let enrollment = null;
+        for (const doc of firestoreData.documents) {
+          const fields = doc.fields;
+          if (fields.email?.stringValue === email) {
+            enrollment = fields;
+            break;
+          }
+        }
+
+        if (!enrollment) {
           return new Response(JSON.stringify({ error: 'No enrollment found for this email' }), {
             status: 400,
             headers: corsHeaders,
           });
         }
 
-        const doc = snapshot.docs[0];
-        const enrollment = doc.data();
-
         // Check expiration date
-        const expirationDate = enrollment.expirationDate;
-        if (!expirationDate) {
+        const expirationDateStr = enrollment.expirationDate?.stringValue;
+        if (!expirationDateStr) {
           return new Response(JSON.stringify({ error: 'Invalid enrollment data' }), {
             status: 400,
             headers: corsHeaders,
           });
         }
 
-        const expirationTime = expirationDate instanceof Date ? expirationDate : expirationDate.toDate?.() || new Date(expirationDate);
+        const expirationDate = new Date(expirationDateStr);
         const now = new Date();
 
-        if (now > expirationTime) {
+        if (now > expirationDate) {
           return new Response(JSON.stringify({ error: 'Your course access has expired. Please purchase again to regain access.' }), {
             status: 403,
             headers: corsHeaders,
@@ -125,7 +162,7 @@ export async function onRequest(context: any): Promise<Response> {
         }
 
         // Access is valid
-        return new Response(JSON.stringify({ success: true, user: { email, uid: 'user-' + email }, expirationDate: expirationTime.toISOString() }), {
+        return new Response(JSON.stringify({ success: true, user: { email, uid: 'user-' + email }, expirationDate: expirationDateStr }), {
           status: 200,
           headers: corsHeaders,
         });
