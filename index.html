@@ -103,11 +103,11 @@
                 <img src="images/chakras.png" alt="Chakras" class="login-form-chakras">
                 <h3>Access Your Course</h3>
                 <form id="login-form">
-                    <input type="email" id="login-email" placeholder="Email" required>
-                    <input type="password" id="login-password" placeholder="Password" required>
+                    <input type="email" id="login-email" name="email" placeholder="Email" autocomplete="username" required>
+                    <input type="password" id="login-password" name="password" placeholder="Password" autocomplete="current-password" required>
                     <button type="submit">Login</button>
                 </form>
-                <p><a href="#" id="forgot-password-link">Forgot password?</a></p>
+                <p><a href="/reset-password.html">Forgot password?</a></p>
             </div>
 
             <div id="course-overview" style="display:none;" class="login-section-content">
