@@ -33,9 +33,8 @@ export async function onRequest(context: any): Promise<Response> {
     const params = new URLSearchParams();
     params.append('ui_mode', 'embedded_page');
     params.append('mode', 'payment');
-    params.append('line_items[0][price_data][currency]', 'usd');
-    params.append('line_items[0][price_data][unit_amount]', '19900'); // $199.00 USD in cents
-    params.append('line_items[0][price_data][product_data][name]', 'Capitalist Buddha Course');
+    // TEMPORARY: Using $1 CAD test price for verification. Switch to COURSE_PRICE_ID after testing.
+    params.append('line_items[0][price]', 'price_1UX1O6KLvdoBDUk6XgfDKxZh'); // $1 CAD test
     params.append('line_items[0][quantity]', '1');
     params.append('automatic_tax[enabled]', 'true');
     params.append('billing_address_collection', 'required');
