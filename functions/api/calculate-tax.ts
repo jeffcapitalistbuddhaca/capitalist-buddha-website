@@ -28,7 +28,7 @@ export async function onRequest(context: any): Promise<Response> {
     }
 
     const env = context.env;
-    const stripeKey = env?.['Stripe Secret Key 2'];
+    const stripeKey = env?.STRIPE_SECRET_KEY_LIVE;
 
     if (!stripeKey) {
       return new Response(

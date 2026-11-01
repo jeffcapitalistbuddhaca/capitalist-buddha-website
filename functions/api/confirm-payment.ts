@@ -27,7 +27,7 @@ export async function onRequest(context: any): Promise<Response> {
       );
     }
 
-    const stripeKey = (context.env as any)?.['Stripe Secret Key 2'] || '';
+    const stripeKey = (context.env as any)?.STRIPE_SECRET_KEY_LIVE || '';
 
     // Determine if this is a Checkout Session ID (cs_*) or PaymentIntent ID (pi_*)
     const isCheckoutSession = paymentIntentId.startsWith('cs_');
