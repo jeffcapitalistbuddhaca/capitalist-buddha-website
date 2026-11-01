@@ -409,11 +409,118 @@ Once added:
 6. Test with real payment
 7. Update wrangler.toml with live credentials
 
+---
+
+## 🔒 6-MONTH ENROLLMENT EXPIRATION - FULLY IMPLEMENTED (November 1, 2026)
+
+### Feature: Automatic Course Access Expiration
+
+**Status**: ✅ TESTED & WORKING IN PRODUCTION
+
+### How It Works
+
+1. **Payment → Enrollment**
+   - User completes Stripe payment
+   - `/api/confirm-payment` creates enrollment in Firebase Firestore
+   - Enrollment includes: email, enrollmentDate, expirationDate (180 days from now)
+
+2. **Login Enforcement**
+   - User logs in via `/api/auth`
+   - Backend checks expiration date against current date
+   - If expired: Returns error `"Your course access has expired. Please purchase again to regain access."`
+   - If valid: Returns success and user can access course
+
+3. **Expiration Date Calculation**
+   - 180 days = 6 months (6 × 30 × 24 × 60 × 60 × 1000 milliseconds)
+   - Set at account creation time
+   - Automatically checked on every login
+
+### Authentication Implementation
+
+**Service Account Authentication with Firebase Firestore:**
+
+```
+1. Read private key + client email from Cloudflare secrets:
+   - FIREBASE_PRIVATE_KEY (PEM format with BEGIN/END markers)
+   - FIREBASE_CLIENT_EMAIL (service account email)
+   - FIREBASE_PROJECT_ID_CORRECT (project ID)
+
+2. Create JWT token (per official Google OAuth2 spec):
+   - Header: { alg: "RS256", typ: "JWT" }
+   - Payload: { iss, scope, aud, iat, exp }
+   - Scope: https://www.googleapis.com/auth/datastore (REQUIRED for Firestore)
+   - Sign with RSA-SHA256 using service account private key
+
+3. Exchange JWT for access token:
+   - POST to: https://oauth2.googleapis.com/token
+   - Parameters: grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer, assertion=JWT
+   - Response: access_token with 3600s expiry
+
+4. Query Firestore REST API:
+   - Base URL: https://firestore.googleapis.com/v1/
+   - Resource: projects/{PROJECT_ID}/databases/(default)/documents/enrollments
+   - Header: Authorization: Bearer {access_token}
+   - Returns: enrollment documents with email, expirationDate fields
+```
+
+### Technical Details
+
+**JWT Signing Method:**
+- Uses Web Crypto API (`crypto.subtle`) available in Cloudflare Workers
+- RSA with SHA-256
+- Base64url encoding with proper padding removal
+
+**Firestore Query:**
+- Lists all enrollments in collection
+- Finds document by matching email field
+- Extracts expirationDate Firestore timestamp
+- Converts to JavaScript Date for comparison
+
+**Error Handling:**
+- Missing credentials: Falls back to allowing login (for local dev)
+- Expired enrollment: Returns 403 Forbidden with expiration message
+- Invalid enrollment: Returns 400 Bad Request with "not found" message
+
+### Files Modified
+
+**Backend Authentication:**
+- `functions/api/auth.ts` - Complete rewrite with service account JWT auth
+
+**Enrollment Creation:**
+- `functions/api/confirm-payment.ts` - Creates Firebase enrollment with 6-month expiration
+
+**Testing Utility:**
+- `functions/api/create-test-enrollment.ts` - Creates test enrollments without payment
+
+### Environment Variables Required
+
+```
+FIREBASE_PROJECT_ID_CORRECT = conscious-business-course
+FIREBASE_PRIVATE_KEY = -----BEGIN PRIVATE KEY-----
+                       [full private key content with actual newlines]
+                       -----END PRIVATE KEY-----
+FIREBASE_CLIENT_EMAIL = firebase-adminsdk-[xxx]@[project].iam.gserviceaccount.com
+```
+
+### Test Results - VERIFIED ✅
+
+**Test 1: Expired Enrollment**
+- Created test account with expirationDate = yesterday
+- Login attempt returned: `"Your course access has expired. Please purchase again to regain access."`
+- ✅ PASS
+
+**Test 2: Valid Enrollment**
+- Created test account with expirationDate = 180 days from now
+- Login attempt returned: `"success": true`
+- ✅ PASS
+
 ### Site Status
-**Build Date**: November 1, 2026
-**Current Environment**: Cloudflare Pages + Workers (TEST MODE)
-**Payment System**: Stripe Checkout Sessions (TEST)
-**Tax System**: Stripe Automatic Tax (TEST)
-**Database**: Firebase Firestore (configured, pending secrets)
+**Build Date**: November 1, 2026 (updated with 6-month expiration)
+**Current Environment**: Cloudflare Pages + Workers
+**Payment System**: Stripe Checkout Sessions (LIVE)
+**Tax System**: Stripe Automatic Tax (LIVE)
+**Database**: Firebase Firestore (LIVE)
+**Authentication**: Service account JWT + OAuth2 (LIVE)
+**6-Month Expiration**: ✅ FULLY IMPLEMENTED & TESTED
 **Email Capture**: Active (checkout + account creation)
-**Status**: Ready to shift to LIVE Stripe when credentials provided
+**Status**: PRODUCTION READY - All features tested and working
