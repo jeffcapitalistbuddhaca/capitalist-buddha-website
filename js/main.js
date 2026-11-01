@@ -1,4 +1,4 @@
-const STRIPE_PUBLISHABLE = 'pk_test_51UVYmmKLvdoBDUk6kEmkKFKv5znaZoWM4WXBB4kyGInGQoj4aYgeUsOYEXqgApfbWF7W9KizCqgEZxKKfNM34tZF00TJ1Mtwve';
+const STRIPE_PUBLISHABLE = 'pk_live_51UVYmmKLvdoBDUk6JSd85hTepxVDpzTYg9e7P7nutr3pKHzjo5Sd3f8NtaRCwChD5ybqmDIFaYwm8RnJFG7vk9wV00YTCDLGpQ';
 const COURSE_PRICE = 199;
 const ACCESS_DAYS = 180;
 const WORKER_URL = 'https://capitalistbuddha.ca';
