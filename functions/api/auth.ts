@@ -14,10 +14,18 @@ function initializeFirebase(context: any) {
 
   let privateKey = (context.env as any)?.['FIREBASE_PRIVATE_KEY'] || '';
 
-  // Handle various escaping formats
+  // Clean up the private key - handle various escaping formats
+  // First, handle if it has quotes around it (from copying)
+  if ((privateKey.startsWith('"') && privateKey.endsWith('"')) ||
+      (privateKey.startsWith("'") && privateKey.endsWith("'"))) {
+    privateKey = privateKey.slice(1, -1);
+  }
+
+  // Replace escaped newlines in order of likelihood
   privateKey = privateKey
     .replace(/\\n/g, '\n')           // Replace \\n with actual newlines
-    .replace(/\\\\/g, '\\')          // Fix double-escaped backslashes
+    .replace(/\\t/g, '\t')           // Replace \\t with tabs
+    .replace(/\\r/g, '\r')           // Replace \\r with carriage returns
     .trim();
 
   const serviceAccount = {
@@ -32,9 +40,14 @@ function initializeFirebase(context: any) {
     auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
   };
 
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount as any),
-  });
+  try {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount as any),
+    });
+  } catch (initError: any) {
+    console.error('Firebase init error:', initError.message);
+    throw new Error(`Firebase init failed: ${initError.message}`);
+  }
 
   db = admin.firestore();
   return db;
