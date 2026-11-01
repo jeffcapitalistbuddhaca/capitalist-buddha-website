@@ -28,7 +28,7 @@ export async function onRequest(context: any): Promise<Response> {
     }
 
     if (action === 'login') {
-      const firebaseProject = (context.env as any)?.['FIREBASE_PROJECT_ID'] || '';
+      const firebaseProject = (context.env as any)?.['FIREBASE_PROJECT_ID_CORRECT'] || '';
       const firebaseKey = (context.env as any)?.['FIREBASE_API_KEY'] || '';
 
       if (!firebaseProject || !firebaseKey) {
