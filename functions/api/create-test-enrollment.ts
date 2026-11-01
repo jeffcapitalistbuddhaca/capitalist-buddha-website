@@ -31,8 +31,13 @@ export async function onRequest(context: any): Promise<Response> {
     const privateKeyPem = (context.env as any)?.['FIREBASE_PRIVATE_KEY'] || '';
     const clientEmail = (context.env as any)?.['FIREBASE_CLIENT_EMAIL'] || '';
 
+    console.log('Environment check:');
+    console.log('  firebaseProject:', firebaseProject ? 'set' : 'MISSING');
+    console.log('  privateKeyPem:', privateKeyPem ? `set (${privateKeyPem.length} chars)` : 'MISSING');
+    console.log('  clientEmail:', clientEmail ? `set (${clientEmail})` : 'MISSING');
+
     if (!firebaseProject || !privateKeyPem || !clientEmail) {
-      return new Response(JSON.stringify({ error: 'Firebase service account not configured' }), {
+      return new Response(JSON.stringify({ error: 'Firebase service account not configured', missing: { firebaseProject: !firebaseProject, privateKeyPem: !privateKeyPem, clientEmail: !clientEmail } }), {
         status: 500,
         headers: corsHeaders,
       });
@@ -96,8 +101,11 @@ export async function onRequest(context: any): Promise<Response> {
       });
 
       const tokenData = await tokenResponse.json() as any;
+      console.log('Token response status:', tokenResponse.status);
+      console.log('Token data:', tokenData);
+
       if (!tokenData.access_token) {
-        throw new Error('Failed to get access token');
+        throw new Error(`Failed to get access token: ${JSON.stringify(tokenData)}`);
       }
 
       // Create document in Firestore with access token

@@ -74,8 +74,11 @@ export async function onRequest(context: any): Promise<Response> {
         });
 
         const tokenData = await tokenResponse.json() as any;
+        console.log('Token response status:', tokenResponse.status);
+        console.log('Token response:', tokenData);
+
         if (!tokenData.access_token) {
-          throw new Error('Failed to get access token');
+          throw new Error(`Failed to get access token: ${JSON.stringify(tokenData)}`);
         }
 
         // Query Firestore with access token
