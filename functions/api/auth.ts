@@ -12,11 +12,19 @@ let db: any = null;
 function initializeFirebase(context: any) {
   if (db) return db;
 
+  let privateKey = (context.env as any)?.['FIREBASE_PRIVATE_KEY'] || '';
+
+  // Handle various escaping formats
+  privateKey = privateKey
+    .replace(/\\n/g, '\n')           // Replace \\n with actual newlines
+    .replace(/\\\\/g, '\\')          // Fix double-escaped backslashes
+    .trim();
+
   const serviceAccount = {
     type: 'service_account',
     project_id: (context.env as any)?.['FIREBASE_PROJECT_ID_CORRECT'],
     private_key_id: 'key-id',
-    private_key: (context.env as any)?.['FIREBASE_PRIVATE_KEY']?.replace(/\\n/g, '\n'),
+    private_key: privateKey,
     client_email: (context.env as any)?.['FIREBASE_CLIENT_EMAIL'],
     client_id: 'client-id',
     auth_uri: 'https://accounts.google.com/o/oauth2/auth',
