@@ -33,7 +33,7 @@ export async function onRequest(context: any): Promise<Response> {
     const params = new URLSearchParams();
     params.append('ui_mode', 'embedded_page');
     params.append('mode', 'payment');
-    const priceId = env?.COURSE_PRICE_ID;
+    const priceId = env?.['Conscious Business Course Price ID'];
     if (!priceId) {
       return new Response(
         JSON.stringify({ error: 'Price ID not found' }),
