@@ -107,10 +107,12 @@
                     <input type="password" id="login-password" name="password" placeholder="Password" autocomplete="current-password" required>
                     <button type="submit">Login</button>
                 </form>
+                <p id="login-message" class="login-message"></p>
                 <p><a href="/reset-password.html">Forgot password?</a></p>
             </div>
 
             <div id="course-overview" style="display:none;" class="login-section-content">
+                <button type="button" id="logout-button">Log out</button>
                 <img src="images/chakras.png" alt="Chakras" class="login-chakras">
                 <h3>Course Overview</h3>
                 <p>Our research shows that 40% of people who experience a peak consciousness expanding experience encounter destabilizing events in their life. Some transition out of careers, relationships, and geographical location. Through this transition, many walk the path of the dark night of the soul and experience years of struggle. The intention of this course is to help people who, after a spiritual transformative experience or an awakening, have changed important aspects of their life, such as their career. This course is to help people extract their passion, cultivate a life around it, and start a business where work, life, and sustainable income intersect into a profound feeling of peace.</p>
@@ -188,5 +190,6 @@
 
     <script src="https://js.stripe.com/v3/"></script>
     <script src="js/main.js"></script>
+    <script type="module" src="js/auth.js"></script>
 </body>
 </html>

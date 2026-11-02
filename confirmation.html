@@ -99,6 +99,13 @@
             background: #fadbd8;
             border-radius: 4px;
         }
+        .success {
+            color: #27ae60;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #d4edda;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -129,13 +136,14 @@
         </div>
 
         <div id="error-message" class="error" style="display: none;"></div>
+        <div id="success-message" class="success" style="display: none;"></div>
 
         <form id="account-form" novalidate>
             <div class="section-label">Create Your Account</div>
 
             <div class="form-group">
                 <label for="email">Email *</label>
-                <input type="email" id="email" name="email" required placeholder="Enter your email" autocomplete="username">
+                <input type="email" id="email" name="email" required placeholder="Enter your email" autocomplete="username" readonly>
             </div>
 
             <div class="form-group">
@@ -145,145 +153,102 @@
 
             <div class="form-group">
                 <label for="confirm-password">Confirm Password *</label>
-                <input type="password" id="confirm-password" name="confirm-password" required placeholder="Confirm your password">
+                <input type="password" id="confirm-password" name="confirm-password" required placeholder="Confirm your password" autocomplete="new-password">
             </div>
 
-            <button type="submit" class="confirm-button">Complete Setup & Access Course</button>
+            <button type="submit" id="create-button" class="confirm-button">Complete Setup & Access Course</button>
         </form>
     </div>
 
     <script src="https://js.stripe.com/v3/"></script>
-    <script>
-        const STRIPE_PUBLISHABLE = 'pk_live_51UVYmmKLvdoBDUk6JSd85hTepxVDpzTYg9e7P7nutr3pKHzjo5Sd3f8NtaRCwChD5ybqmDIFaYwm8RnJFG7vk9wV00YTCDLGpQ';
-        const WORKER_URL = 'https://capitalistbuddha.ca';
+    <script type="module">
+        import { auth } from "./js/firebase-init.js";
+        import {
+            createUserWithEmailAndPassword,
+            sendEmailVerification,
+        } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 
-        let stripe = Stripe(STRIPE_PUBLISHABLE);
+        const errorDiv = document.getElementById("error-message");
+        const successDiv = document.getElementById("success-message");
+        const form = document.getElementById("account-form");
+        const emailInput = document.getElementById("email");
+        const createButton = document.getElementById("create-button");
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const errorDiv = document.getElementById('error-message');
-            const form = document.getElementById('account-form');
-            const emailInput = document.getElementById('email');
+        function showError(text) {
+            errorDiv.textContent = text;
+            errorDiv.style.display = "block";
+        }
 
-            if (!errorDiv || !form) {
-                console.error('Required DOM elements not found');
+        // 1. Find out which email paid, straight from Stripe (via our session-status endpoint).
+        const sessionId = new URLSearchParams(window.location.search).get("session_id");
+        if (!sessionId) {
+            showError("Invalid confirmation link. Please contact us.");
+        } else {
+            try {
+                const response = await fetch(`/api/session-status?session_id=${encodeURIComponent(sessionId)}`);
+                const data = await response.json();
+                if (data.status === "complete" && data.customer_email) {
+                    emailInput.value = data.customer_email;
+                    form.style.display = "block";
+                } else {
+                    showError("We couldn't confirm this payment. Please contact us.");
+                }
+            } catch (err) {
+                console.error("Session status error:", err);
+                showError("We couldn't confirm this payment. Please refresh the page or contact us.");
+            }
+        }
+
+        // 2. Create the Firebase account and send the verification email.
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            errorDiv.style.display = "none";
+            const email = emailInput.value.trim();
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirm-password").value;
+
+            if (!email || !password || !confirmPassword) {
+                showError("Please fill in all fields.");
                 return;
             }
 
-            // Get session_id or clientSecret from URL
-            const params = new URLSearchParams(window.location.search);
-            const sessionId = params.get('session_id');
-            const clientSecret = params.get('payment_intent_client_secret');
-            const prefillEmail = params.get('email');
-
-            // Prefill email if provided
-            if (prefillEmail && emailInput) {
-                emailInput.value = decodeURIComponent(prefillEmail);
-            }
-
-            // Payment verification depends on flow type
-            if (!sessionId && !clientSecret) {
-                errorDiv.textContent = 'Invalid confirmation link. Please contact support.';
-                errorDiv.style.display = 'block';
-                form.style.display = 'none';
+            if (!email.includes("@")) {
+                showError("Please enter a valid email address.");
                 return;
             }
 
-            // For Checkout Session flow: payment is already verified by session status
-            if (sessionId) {
-                console.log('Checkout Session payment confirmed, ready for account creation');
+            if (password.length < 8) {
+                showError("Please use at least 8 characters for your password.");
+                return;
             }
 
-            // For Payment Intent flow (legacy): verify with Stripe
-            if (clientSecret) {
-                try {
-                    stripe.retrievePaymentIntent(clientSecret).then(({paymentIntent}) => {
-                        if (paymentIntent.status !== 'succeeded') {
-                            errorDiv.textContent = `Payment failed with status: ${paymentIntent.status}`;
-                            errorDiv.style.display = 'block';
-                            form.style.display = 'none';
-                        }
-                    }).catch(err => {
-                        errorDiv.textContent = `Error verifying payment: ${err.message}`;
-                        errorDiv.style.display = 'block';
-                        form.style.display = 'none';
-                    });
-                } catch (err) {
-                    errorDiv.textContent = `Error: ${err.message}`;
-                    errorDiv.style.display = 'block';
-                    form.style.display = 'none';
-                }
+            if (password !== confirmPassword) {
+                showError("Passwords do not match.");
+                return;
             }
 
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                const email = document.getElementById('email').value.trim();
-                const password = document.getElementById('password').value;
-                const confirmPassword = document.getElementById('confirm-password').value;
-
-                // Validate all fields are filled
-                if (!email || !password || !confirmPassword) {
-                    errorDiv.textContent = 'Please fill in all fields';
-                    errorDiv.style.display = 'block';
-                    return;
+            createButton.disabled = true;
+            try {
+                const { user } = await createUserWithEmailAndPassword(auth, email, password);
+                await sendEmailVerification(user);
+                form.style.display = "none";
+                successDiv.innerHTML =
+                    "Your account is ready. We sent a verification email to <strong></strong>. " +
+                    "Click the link in that email, then " +
+                    '<a href="/?tab=login">go to the course</a>.';
+                successDiv.querySelector("strong").textContent = email;
+                successDiv.style.display = "block";
+            } catch (err) {
+                console.error("Account creation error:", err.code, err.message);
+                if (err.code === "auth/email-already-in-use") {
+                    showError('An account already exists for this email. Please log in, or use "Forgot password?" on the login page.');
+                } else if (err.code === "auth/weak-password") {
+                    showError("That password is too weak. Please choose a longer one.");
+                } else {
+                    showError("Something went wrong creating your account. Please try again or contact us.");
                 }
-
-                // Validate passwords match
-                if (password !== confirmPassword) {
-                    errorDiv.textContent = 'Passwords do not match';
-                    errorDiv.style.display = 'block';
-                    return;
-                }
-
-                // Validate email format
-                if (!email.includes('@')) {
-                    errorDiv.textContent = 'Please enter a valid email address';
-                    errorDiv.style.display = 'block';
-                    return;
-                }
-
-                try {
-                    let paymentId = null;
-
-                    // Get payment ID based on flow type
-                    if (sessionId) {
-                        // For Checkout Session: use sessionId
-                        paymentId = sessionId;
-                    } else if (clientSecret) {
-                        // For Payment Intent: retrieve from Stripe
-                        const {paymentIntent} = await stripe.retrievePaymentIntent(clientSecret);
-                        paymentId = paymentIntent.id;
-                    }
-
-                    if (!paymentId) {
-                        throw new Error('Payment ID not found');
-                    }
-
-                    // Create enrollment
-                    const response = await fetch(`${WORKER_URL}/api/confirm-payment`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            paymentIntentId: paymentId,
-                            email,
-                            password
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        // Clear any previous user session and redirect to login
-                        localStorage.removeItem('currentUser');
-                        window.location.href = `/?tab=login&email=${encodeURIComponent(email)}`;
-                    } else {
-                        throw new Error(data.error || 'Failed to create account');
-                    }
-                } catch (error) {
-                    errorDiv.textContent = `Error: ${error.message}`;
-                    errorDiv.style.display = 'block';
-                }
-            });
+                createButton.disabled = false;
+            }
         });
     </script>
 </body>

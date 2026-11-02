@@ -4,10 +4,7 @@ const ACCESS_DAYS = 180;
 const WORKER_URL = 'https://capitalistbuddha.ca';
 
 let modules = [];
-let currentUser = null;
 let stripe = null;
-let elements = null;
-let paymentElement = null;
 
 // Initialize Stripe
 document.addEventListener('DOMContentLoaded', async () => {
@@ -100,51 +97,59 @@ if (contactForm) {
     });
 }
 
-// Login form - Call Worker to authenticate
-const loginForm = document.getElementById('login-form');
-if (loginForm) {
-    // Prefill email from URL parameter (from account creation redirect)
-    const params = new URLSearchParams(window.location.search);
-    const emailParam = params.get('email');
-    if (emailParam) {
-        const loginEmail = document.getElementById('login-email');
-        if (loginEmail) {
-            loginEmail.value = decodeURIComponent(emailParam);
-        }
-    }
+// Login and logout are handled in js/auth.js (Firebase Authentication).
 
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
+// ---- Protected video addresses ----
+// Each video plays from our own site: /api/video/<file name in R2>?token=<Firebase ID token>
+function videoUrl(path, token) {
+    // Each part of the R2 file name is encoded so names with spaces etc. work unchanged.
+    const encodedPath = path.split('/').map(encodeURIComponent).join('/');
+    return `/api/video/${encodedPath}?token=${encodeURIComponent(token)}`;
+}
 
-        try {
-            // Call Worker to verify credentials and check expiration
-            const response = await fetch(`${WORKER_URL}/api/auth`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
+// One video player. The file name goes in data-video; the address is added later.
+function videoBlock(title, path) {
+    return `
+        <div class="video-container">
+            <h4>${title}</h4>
+            <video controls preload="none" width="100%" data-video="${path}"></video>
+            <p class="video-error" style="display:none;"></p>
+        </div>
+    `;
+}
 
-            const data = await response.json();
-
-            if (data.success) {
-                currentUser = { email, ...data };
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                document.getElementById('login-form-container').style.display = 'none';
-                document.getElementById('course-overview').style.display = 'block';
-                await loadModules();
-            } else {
-                alert(data.error || 'Invalid credentials');
+// Give every video in `container` its protected address.
+// ID tokens last one hour. If a video stops loading later, get a fresh
+// token once and continue from the same spot.
+function attachVideoSources(container, token) {
+    container.querySelectorAll('video[data-video]').forEach((video) => {
+        const errorText = video.parentElement.querySelector('.video-error');
+        video.src = videoUrl(video.dataset.video, token);
+        let retried = false;
+        video.addEventListener('error', async () => {
+            if (retried) {
+                if (errorText) {
+                    errorText.textContent = 'This video could not be loaded. If you just created your account, click the link in the verification email we sent you, then refresh this page.';
+                    errorText.style.display = 'block';
+                }
+                return;
             }
-        } catch (error) {
-            console.error('Login error:', error);
-            alert('An error occurred. Please try again.');
-        }
+            retried = true;
+            const resumeAt = video.currentTime;
+            const freshToken = await window.cbGetIdToken(true);
+            if (!freshToken) return;
+            video.addEventListener('loadedmetadata', () => {
+                video.currentTime = resumeAt;
+                retried = false;
+                if (errorText) errorText.style.display = 'none';
+            }, { once: true });
+            video.src = videoUrl(video.dataset.video, freshToken);
+            video.play().catch(() => {});
+        });
     });
 }
 
-// Load modules with R2 signed URLs
+// Build the module list. Called by js/auth.js after a successful login.
 async function loadModules() {
     const modulesList = document.getElementById('modules-list');
     if (!modulesList) return;
@@ -154,6 +159,9 @@ async function loadModules() {
     }
 
     if (!modules.length) return;
+
+    const token = await window.cbGetIdToken();
+    if (!token) return; // nobody is logged in
 
     modulesList.innerHTML = '';
 
@@ -168,66 +176,20 @@ async function loadModules() {
         const content = document.createElement('div');
         content.className = 'module-content';
 
-        // Get signed URLs from Worker
-        let signedUrls = {};
-        try {
-            const videoPaths = [];
-            if (module.meditation_video) videoPaths.push(module.meditation_video);
-            if (module.explanation_video) videoPaths.push(module.explanation_video);
-
-            if (videoPaths.length) {
-                const urlResponse = await fetch(`${WORKER_URL}/api/get-signed-urls`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: currentUser.email,
-                        videoPaths
-                    })
-                });
-
-                const urlData = await urlResponse.json();
-                if (urlData.success) {
-                    urlData.signedUrls.forEach(item => {
-                        signedUrls[item.path] = item.url;
-                    });
-                }
-            }
-        } catch (error) {
-            console.error('Error getting signed URLs:', error);
-        }
-
         let videosHtml = '';
         if (module.explanation_video) {
-            const url = signedUrls[module.explanation_video] || '';
-            const type = module.explanation_video.endsWith('.mov') ? 'video/quicktime' : 'video/mp4';
-            videosHtml += `
-                <div class="video-container">
-                    <h4>Explanation</h4>
-                    <video controls preload="metadata" width="100%">
-                        <source src="${url}" type="${type}">
-                        Your browser does not support this video format.
-                    </video>
-                </div>
-            `;
+            videosHtml += videoBlock('Explanation', module.explanation_video);
         }
         if (module.meditation_video) {
-            const url = signedUrls[module.meditation_video] || '';
-            const type = module.meditation_video.endsWith('.mov') ? 'video/quicktime' : 'video/mp4';
-            videosHtml += `
-                <div class="video-container">
-                    <h4>Meditation</h4>
-                    <video controls preload="metadata" width="100%">
-                        <source src="${url}" type="${type}">
-                        Your browser does not support this video format.
-                    </video>
-                </div>
-            `;
+            videosHtml += videoBlock('Meditation', module.meditation_video);
         }
 
         content.innerHTML = `
             <div class="module-text">${(module.text || 'Module content loading...').split(/[\r\n]{2,}/).filter(p => p.trim()).map(p => `<p>${p.trim().replace(/[\r\n]+/g, ' ')}</p>`).join('')}</div>
             ${videosHtml ? `<div class="module-videos">${videosHtml}</div>` : ''}
         `;
+
+        attachVideoSources(content, token);
 
         header.addEventListener('click', () => {
             content.classList.toggle('active');
@@ -257,23 +219,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     const requestedTab = params.get('tab');
 
-    const savedUser = localStorage.getItem('currentUser');
-
     // If tab parameter is set, activate that tab
     if (requestedTab) {
         activateTab(requestedTab);
-    }
-
-    // Show courses if user is logged in and not explicitly requesting login tab
-    if (savedUser && requestedTab !== 'login') {
-        currentUser = JSON.parse(savedUser);
-        const loginContainer = document.getElementById('login-form-container');
-        const courseOverview = document.getElementById('course-overview');
-        if (loginContainer && courseOverview) {
-            loginContainer.style.display = 'none';
-            courseOverview.style.display = 'block';
-            loadModules();
-        }
     }
 });
 
