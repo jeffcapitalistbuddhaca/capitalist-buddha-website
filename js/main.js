@@ -74,25 +74,45 @@ if (payBtn) {
     });
 }
 
-// Contact form
+// Contact form - sends the message to Jeff through /api/contact (Brevo)
 const contactForm = document.getElementById('contact-form');
 if (contactForm) {
     contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const name = document.getElementById('contact-name').value;
-        const email = document.getElementById('contact-email').value;
-        const message = document.getElementById('contact-message').value;
+        const status = document.getElementById('contact-status');
+        const button = contactForm.querySelector('button[type="submit"]');
+        const trap = document.getElementById('contact-website');
+
+        const payload = {
+            name: document.getElementById('contact-name').value,
+            email: document.getElementById('contact-email').value,
+            message: document.getElementById('contact-message').value,
+            website: trap ? trap.value : ''
+        };
+
+        if (button) button.disabled = true;
+        status.textContent = 'Sending...';
 
         try {
-            // For now, just show a message. In production, create a Worker endpoint
-            document.getElementById('contact-status').textContent = 'Thank you! We will contact you soon.';
-            contactForm.reset();
-            setTimeout(() => {
-                document.getElementById('contact-status').textContent = '';
-            }, 5000);
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json().catch(() => ({}));
+
+            if (response.ok && data.ok) {
+                status.textContent = 'Thank you! Your message has been sent. We will contact you soon.';
+                contactForm.reset();
+            } else {
+                status.textContent = (data.error || 'Sorry, your message could not be sent.') +
+                    ' You can also email jeff@capitalistbuddha.ca directly.';
+            }
         } catch (error) {
             console.error('Contact form error:', error);
-            document.getElementById('contact-status').textContent = 'Error sending message.';
+            status.textContent = 'Sorry, your message could not be sent. You can also email jeff@capitalistbuddha.ca directly.';
+        } finally {
+            if (button) button.disabled = false;
         }
     });
 }
