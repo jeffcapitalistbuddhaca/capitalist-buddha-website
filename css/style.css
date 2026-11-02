@@ -804,3 +804,41 @@ footer p {
         font-size: 1.5rem;
     }
 }
+
+/* ---- Mobile only: centre the Login tab (login form + course overview) ---- */
+@media (max-width: 768px) {
+  #login.login-section,
+  #login .login-form-wrapper,
+  #login .login-section-content {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+    float: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  #login #login-form,
+  #login #login-form input,
+  #login #login-form button {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  #login #login-form {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  #login .modules-list,
+  #login .module-item,
+  #login .module-content,
+  #login .video-container,
+  #login video {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
