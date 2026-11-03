@@ -1420,3 +1420,220 @@ a.book-link:hover {
     }
 }
 /* ===== END PHASE 2 POLISH ===== */
+
+/* ===== PHASE 3 - FADED ARTWORK + COURSES ADDITIONS (Nov 2026) ===== */
+
+/* Tabs stay at the very top, with the name on the left (desktop) */
+nav.tabs {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+    align-items: center !important;
+}
+.cb-brand {
+    display: none;
+}
+@media (min-width: 1100px) {
+    .cb-brand {
+        display: block;
+        position: absolute;
+        left: 28px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-family: 'Playfair Display', Georgia, serif;
+        font-weight: 600;
+        font-size: 22px;
+        color: #ffffff;
+        white-space: nowrap;
+    }
+}
+
+/* Artwork faded into the background; text scrolls over it */
+.cb-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+.cb-bg-flags {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 22vh;
+    object-fit: cover;
+    object-position: center top;
+    opacity: 0.18;
+    -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent);
+    mask-image: linear-gradient(to bottom, #000 30%, transparent);
+}
+.cb-bg-emblem {
+    position: absolute;
+    left: 50%;
+    top: 55%;
+    width: 46vh;
+    height: 69vh;
+    transform: translate(-50%, -50%);
+    background: #967ca0;
+    -webkit-mask: url('../images/emblem.png') center / contain no-repeat;
+    mask: url('../images/emblem.png') center / contain no-repeat;
+    opacity: 0.09;
+}
+.cb-bg-leaf {
+    position: absolute;
+    width: 34vw;
+    max-width: 520px;
+    height: auto;
+    opacity: 0.16;
+}
+.cb-bg-leaf-l {
+    left: -8vw;
+    bottom: -6vh;
+}
+.cb-bg-leaf-r {
+    right: -8vw;
+    top: 12vh;
+}
+
+/* Nothing solid on top of the artwork */
+main.container,
+.tab-content,
+.cb-section {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+main.container,
+footer {
+    position: relative;
+    z-index: 1;
+}
+main.container {
+    margin-top: 0 !important;
+    padding-top: 40px !important;
+}
+
+/* Chakras stay in view in the left margin (wide screens) */
+@media (min-width: 1100px) {
+    .courses-chakras,
+    .professor-chakras,
+    .book-chakras,
+    .contact-chakras,
+    .login-form-chakras,
+    .login-chakras {
+        position: fixed !important;
+        left: 28px !important;
+        top: 55% !important;
+        transform: translateY(-50%) !important;
+        width: 54px !important;
+        height: auto !important;
+        z-index: 2 !important;
+        pointer-events: none;
+    }
+}
+@media (max-width: 1099px) {
+    .courses-chakras,
+    .professor-chakras,
+    .book-chakras,
+    .contact-chakras,
+    .login-form-chakras,
+    .login-chakras {
+        display: none !important;
+    }
+}
+
+/* Meet the Professor + The companion book: centred */
+#courses .cb-feature {
+    text-align: center;
+}
+#courses .cb-feature .cb-eyebrow {
+    text-align: center;
+    margin-bottom: 18px !important;
+}
+.cb-feature-photo {
+    display: block;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 20px auto;
+    border-radius: 50%;
+    border: 6px solid #967ca0;
+    object-fit: cover;
+}
+.cb-feature-cover {
+    display: block;
+    width: 180px;
+    height: auto;
+    margin: 0 auto 20px auto;
+    border-radius: 4px;
+    box-shadow: 0 10px 24px rgba(60, 40, 60, 0.22);
+}
+#courses .cb-feature p {
+    max-width: 680px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+#courses .cb-link-btn {
+    flex: none !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    color: #967ca0 !important;
+    font-family: 'Crimson Pro', Georgia, serif !important;
+    font-size: 20px !important;
+    font-weight: 600 !important;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
+}
+
+/* Payment box centred on the page (same centre as the footer emblem) */
+#courses .course-purchase {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Footer: full width, edge to edge */
+footer {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    left: 0 !important;
+    box-sizing: border-box !important;
+}
+
+@media (max-width: 768px) {
+    .cb-bg-flags {
+        height: 14vh;
+    }
+    .cb-bg-emblem {
+        width: 60vw;
+        height: 90vw;
+    }
+    .cb-bg-leaf {
+        width: 60vw;
+        opacity: 0.12;
+    }
+    main.container {
+        padding-top: 24px !important;
+    }
+    .cb-feature-photo {
+        width: 160px;
+        height: 160px;
+    }
+    .cb-feature-cover {
+        width: 150px;
+    }
+}
+/* Remove the old chakra indent so every page is truly centred */
+.courses-section,
+.professor-section,
+.login-section,
+.book-section,
+.contact-section {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+/* ===== END PHASE 3 ===== */
