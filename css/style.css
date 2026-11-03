@@ -842,3 +842,56 @@ footer p {
     box-sizing: border-box !important;
   }
 }
+
+/* ===== PHASE 1 DESIGN UPDATE (Nov 2026) ===== */
+
+/* 1. Professor photo: centred circle above the heading (desktop + mobile) */
+#professor .professor-photo {
+    float: none !important;
+    position: static !important;
+    display: block !important;
+    width: 260px !important;
+    height: 260px !important;
+    max-width: none !important;
+    margin: 0 auto 28px auto !important;
+    object-fit: cover !important;
+    object-position: 50% 50% !important;
+    border-radius: 50% !important;
+}
+#professor h2 {
+    text-align: center;
+}
+
+/* 2. Professor text: a centred, comfortable reading column */
+#professor p {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* 3. Gentle fade when switching tabs */
+@keyframes cbFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.tab-content.active {
+    animation: cbFadeIn 0.35s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+    .tab-content.active { animation: none; }
+}
+
+/* 4. Smooth colour change when hovering the menu tabs */
+.tab-btn {
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Mobile sizes */
+@media (max-width: 768px) {
+    #professor .professor-photo {
+        width: 200px !important;
+        height: 200px !important;
+        margin-bottom: 20px !important;
+    }
+}
+/* ===== END PHASE 1 ===== */
