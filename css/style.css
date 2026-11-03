@@ -1703,3 +1703,58 @@ footer {
         opacity: 0.32 !important;
     }
 }
+
+/* Desktop prayer flags lighter still */
+@media (min-width: 769px) {
+    .cb-bg-flags {
+        opacity: 0.2 !important;
+    }
+}
+
+/* Phone: hamburger menu in the top bar */
+.cb-menu-toggle {
+    display: none;
+}
+@media (max-width: 768px) {
+    nav.tabs {
+        justify-content: flex-end !important;
+        min-height: 56px;
+        padding: 0 12px !important;
+        flex-wrap: wrap !important;
+    }
+    .cb-menu-toggle {
+        display: block;
+        background: none;
+        border: none;
+        width: 44px;
+        height: 44px;
+        padding: 10px;
+        margin: 6px 0;
+        cursor: pointer;
+    }
+    .cb-menu-toggle span {
+        display: block;
+        height: 2px;
+        background: #ffffff;
+        margin: 5px 0;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+    nav.tabs .tab-btn {
+        display: none !important;
+    }
+    nav.tabs.cb-open .tab-btn {
+        display: block !important;
+        flex: 0 0 100% !important;
+        max-width: none !important;
+        text-align: left !important;
+        font-size: 1.1rem !important;
+        padding: 14px 8px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+    }
+    nav.tabs.cb-open .cb-menu-toggle span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    nav.tabs.cb-open .cb-menu-toggle span:nth-child(2) { opacity: 0; }
+    nav.tabs.cb-open .cb-menu-toggle span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    #courses .cb-link-btn {
+        display: inline !important;
+    }
+}
