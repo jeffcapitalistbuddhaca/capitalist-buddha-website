@@ -1299,16 +1299,18 @@ a.book-link:hover {
 }
 /* ===== END LOGGED-IN COURSE PAGE ===== */
 
-/* ===== PHASE 2 FIXES - ROUND 2 - DESKTOP ONLY (Nov 2026) ===== */
+/* ===== PHASE 2 FIXES - ROUND 2 (Nov 2026) ===== */
+/* Desktop-only part */
 @media (min-width: 769px) {
 
-    /* 1. Contact: bigger badge, less empty space */
+    /* 1. Contact: badge about double the size, less empty space */
     #contact.active {
-        grid-template-columns: minmax(0, 560px) 340px !important;
-        column-gap: 48px !important;
+        grid-template-columns: minmax(0, 560px) minmax(0, 600px) !important;
+        column-gap: 40px !important;
     }
     #contact.active > .contact-badge {
-        width: 340px !important;
+        width: 100% !important;
+        max-width: 600px !important;
         grid-row: 2 / span 2 !important;
     }
     #contact.active > h2 {
@@ -1381,49 +1383,46 @@ a.book-link:hover {
         margin-top: 8px !important;
     }
 }
-/* ===== END PHASE 2 FIXES - ROUND 2 ===== */
 
-/* ===== PHASE 2 FIXES (Nov 2026) ===== */
-
-/* All page titles: same font, colour and size on every tab */
-.tab-content h2,
-#login-form-container h3,
-#book h3:first-of-type {
-    font-family: 'Playfair Display', Georgia, serif !important;
-    font-weight: 600 !important;
-    color: #967ca0 !important;
-    font-size: 44px !important;
-    line-height: 1.2 !important;
-}
-
-/* Desktop: bigger text, less empty space, title lined up with the text */
-@media (min-width: 769px) {
-    body {
-        font-size: 21px;
-    }
-    #courses > h2,
-    #courses .cb-section {
-        max-width: 880px;
-        margin-left: auto !important;
-        margin-right: auto !important;
-    }
-    #courses > h2 {
-        margin-bottom: 20px;
-    }
-    #courses .cb-section {
-        margin-bottom: 32px;
-    }
-    .tab-content p {
-        margin-bottom: 16px;
-    }
-}
-
-/* Phones: titles a little smaller */
+/* Phones: centred page titles */
 @media (max-width: 768px) {
-    .tab-content h2,
+    #courses > h2,
+    #professor h2,
     #login-form-container h3,
-    #book h3:first-of-type {
-        font-size: 34px !important;
+    #course-overview > h3:first-of-type,
+    #book h3:first-of-type,
+    #contact h2 {
+        text-align: center !important;
     }
 }
-/* ===== END PHASE 2 FIXES ===== */
+
+/* No more white on white (desktop AND phones):
+   the contact form card and the module cards use the SAME tan colour
+   as the payment box (.course-purchase). */
+#contact-form {
+    background: #D4B8A1 !important;
+    box-shadow: none !important;
+}
+#contact-form input[type="text"],
+#contact-form input[type="email"],
+#contact-form textarea {
+    background: #ffffff !important;
+    border: 1px solid #c9b29a !important;
+}
+#course-overview .module-item {
+    background: #D4B8A1 !important;
+    box-shadow: none !important;
+}
+#course-overview .module-header {
+    background: #D4B8A1 !important;
+}
+#course-overview .module-header:hover {
+    background: #cfb69d !important;
+}
+#course-overview .module-header span:last-child {
+    color: #3c3438 !important;
+}
+#course-overview .module-content {
+    border-top: 1px solid rgba(60, 52, 56, 0.15) !important;
+}
+/* ===== END PHASE 2 FIXES - ROUND 2 ===== */
