@@ -1355,3 +1355,68 @@ a.book-link:hover {
     font-family: 'Crimson Pro', Georgia, serif !important;
 }
 /* ===== END MODULES FONTS ===== */
+
+/* ===== PHASE 2 POLISH (Nov 2026) ===== */
+
+/* Section subtitles on the Courses tab: real subtitles, clearly different
+   from the paragraph text (desktop and phone) */
+#courses .cb-eyebrow {
+    display: block !important;
+    font-family: 'Playfair Display', Georgia, serif !important;
+    font-weight: 600 !important;
+    font-size: 26px !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    color: #3d696a !important;
+    margin: 0 0 10px 0 !important;
+}
+
+/* Desktop */
+@media (min-width: 769px) {
+    /* Bigger body text */
+    body {
+        font-size: 23px !important;
+    }
+    .tab-content p,
+    .tab-content li {
+        font-size: 23px !important;
+    }
+
+    /* Courses: a little less space between sections */
+    #courses > h2 {
+        margin-bottom: 12px !important;
+    }
+    #courses .cb-section {
+        margin-bottom: 28px !important;
+    }
+
+    /* Professor: close the gap between the title and the first paragraph */
+    #professor .professor-intro {
+        align-items: start !important;
+        row-gap: 0 !important;
+        margin-top: 0 !important;
+    }
+    #professor .professor-intro h2 {
+        margin-top: 0 !important;
+        margin-bottom: 12px !important;
+        padding: 0 !important;
+    }
+    #professor .professor-intro p {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+    #professor .professor-intro .professor-photo {
+        align-self: center !important;
+    }
+}
+
+/* Phones */
+@media (max-width: 768px) {
+    body {
+        font-size: 19px !important;
+    }
+    #courses .cb-eyebrow {
+        font-size: 22px !important;
+    }
+}
+/* ===== END PHASE 2 POLISH ===== */
