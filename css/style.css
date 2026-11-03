@@ -1696,3 +1696,10 @@ footer {
     }
 }
 /* ===== END DESKTOP CHANGES + PINK CARDS ===== */
+
+/* Desktop prayer flags slightly lighter (phone unchanged) */
+@media (min-width: 769px) {
+    .cb-bg-flags {
+        opacity: 0.32 !important;
+    }
+}
