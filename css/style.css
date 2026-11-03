@@ -1666,3 +1666,33 @@ footer {
     }
 }
 /* ===== END ADJUSTMENTS ===== */
+
+/* ===== PHASE 3 - DESKTOP CHANGES + PINK CARDS (Nov 2026) ===== */
+/* "What's included" cards: muted pink (from the chakras), not white */
+#courses .cb-card {
+    background: #ecd4dd !important;
+    box-shadow: none !important;
+}
+
+/* Desktop only - phone stays exactly as it is */
+@media (min-width: 769px) {
+    /* Prayer flags: show the whole string just under the tab bar */
+    .cb-bg-flags {
+        width: 100% !important;
+        height: auto !important;
+        object-fit: fill !important;
+        top: calc(56px - 9vw) !important;
+        -webkit-mask-image: linear-gradient(to bottom, #000 75%, transparent) !important;
+        mask-image: linear-gradient(to bottom, #000 75%, transparent) !important;
+    }
+    /* Remove the right-hand foliage and put the emblem there instead */
+    .cb-bg-leaf-r {
+        display: none !important;
+    }
+    .cb-bg-emblem {
+        left: auto !important;
+        right: 3vw !important;
+        transform: translateY(-50%) !important;
+    }
+}
+/* ===== END DESKTOP CHANGES + PINK CARDS ===== */
