@@ -1871,3 +1871,77 @@ textarea:focus-visible {
     }
 }
 /* ===== END PHASE 2 POLISH ===== */
+
+/* ===== PHASE 3 - FADED ARTWORK BACKGROUND (Nov 2026) ===== */
+/* Hide the old corner leaves at the top (they were being cut off) */
+.botanical-left-top,
+.botanical-right-1,
+.botanical-left-bottom,
+.botanical-right-2 {
+    display: none !important;
+}
+/* Large faint emblem behind the text; stays put while scrolling */
+body::before {
+    content: "";
+    position: fixed;
+    left: 50%;
+    top: 55%;
+    width: 70vmin;
+    height: 85vmin;
+    transform: translate(-50%, -50%);
+    background: #967ca0;
+    -webkit-mask: url('../images/emblem.png') center / contain no-repeat;
+    mask: url('../images/emblem.png') center / contain no-repeat;
+    opacity: 0.08;
+    z-index: 0;
+    pointer-events: none;
+}
+/* Faint leaves in the background corners */
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+        url('../images/botanical-left.png') left bottom / auto 45vh no-repeat,
+        url('../images/botanical-right-1.png') right top / auto 45vh no-repeat;
+    opacity: 0.12;
+    z-index: 0;
+    pointer-events: none;
+}
+main.container,
+footer,
+.cb-header {
+    position: relative;
+    z-index: 1;
+}
+.cb-header {
+    position: sticky !important;
+    z-index: 100 !important;
+}
+.cb-header .tab-btn {
+    white-space: nowrap !important;
+}
+#courses > h2 {
+    margin-top: 32px !important;
+}
+#courses .cb-section {
+    margin-bottom: 24px !important;
+}
+footer {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    left: 0 !important;
+    box-sizing: border-box !important;
+}
+@media (max-width: 768px) {
+    body::before {
+        width: 85vw;
+        height: 100vw;
+    }
+    #courses > h2 {
+        margin-top: 20px !important;
+    }
+}
+/* ===== END FADED ARTWORK BACKGROUND ===== */
