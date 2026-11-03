@@ -927,3 +927,224 @@ footer p {
     }
 }
 /* ===== END FOOTER CENTRING ===== */
+
+/* ===== PHASE 2 DESIGN UPDATE (Nov 2026) ===== */
+/* Colours from the book cover: gold #c9a46a (cover kraft), lilac #bc88bc, deep green #323b3d */
+
+/* 2. Fonts (free Google Fonts, matching the book cover)
+      Titles: Playfair Display Semibold (stand-in for Moret)
+      Text:   Crimson Pro (stand-in for Minion Pro) */
+body {
+    font-family: 'Crimson Pro', Georgia, 'Times New Roman', serif;
+    font-size: 19px;
+}
+h1, h2, h3, h4 {
+    font-family: 'Playfair Display', Georgia, 'Times New Roman', serif !important;
+    font-weight: 600 !important;
+}
+
+/* 3. More breathing room */
+.tab-content p {
+    line-height: 1.8;
+    margin-bottom: 20px;
+}
+.tab-content h2 {
+    margin-bottom: 24px;
+}
+.tab-content li {
+    line-height: 1.6;
+    margin-bottom: 6px;
+}
+.tab-content h3 {
+    margin-top: 12px;
+    margin-bottom: 14px;
+}
+
+/* 1. Gold accent on buttons and the book link (NOT the payment button) */
+#login button,
+#contact-form button[type="submit"],
+a.book-link {
+    background: #c9a46a !important;
+    color: #2f2a2c !important;
+    border: none !important;
+    border-radius: 999px !important;
+    padding: 12px 28px !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    display: inline-block;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+}
+#login button:hover,
+#contact-form button[type="submit"]:hover,
+a.book-link:hover {
+    background: #b8925a !important;
+}
+
+/* 4. Credentials strip (Professor tab) */
+#professor .cb-credentials {
+    display: flex;
+    justify-content: center;
+    max-width: 960px;
+    margin: 28px auto 40px auto;
+    padding: 28px 12px;
+    background: rgba(201, 164, 106, 0.14);
+    border-radius: 16px;
+}
+#professor .cb-cred {
+    flex: 1;
+    text-align: center;
+    padding: 0 12px;
+    border-left: 1px solid rgba(150, 124, 160, 0.3);
+}
+#professor .cb-cred:first-child {
+    border-left: none;
+}
+#professor .cb-cred-num {
+    display: block;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+    font-size: 42px;
+    line-height: 1.1;
+    color: #967ca0;
+}
+#professor .cb-cred-label {
+    display: block;
+    margin-top: 8px;
+    font-size: 16px;
+    line-height: 1.35;
+}
+
+/* 5. Courses tab sections and "What's included" cards */
+#courses .cb-section {
+    max-width: 760px;
+    margin: 0 auto 48px auto;
+}
+#courses .cb-eyebrow {
+    display: block;
+    font-size: 14px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #3d696a;
+    margin-bottom: 6px;
+}
+#courses .cb-cards {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-top: 20px;
+}
+#courses .cb-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 22px 14px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(80, 60, 90, 0.08);
+}
+#courses .cb-card svg {
+    width: 34px;
+    height: 34px;
+    color: #3d696a;
+}
+#courses .cb-card strong {
+    display: block;
+    margin-top: 10px;
+    font-size: 18px;
+    line-height: 1.25;
+    color: #3c3438;
+}
+#courses .cb-card span {
+    display: block;
+    margin-top: 4px;
+    font-size: 15px;
+    line-height: 1.35;
+    color: #6b6065;
+}
+
+/* 8. Contact form as a soft card */
+#contact-form {
+    max-width: 520px;
+    margin: 8px auto 0 auto;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 30px;
+    box-shadow: 0 6px 24px rgba(80, 60, 90, 0.10);
+}
+#contact-form label {
+    display: block;
+    font-weight: 600;
+    margin: 14px 0 6px 0;
+}
+#contact-form input[type="text"],
+#contact-form input[type="email"],
+#contact-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #ddd3d8;
+    border-radius: 10px;
+    background: #fbfafa;
+    padding: 12px 14px;
+    font: inherit;
+}
+#contact-form button[type="submit"] {
+    margin-top: 20px;
+}
+#contact #contact-status {
+    text-align: center;
+}
+
+/* Phones */
+@media (max-width: 768px) {
+    body {
+        font-size: 18px;
+    }
+    #professor .cb-credentials {
+        display: block;
+        padding: 8px 18px;
+    }
+    #professor .cb-cred {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        text-align: left;
+        padding: 12px 0;
+        border-left: none;
+        border-top: 1px solid rgba(150, 124, 160, 0.25);
+    }
+    #professor .cb-cred:first-child {
+        border-top: none;
+    }
+    #professor .cb-cred-num {
+        font-size: 30px;
+        min-width: 70px;
+        text-align: right;
+    }
+    #professor .cb-cred-label {
+        margin-top: 0;
+    }
+    #courses .cb-cards {
+        grid-template-columns: 1fr 1fr;
+    }
+    #courses .cb-card:last-child {
+        grid-column: 1 / -1;
+    }
+    #contact-form {
+        padding: 22px;
+    }
+}
+/* ===== END PHASE 2 ===== */
+
+/* ===== PHASE 2 - item 6: slimmer header on phones only ===== */
+@media (max-width: 768px) {
+    header {
+        min-height: 0 !important;
+        height: auto !important;
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+    header .header-emblem {
+        max-height: 120px !important;
+        width: auto !important;
+    }
+}
+/* ===== END PHASE 2 item 6 ===== */
