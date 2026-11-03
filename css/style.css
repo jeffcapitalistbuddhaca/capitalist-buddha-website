@@ -1223,78 +1223,12 @@ a.book-link:hover {
 #login #logout-button:hover {
     background: rgba(150, 124, 160, 0.10) !important;
 }
-#course-overview .module-item {
-    background: #ffffff;
-    border-radius: 14px;
-    box-shadow: 0 2px 10px rgba(80, 60, 90, 0.08);
-    margin-bottom: 14px;
-    overflow: hidden;
-    border: none !important;
-}
-#course-overview .module-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    padding: 18px 22px !important;
-    font-family: 'Playfair Display', Georgia, serif;
-    font-weight: 600;
-    font-size: 20px;
-    color: #3c3438;
-    background: #ffffff !important;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-#course-overview .module-header:hover {
-    background: #faf6f0 !important;
-}
-#course-overview .module-header span:last-child {
-    color: #c9a46a;
-    font-size: 16px;
-    flex: none;
-}
-#course-overview .module-content {
-    padding: 0 22px;
-    border-top: 1px solid #efe8e1;
-}
-#course-overview .module-content.active {
-    padding: 20px 22px 26px 22px;
-}
-#course-overview .module-text p {
-    line-height: 1.8;
-    margin-bottom: 16px;
-}
-#course-overview .video-container {
-    margin-top: 22px;
-}
-#course-overview .video-container h4 {
-    font-family: inherit !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: #3d696a;
-    margin-bottom: 8px;
-}
-#course-overview .video-container video {
-    width: 100%;
-    border-radius: 12px;
-    background: #323b3d;
-    display: block;
-}
 @media (max-width: 768px) {
     #course-overview > h3:first-of-type {
         font-size: 34px !important;
     }
     #course-overview > h3:not(:first-of-type) {
         font-size: 24px !important;
-    }
-    #course-overview .module-header {
-        font-size: 18px;
-        padding: 16px 18px !important;
-    }
-    #course-overview .module-content.active {
-        padding: 16px 18px 22px 18px;
     }
 }
 /* ===== END LOGGED-IN COURSE PAGE ===== */
@@ -1396,9 +1330,7 @@ a.book-link:hover {
     }
 }
 
-/* No more white on white (desktop AND phones):
-   the contact form card and the module cards use the SAME tan colour
-   as the payment box (.course-purchase). */
+/* Contact form card: tan colour (same as payment box) */
 #contact-form {
     background: #D4B8A1 !important;
     box-shadow: none !important;
@@ -1409,20 +1341,17 @@ a.book-link:hover {
     background: #ffffff !important;
     border: 1px solid #c9b29a !important;
 }
-#course-overview .module-item {
-    background: #D4B8A1 !important;
-    box-shadow: none !important;
-}
-#course-overview .module-header {
-    background: #D4B8A1 !important;
-}
-#course-overview .module-header:hover {
-    background: #cfb69d !important;
-}
-#course-overview .module-header span:last-child {
-    color: #3c3438 !important;
-}
-#course-overview .module-content {
-    border-top: 1px solid rgba(60, 52, 56, 0.15) !important;
-}
 /* ===== END PHASE 2 FIXES - ROUND 2 ===== */
+
+/* ===== MODULES: NEW FONTS, ORIGINAL COLOURS (Nov 2026) ===== */
+#course-overview .module-header,
+#course-overview .module-header span {
+    font-family: 'Playfair Display', Georgia, serif !important;
+    font-weight: 600 !important;
+}
+#course-overview .module-content,
+#course-overview .module-text,
+#course-overview .module-text p {
+    font-family: 'Crimson Pro', Georgia, serif !important;
+}
+/* ===== END MODULES FONTS ===== */
