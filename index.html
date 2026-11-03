@@ -29,7 +29,8 @@
 
     <nav class="tabs">
         <button class="cb-menu-toggle" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
-        <button class="tab-btn active" data-tab="courses">Courses</button>
+        <button class="tab-btn active" data-tab="home">Home</button>
+        <button class="tab-btn" data-tab="courses">Courses</button>
         <button class="tab-btn" data-tab="professor">The Professor</button>
         <button class="tab-btn" data-tab="login">Login to Course</button>
         <button class="tab-btn" data-tab="book">Course Text</button>
@@ -37,8 +38,45 @@
     </nav>
 
     <main class="container">
+        <!-- HOME TAB (landing page) -->
+        <section id="home" class="tab-content active home-section">
+            <div class="cb-home">
+                <div class="cb-home-text">
+                    <h1 class="cb-hero-title">Our research shows that 40% of people destabilize after peak consciousness-expanding experiences.</h1>
+                    <p class="cb-hero-sub">Conscious Business is a university-level course that helps you move from upheaval to a business built around who you&rsquo;ve become.</p>
+                    <button type="button" class="tab-btn cb-hero-btn" data-tab="courses">See how the course works</button>
+                </div>
+                <img src="images/book-cover.webp" alt="Capitalist Buddha: Waking up to Conscious Economics - book cover" class="cb-home-cover">
+            </div>
+
+            <div class="cb-carousel" aria-roledescription="carousel">
+                <button type="button" class="cb-car-arrow cb-car-prev" aria-label="Previous">&#8249;</button>
+                <div class="cb-car-track">
+                    <div class="cb-car-slide active">
+                        <h3>Left your career after an awakening?</h3>
+                        <p>You&rsquo;re not lost. You&rsquo;re in transition.</p>
+                    </div>
+                    <div class="cb-car-slide">
+                        <h3>16 modules. 12 live sessions.</h3>
+                        <p>Meditation, journaling and design thinking, about 25 minutes at a time.</p>
+                    </div>
+                    <div class="cb-car-slide">
+                        <img src="images/professor-headshot-new.jpg" alt="Dr. Jeffrey Overall" class="cb-car-photo" loading="lazy">
+                        <h3>Taught by Dr. Jeffrey Overall</h3>
+                        <p>A former tenured professor who has researched spiritual awakening and mental health for over 15 years.</p>
+                    </div>
+                    <div class="cb-car-slide">
+                        <h3>Starts January 2027</h3>
+                        <p>$199 USD, with 6 months&rsquo; access to all materials.</p>
+                    </div>
+                </div>
+                <button type="button" class="cb-car-arrow cb-car-next" aria-label="Next">&#8250;</button>
+                <div class="cb-car-dots"></div>
+            </div>
+        </section>
+
         <!-- COURSES TAB -->
-        <section id="courses" class="tab-content active courses-section">
+        <section id="courses" class="tab-content courses-section">
             <img src="images/chakras.png" alt="Chakras" class="courses-chakras">
             <h2>Conscious Business Course</h2>
 
@@ -266,6 +304,30 @@
         document.querySelectorAll('.tab-btn').forEach(function (b) {
             b.addEventListener('click', function () { close(); window.scrollTo(0, 0); });
         });
+    })();
+    (function () {
+        var slides = document.querySelectorAll('.cb-car-slide');
+        var dotsBox = document.querySelector('.cb-car-dots');
+        if (!slides.length || !dotsBox) return;
+        var i = 0, timer, dots = [];
+        slides.forEach(function (_, n) {
+            var d = document.createElement('button');
+            d.type = 'button';
+            d.className = 'cb-car-dot' + (n === 0 ? ' active' : '');
+            d.setAttribute('aria-label', 'Slide ' + (n + 1));
+            d.addEventListener('click', function () { show(n); restart(); });
+            dotsBox.appendChild(d);
+            dots.push(d);
+        });
+        function show(n) {
+            slides[i].classList.remove('active'); dots[i].classList.remove('active');
+            i = (n + slides.length) % slides.length;
+            slides[i].classList.add('active'); dots[i].classList.add('active');
+        }
+        function restart() { clearInterval(timer); timer = setInterval(function () { show(i + 1); }, 6000); }
+        document.querySelector('.cb-car-prev').addEventListener('click', function () { show(i - 1); restart(); });
+        document.querySelector('.cb-car-next').addEventListener('click', function () { show(i + 1); restart(); });
+        restart();
     })();
     </script>
 </body>
