@@ -845,26 +845,35 @@ footer p {
 
 /* ===== PHASE 1 DESIGN UPDATE (Nov 2026) ===== */
 
-/* 1. Professor photo: centred circle above the heading (desktop + mobile) */
+/* 1. Professor tab: heading + first paragraph on the left, photo on the right (desktop) */
+#professor .professor-intro {
+    display: flex;
+    align-items: center;
+    gap: 48px;
+    max-width: 960px;
+    margin: 0 auto 8px auto;
+}
+#professor .professor-intro-text {
+    flex: 1;
+    min-width: 0;
+}
 #professor .professor-photo {
     float: none !important;
     position: static !important;
     display: block !important;
+    flex: none;
     width: 260px !important;
     height: 260px !important;
     max-width: none !important;
-    margin: 0 auto 28px auto !important;
+    margin: 0 !important;
     object-fit: cover !important;
     object-position: 50% 50% !important;
     border-radius: 50% !important;
 }
-#professor h2 {
-    text-align: center;
-}
 
-/* 2. Professor text: a centred, comfortable reading column */
-#professor p {
-    max-width: 720px;
+/* 2. Remaining Professor paragraphs line up with the intro */
+#professor > p {
+    max-width: 960px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -886,12 +895,17 @@ footer p {
     transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* Mobile sizes */
+/* Phones: photo drops below the first paragraph, centred */
 @media (max-width: 768px) {
+    #professor .professor-intro {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+    }
     #professor .professor-photo {
         width: 200px !important;
         height: 200px !important;
-        margin-bottom: 20px !important;
+        margin: 8px auto 24px auto !important;
     }
 }
 /* ===== END PHASE 1 ===== */
