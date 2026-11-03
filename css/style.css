@@ -1920,9 +1920,26 @@ footer {
         padding: 0 0 40px 0;
     }
     .cb-car-track {
-        min-height: 300px;
+        min-height: 0;
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        touch-action: auto;
+    }
+    .cb-car-track::-webkit-scrollbar {
+        display: none;
     }
     .cb-car-slide {
+        position: relative;
+        inset: auto;
+        flex: 0 0 100%;
+        min-height: 300px;
+        box-sizing: border-box;
+        scroll-snap-align: center;
+        opacity: 1;
+        visibility: visible;
         padding: 24px 20px;
     }
     .cb-car-slide h3 {
