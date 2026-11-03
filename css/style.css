@@ -1148,3 +1148,62 @@ a.book-link:hover {
     }
 }
 /* ===== END PHASE 2 item 6 ===== */
+
+/* ===== PHASE 2 FIXES (Nov 2026) ===== */
+
+/* All page titles: same font, colour and size on every tab */
+.tab-content h2,
+#login-form-container h3,
+#book h3:first-of-type {
+    font-family: 'Playfair Display', Georgia, serif !important;
+    font-weight: 600 !important;
+    color: #967ca0 !important;
+    font-size: 44px !important;
+    line-height: 1.2 !important;
+}
+
+/* Desktop: bigger text, less empty space, title lined up with the text */
+@media (min-width: 769px) {
+    body {
+        font-size: 21px;
+    }
+    #courses > h2,
+    #courses .cb-section {
+        max-width: 880px;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+    #courses > h2 {
+        margin-bottom: 20px;
+    }
+    #courses .cb-section {
+        margin-bottom: 32px;
+    }
+    .tab-content p {
+        margin-bottom: 16px;
+    }
+
+    /* Contact: badge above the title, centred, never over the form */
+    #contact .contact-badge {
+        position: static !important;
+        float: none !important;
+        display: block !important;
+        width: 200px !important;
+        height: auto !important;
+        margin: 0 auto 16px auto !important;
+        transform: none !important;
+    }
+    #contact h2 {
+        text-align: center;
+    }
+}
+
+/* Phones: titles a little smaller */
+@media (max-width: 768px) {
+    .tab-content h2,
+    #login-form-container h3,
+    #book h3:first-of-type {
+        font-size: 34px !important;
+    }
+}
+/* ===== END PHASE 2 FIXES ===== */
