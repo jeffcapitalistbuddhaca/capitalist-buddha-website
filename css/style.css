@@ -915,15 +915,15 @@ footer p {
     #courses .course-purchase {
         max-width: 560px !important;
         margin: 48px auto 90px auto !important;
-        padding: 38px 40px 36px 40px !important;
-        background: #ffffff !important;
-        border-radius: 18px !important;
-        border-top: 5px solid #967ca0 !important;
-        box-shadow: 0 8px 28px rgba(90, 60, 110, 0.12) !important;
         text-align: center !important;
-    }
-    #courses .course-purchase h3 {
-        color: #967ca0 !important;
     }
 }
 /* ===== END PAYMENT BOX ===== */
+
+/* ===== FOOTER CENTRING - DESKTOP ONLY ===== */
+@media (min-width: 769px) {
+    footer {
+        margin-left: 70px !important;
+    }
+}
+/* ===== END FOOTER CENTRING ===== */
