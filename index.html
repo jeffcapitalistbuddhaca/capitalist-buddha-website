@@ -327,6 +327,21 @@
         function restart() { clearInterval(timer); timer = setInterval(function () { show(i + 1); }, 6000); }
         document.querySelector('.cb-car-prev').addEventListener('click', function () { show(i - 1); restart(); });
         document.querySelector('.cb-car-next').addEventListener('click', function () { show(i + 1); restart(); });
+        var track = document.querySelector('.cb-car-track');
+        var startX = null, startY = null;
+        track.addEventListener('touchstart', function (e) {
+            startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+        }, { passive: true });
+        track.addEventListener('touchend', function (e) {
+            if (startX === null) return;
+            var dx = e.changedTouches[0].clientX - startX;
+            var dy = e.changedTouches[0].clientY - startY;
+            if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+                show(dx < 0 ? i + 1 : i - 1);
+                restart();
+            }
+            startX = null;
+        }, { passive: true });
         restart();
     })();
     </script>

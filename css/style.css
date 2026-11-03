@@ -1819,6 +1819,7 @@ footer {
 .cb-car-track {
     position: relative;
     min-height: 260px;
+    touch-action: pan-y;
 }
 .cb-car-slide {
     position: absolute;
