@@ -1356,6 +1356,457 @@ a.book-link:hover {
 }
 /* ===== END MODULES FONTS ===== */
 
+/* ===== PHASE 3 DESIGN (Nov 2026) ===== */
+
+/* ---------- 1. Slim top bar (desktop) + hamburger menu (phone) ---------- */
+.cb-header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+    background: #f4f1ed !important;
+    background-image: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-bottom: 1px solid #e6ded6 !important;
+}
+.cb-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+    padding: 0 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+.cb-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+}
+.cb-brand img {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+}
+.cb-brand span {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+    font-size: 24px;
+    color: #967ca0;
+}
+.cb-header .tabs {
+    display: flex !important;
+    align-items: center !important;
+    gap: 28px !important;
+    background: none !important;
+    background-image: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: auto !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+.cb-header .tab-btn {
+    background: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 6px 0 !important;
+    margin: 0 !important;
+    color: #3c3438 !important;
+    font-family: 'Crimson Pro', Georgia, serif !important;
+    font-size: 19px !important;
+    font-weight: 600 !important;
+    cursor: pointer;
+    border-bottom: 2px solid transparent !important;
+}
+.cb-header .tab-btn::before,
+.cb-header .tab-btn::after {
+    display: none !important;
+}
+.cb-header .tab-btn:hover {
+    color: #967ca0 !important;
+}
+.cb-header .tab-btn.active {
+    color: #967ca0 !important;
+    border-bottom-color: #967ca0 !important;
+}
+/* "Login to Course" = gold pill button */
+.cb-header .tab-btn[data-tab="login"] {
+    background: #c9a46a !important;
+    color: #2f2a2c !important;
+    border-radius: 999px !important;
+    padding: 8px 20px !important;
+    border-bottom: none !important;
+}
+.cb-header .tab-btn[data-tab="login"]:hover,
+.cb-header .tab-btn[data-tab="login"].active {
+    background: #b8925a !important;
+    color: #2f2a2c !important;
+}
+.cb-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    cursor: pointer;
+}
+.cb-menu-toggle span {
+    display: block;
+    height: 2px;
+    background: #3c3438;
+    margin: 5px 0;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Corner leaves blended into the top of the page (replaces the big banner) */
+.botanical-left-top,
+.botanical-right-1 {
+    position: absolute !important;
+    top: 72px !important;
+    height: 220px !important;
+    width: auto !important;
+    max-width: none !important;
+    z-index: 0 !important;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(to bottom, #000 35%, transparent);
+    mask-image: linear-gradient(to bottom, #000 35%, transparent);
+}
+.botanical-left-top { left: 0 !important; right: auto !important; }
+.botanical-right-1 { right: 0 !important; left: auto !important; }
+.botanical-left-bottom,
+.botanical-right-2 {
+    display: none !important;
+}
+main.container {
+    position: relative;
+    z-index: 1;
+}
+html,
+body {
+    overflow-x: clip;
+}
+
+/* ---------- 2. Chakras follow the reader (desktop, wide screens) ---------- */
+@media (min-width: 1100px) {
+    .courses-chakras,
+    .professor-chakras,
+    .book-chakras,
+    .contact-chakras,
+    .login-form-chakras,
+    .login-chakras {
+        position: fixed !important;
+        left: 32px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        width: 56px !important;
+        height: auto !important;
+        z-index: 2 !important;
+        pointer-events: none;
+    }
+}
+@media (max-width: 1099px) {
+    .courses-chakras,
+    .professor-chakras,
+    .book-chakras,
+    .contact-chakras,
+    .login-form-chakras,
+    .login-chakras {
+        display: none !important;
+    }
+}
+
+/* ---------- 3. Artwork accents on the Courses tab ---------- */
+#courses {
+    position: relative;
+}
+.cb-divider {
+    position: relative;
+    pointer-events: none;
+}
+.cb-divider img {
+    display: block;
+}
+/* a) pair of leaves */
+.cb-divider-leaves {
+    display: flex;
+    justify-content: center;
+    gap: 160px;
+    height: 130px;
+    margin: 8px auto 20px auto;
+}
+.cb-divider-leaves img {
+    height: 130px;
+    width: auto;
+    opacity: 0.9;
+}
+/* b) emblem midway down the page, in lilac */
+.cb-divider-emblem {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    max-width: 880px;
+    margin: 16px auto 24px auto;
+}
+.cb-divider-emblem .cb-line {
+    flex: 1;
+    height: 1px;
+    background: #cdbfd2;
+}
+.cb-divider-emblem .cb-emblem {
+    width: 150px;
+    height: 190px;
+    background: #967ca0;
+    -webkit-mask: url('../images/emblem.png') center / contain no-repeat;
+    mask: url('../images/emblem.png') center / contain no-repeat;
+}
+/* c) prayer flags right across the screen */
+.cb-divider-flags {
+    width: 100vw;
+    margin: 8px 0 24px calc(50% - 50vw);
+}
+.cb-divider-flags img {
+    width: 100%;
+    height: auto;
+    max-height: 180px;
+    object-fit: cover;
+    object-position: center top;
+}
+/* d) single leaf */
+.cb-divider-leaf {
+    display: flex;
+    justify-content: center;
+    margin: 4px auto 16px auto;
+}
+.cb-divider-leaf img {
+    height: 110px;
+    width: auto;
+    opacity: 0.9;
+}
+/* e) leaves peeking in from the edges */
+.cb-edge {
+    position: absolute;
+    width: auto;
+    height: 200px;
+    opacity: 0.55;
+    pointer-events: none;
+    z-index: 0;
+}
+.cb-edge-1 { right: -40px; top: 22%; }
+.cb-edge-2 { left: -40px; top: 42%; }
+.cb-edge-3 { right: -40px; top: 62%; }
+.cb-edge-4 { left: -40px; top: 80%; }
+#courses .cb-section,
+#courses > h2,
+#courses .course-purchase {
+    position: relative;
+    z-index: 1;
+}
+
+/* ---------- 4. Inside the 16 modules (sideways scroll) ---------- */
+.cb-note {
+    font-size: 18px !important;
+    margin-bottom: 12px !important;
+}
+.cb-modules {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding: 4px 4px 14px 4px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+}
+.cb-module-card {
+    flex: 0 0 180px;
+    background: #ffffff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(80, 60, 90, 0.08);
+    scroll-snap-align: start;
+}
+.cb-module-num {
+    height: 96px;
+    display: flex;
+    align-items: flex-end;
+    padding: 10px 12px;
+    color: #ffffff;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+    font-size: 30px;
+}
+.cb-module-name {
+    padding: 12px 14px 16px 14px;
+    min-height: 66px;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1.3;
+    color: #3c3438;
+}
+
+/* ---------- 5. Meet the Professor + The companion book ---------- */
+.cb-feature {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+}
+.cb-feature-photo {
+    width: 220px;
+    height: 220px;
+    flex: none;
+    border-radius: 50%;
+    border: 6px solid #967ca0;
+    object-fit: cover;
+    object-position: 50% 50%;
+}
+.cb-feature-cover {
+    width: 170px;
+    flex: none;
+    border-radius: 4px;
+    box-shadow: 0 10px 24px rgba(60, 40, 60, 0.22);
+}
+/* "Read more" link that opens another tab (looks like a link) */
+#courses .cb-link-btn {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: #967ca0 !important;
+    font-family: 'Crimson Pro', Georgia, serif !important;
+    font-size: 19px !important;
+    font-weight: 600 !important;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
+    box-shadow: none !important;
+}
+
+/* ---------- 6. Accessibility basics ---------- */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid #c9a46a !important;
+    outline-offset: 3px !important;
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 768px) {
+    .cb-bar {
+        height: 60px;
+        padding: 0 16px;
+    }
+    .cb-brand img {
+        width: 30px;
+        height: 30px;
+    }
+    .cb-brand span {
+        font-size: 19px;
+    }
+    .cb-menu-toggle {
+        display: block;
+    }
+    .cb-header .tabs {
+        display: none !important;
+    }
+    body.cb-menu-open .cb-header .tabs {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0 !important;
+        position: fixed !important;
+        top: 60px !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        background: #967ca0 !important;
+        padding: 20px 24px !important;
+        z-index: 200 !important;
+        overflow-y: auto;
+    }
+    body.cb-menu-open .cb-header .tab-btn,
+    body.cb-menu-open .cb-header .tab-btn[data-tab="login"] {
+        text-align: left !important;
+        color: #ffffff !important;
+        background: none !important;
+        font-family: 'Playfair Display', Georgia, serif !important;
+        font-size: 26px !important;
+        padding: 14px 0 !important;
+        border-radius: 0 !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.25) !important;
+    }
+    body.cb-menu-open .cb-menu-toggle span:nth-child(1) {
+        transform: translateY(7px) rotate(45deg);
+    }
+    body.cb-menu-open .cb-menu-toggle span:nth-child(2) {
+        opacity: 0;
+    }
+    body.cb-menu-open .cb-menu-toggle span:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg);
+    }
+    body.cb-menu-open {
+        overflow: hidden;
+    }
+    .botanical-left-top,
+    .botanical-right-1 {
+        top: 60px !important;
+        height: 100px !important;
+    }
+    .cb-divider-leaves {
+        gap: 40px;
+        height: 90px;
+    }
+    .cb-divider-leaves img {
+        height: 90px;
+    }
+    .cb-divider-emblem {
+        margin: 12px 18px 18px 18px;
+    }
+    .cb-divider-emblem .cb-emblem {
+        width: 110px;
+        height: 140px;
+    }
+    .cb-divider-leaf img {
+        height: 80px;
+    }
+    .cb-edge {
+        height: 120px;
+        opacity: 0.4;
+    }
+    .cb-edge-2,
+    .cb-edge-4 {
+        display: none;
+    }
+    .cb-module-card {
+        flex: 0 0 150px;
+    }
+    .cb-module-num {
+        height: 80px;
+        font-size: 26px;
+    }
+    .cb-module-name {
+        font-size: 15px;
+    }
+    .cb-feature {
+        flex-direction: column;
+        text-align: center;
+        gap: 18px;
+    }
+    .cb-feature-photo {
+        width: 160px;
+        height: 160px;
+    }
+    .cb-feature-cover {
+        width: 130px;
+    }
+}
+/* ===== END PHASE 3 DESIGN ===== */
+
 /* ===== PHASE 2 POLISH (Nov 2026) ===== */
 
 /* Section subtitles on the Courses tab: real subtitles, clearly different

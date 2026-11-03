@@ -13,10 +13,11 @@
     <meta property="og:description" content="A university-level conscious business course with Dr. Jeffrey Overall. Start date: January 2027.">
     <meta property="og:image" content="https://capitalistbuddha.ca/images/og-image.png">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="theme-color" content="#f4f1ed">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=20261103">
+    <link rel="stylesheet" href="css/style.css?v=20261104">
 </head>
 <body>
     <img src="images/botanical-left.png" alt="Botanical" class="botanical-left-top">
@@ -24,25 +25,33 @@
     <img src="images/botanical-right-1.png" alt="Botanical" class="botanical-right-1">
     <img src="images/botanical-right-2.png" alt="Botanical" class="botanical-right-2">
 
-    <header>
-        <img src="images/prayer-flags.png" alt="Prayer Flags" class="prayer-flags-top">
-        <div class="header-content">
-            <img src="images/emblem.png" alt="Capitalist Buddha" class="header-emblem">
+    <header class="cb-header">
+        <div class="cb-bar">
+            <a class="cb-brand" href="/" aria-label="Capitalist Buddha home">
+                <img src="images/favicon.png" alt="">
+                <span>Capitalist Buddha</span>
+            </a>
+            <button class="cb-menu-toggle" type="button" aria-label="Menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+            <nav class="tabs">
+                <button class="tab-btn active" data-tab="courses">Courses</button>
+                <button class="tab-btn" data-tab="professor">The Professor</button>
+                <button class="tab-btn" data-tab="login">Login to Course</button>
+                <button class="tab-btn" data-tab="book">Course Text</button>
+                <button class="tab-btn" data-tab="contact">Contact Us</button>
+            </nav>
         </div>
     </header>
-
-    <nav class="tabs">
-        <button class="tab-btn active" data-tab="courses">Courses</button>
-        <button class="tab-btn" data-tab="professor">The Professor</button>
-        <button class="tab-btn" data-tab="login">Login to Course</button>
-        <button class="tab-btn" data-tab="book">Course Text</button>
-        <button class="tab-btn" data-tab="contact">Contact Us</button>
-    </nav>
 
     <main class="container">
         <!-- COURSES TAB -->
         <section id="courses" class="tab-content active courses-section">
             <img src="images/chakras.png" alt="Chakras" class="courses-chakras">
+            <img src="images/botanical-footer-right.png" alt="" aria-hidden="true" class="cb-edge cb-edge-1">
+            <img src="images/botanical-left-bottom.png" alt="" aria-hidden="true" class="cb-edge cb-edge-2">
+            <img src="images/botanical-right-2.png" alt="" aria-hidden="true" class="cb-edge cb-edge-3">
+            <img src="images/botanical-footer-left.png" alt="" aria-hidden="true" class="cb-edge cb-edge-4">
             <h2>Conscious Business Course</h2>
 
             <div class="cb-section">
@@ -57,6 +66,11 @@
                 <p>Our research shows that 40% of people who experience a peak consciousness expanding experience encounter destabilizing events in their life. Some transition out of careers, relationships, and geographical location. Through this transition, many walk the path of the dark night of the soul and experience years of struggle.</p>
 
                 <p>This course is intended for anyone, but we have a particular focus towards people who may have had destabilizing experiences through consciousness practices. To complete this entire course, all you are going to need is: your device (e.g., smartphone, tablet, or PC), a journal, and something to write with.</p>
+            </div>
+
+            <div class="cb-divider cb-divider-leaves" aria-hidden="true">
+                <img src="images/botanical-left.png" alt="">
+                <img src="images/botanical-right-1.png" alt="">
             </div>
 
             <div class="cb-section">
@@ -76,6 +90,12 @@
                     <li>Dark night of the soul</li>
                     <li>Capitalism and business ethics</li>
                 </ul>
+            </div>
+
+            <div class="cb-section">
+                <span class="cb-eyebrow">Inside the 16 modules</span>
+                <p class="cb-note">Scroll sideways to preview each module.</p>
+                <div class="cb-modules" id="cb-module-preview"></div>
             </div>
 
             <div class="cb-section">
@@ -107,6 +127,40 @@
                         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="16" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M4 10h16M8 4v4M16 4v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
                         <strong>6-month access</strong>
                         <span>to all materials from the purchase date</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cb-divider cb-divider-emblem" aria-hidden="true">
+                <span class="cb-line"></span><span class="cb-emblem"></span><span class="cb-line"></span>
+            </div>
+
+            <div class="cb-divider cb-divider-flags" aria-hidden="true">
+                <img src="images/prayer-flags.png" alt="">
+            </div>
+
+            <div class="cb-section">
+                <span class="cb-eyebrow">Meet the Professor</span>
+                <div class="cb-feature">
+                    <img src="images/professor-headshot-new.jpg" alt="Dr. Jeffrey Overall" class="cb-feature-photo" loading="lazy">
+                    <div>
+                        <p>Dr. Jeffrey Overall is a professor of conscious economics, entrepreneur, and author whose work explores the relationship between consciousness expansion, mental health, spiritual awakening, and human behaviour. He has been an academic for over a decade.</p>
+                        <button type="button" class="tab-btn cb-link-btn" data-tab="professor">Read more about the Professor &rarr;</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cb-divider cb-divider-leaf" aria-hidden="true">
+                <img src="images/botanical-right-2.png" alt="">
+            </div>
+
+            <div class="cb-section">
+                <span class="cb-eyebrow">The companion book</span>
+                <div class="cb-feature">
+                    <img src="images/book-cover.webp" alt="Capitalist Buddha: Waking up to Conscious Economics - book cover" class="cb-feature-cover" loading="lazy">
+                    <div>
+                        <p>Capitalist Buddha is the accompanying text for the Conscious Business course. The philosophies and theories that form the foundation of the course are rooted in this text.</p>
+                        <a href="https://www.amazon.ca/Capitalist-Buddha-Waking-Conscious-Economics/dp/1778212107/" target="_blank" rel="noopener" class="book-link">Buy the book on Amazon</a>
                     </div>
                 </div>
             </div>
@@ -243,5 +297,7 @@
     <script src="https://js.stripe.com/v3/"></script>
     <script src="js/main.js"></script>
     <script type="module" src="js/auth.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/module-preview.js"></script>
 </body>
 </html>
