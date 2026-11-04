@@ -170,6 +170,34 @@ function attachVideoSources(container, token) {
 }
 
 // Build the module list. Called by js/auth.js after a successful login.
+// Graphic novel panels (stored in R2 next to the videos, behind the login).
+// modules.json: "graphic_novel_panels": 6  -> "<video folder>/Panel 1.png" ... "Panel 6.png"
+function novelHtml(module) {
+    const count = Number(module.graphic_novel_panels) || 0;
+    const ref = module.explanation_video || module.meditation_video || '';
+    if (!count || !ref.includes('/')) return '';
+    const folder = ref.slice(0, ref.lastIndexOf('/'));
+    const ext = module.graphic_novel_ext || 'png';
+    let imgs = '';
+    for (let n = 1; n <= count; n++) {
+        const path = `${folder}/Panel ${n}.${ext}`;
+        imgs += `<img data-panel="${path}" alt="Module ${module.id} graphic novel, panel ${n} of ${count}" class="module-panel" loading="lazy">`;
+    }
+    return `<div class="module-novel"><h4>Graphic novel</h4>${imgs}</div>`;
+}
+
+// Tap a panel to see it full screen; tap again (or Esc) to close
+function openPanel(img) {
+    const box = document.createElement('div');
+    box.className = 'panel-lightbox';
+    box.innerHTML = `<img src="${img.src}" alt="${img.alt}">`;
+    const close = () => { box.remove(); document.removeEventListener('keydown', esc); };
+    const esc = (e) => { if (e.key === 'Escape') close(); };
+    box.addEventListener('click', close);
+    document.addEventListener('keydown', esc);
+    document.body.appendChild(box);
+}
+
 async function loadModules() {
     const modulesList = document.getElementById('modules-list');
     if (!modulesList) return;
@@ -207,9 +235,14 @@ async function loadModules() {
         content.innerHTML = `
             <div class="module-text">${(module.text || 'Module content loading...').split(/[\r\n]{2,}/).filter(p => p.trim()).map(p => `<p>${p.trim().replace(/[\r\n]+/g, ' ')}</p>`).join('')}</div>
             ${videosHtml ? `<div class="module-videos">${videosHtml}</div>` : ''}
+            ${novelHtml(module)}
         `;
 
         attachVideoSources(content, token);
+        content.querySelectorAll('img[data-panel]').forEach((img) => {
+            img.src = videoUrl(img.dataset.panel, token);
+            img.addEventListener('click', () => openPanel(img));
+        });
 
         header.addEventListener('click', () => {
             content.classList.toggle('active');
