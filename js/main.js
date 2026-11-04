@@ -177,7 +177,7 @@ function novelHtml(module) {
     const ref = module.explanation_video || module.meditation_video || '';
     if (!count || !ref.includes('/')) return '';
     const folder = ref.slice(0, ref.lastIndexOf('/'));
-    const ext = module.graphic_novel_ext || '';
+    const ext = module.graphic_novel_ext || 'png';
     let imgs = '';
     for (let n = 1; n <= count; n++) {
         const path = ext ? `${folder}/Panel ${n}.${ext}` : `${folder}/Panel ${n}`;
