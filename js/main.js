@@ -177,10 +177,10 @@ function novelHtml(module) {
     const ref = module.explanation_video || module.meditation_video || '';
     if (!count || !ref.includes('/')) return '';
     const folder = ref.slice(0, ref.lastIndexOf('/'));
-    const ext = module.graphic_novel_ext || 'png';
+    const ext = module.graphic_novel_ext || '';
     let imgs = '';
     for (let n = 1; n <= count; n++) {
-        const path = `${folder}/Panel ${n}.${ext}`;
+        const path = ext ? `${folder}/Panel ${n}.${ext}` : `${folder}/Panel ${n}`;
         imgs += `<img data-panel="${path}" alt="Module ${module.id} graphic novel, panel ${n} of ${count}" class="module-panel" loading="lazy">`;
     }
     return `<div class="module-novel"><h4>Graphic novel</h4>${imgs}</div>`;
