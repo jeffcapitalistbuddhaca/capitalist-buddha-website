@@ -351,5 +351,38 @@
         restart();
     })();
     </script>
+    <script>
+    // Back/forward buttons move between tabs instead of leaving the site
+    (function () {
+        function current() {
+            var a = document.querySelector('.tab-content.active');
+            return a ? a.id : 'home';
+        }
+        function open(tab) {
+            if (typeof activateTab === 'function' && document.getElementById(tab)) {
+                activateTab(tab);
+                window.scrollTo(0, 0);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            var h = location.hash.replace('#', '');
+            if (h && document.getElementById(h) && document.getElementById(h).classList.contains('tab-content')) {
+                open(h);
+            }
+            history.replaceState({ tab: current() }, '', location.href);
+        });
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('.tab-btn[data-tab]');
+            if (!btn) return;
+            var tab = btn.getAttribute('data-tab');
+            if (history.state && history.state.tab === tab) return;
+            history.pushState({ tab: tab }, '', location.pathname + location.search + '#' + tab);
+        });
+        window.addEventListener('popstate', function (e) {
+            var tab = (e.state && e.state.tab) || location.hash.replace('#', '') || 'home';
+            open(tab);
+        });
+    })();
+    </script>
 </body>
 </html>
