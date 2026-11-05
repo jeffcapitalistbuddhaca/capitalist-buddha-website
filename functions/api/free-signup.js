@@ -35,23 +35,30 @@ export async function onRequestPost({ request, env }) {
     );
   }
 
-  // Marketing list only with consent.
+  // Add to the Brevo "Free module" list (new or existing contacts)
   if (env["Brevo API Key"] && env.FREE_LIST_ID) {
+    const headers = {
+      "api-key": env["Brevo API Key"],
+      "content-type": "application/json",
+      accept: "application/json",
+    };
+    const listId = Number(env.FREE_LIST_ID);
     try {
+      // Create the contact, or update it if it already exists
       await fetch("https://api.brevo.com/v3/contacts", {
         method: "POST",
-        headers: {
-          "api-key": env["Brevo API Key"],
-          "content-type": "application/json",
-          accept: "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          listIds: [Number(env.FREE_LIST_ID)],
-          updateEnabled: true,
-        }),
+        headers,
+        body: JSON.stringify({ email, listIds: [listId], updateEnabled: true }),
       });
-    } catch {
+      // Make sure an existing contact is also added to the list
+      const r = await fetch(`https://api.brevo.com/v3/contacts/lists/${listId}/contacts/add`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ emails: [email] }),
+      });
+      if (!r.ok) console.log("Brevo list add:", r.status, await r.text());
+    } catch (e) {
+      console.log("Brevo error:", e && e.message);
       // Don't block the free module if Brevo is unavailable.
     }
   }
