@@ -46,22 +46,39 @@ document.querySelectorAll(".cb-free-form").forEach((form) => {
   });
 });
 
-// 2. Coming back from the email link
-(async () => {
-  if (!isSignInWithEmailLink(auth, window.location.href)) return;
-  let email = null;
-  try { email = localStorage.getItem("cbFreeEmail"); } catch (_) {}
-  if (!email) email = window.prompt("Please confirm your email address to open your free module:");
-  if (!email) return;
-  try {
-    await signInWithEmailLink(auth, email.trim(), window.location.href);
-    try { localStorage.removeItem("cbFreeEmail"); } catch (_) {}
-  } catch (err) {
-    console.error(err);
-    alertBox("That link has expired or was already used. Enter your email below for a new one.");
-  }
+// 2. Coming back from the email link (works on any device or browser)
+async function finishSignIn(email) {
+  await signInWithEmailLink(auth, email.trim(), window.location.href);
+  try { localStorage.removeItem("cbFreeEmail"); } catch (_) {}
   history.replaceState({ tab: "free" }, "", window.location.pathname + "#free");
   if (typeof activateTab === "function") activateTab("free");
+}
+
+(async () => {
+  if (!isSignInWithEmailLink(auth, window.location.href)) return;
+  if (typeof activateTab === "function") activateTab("free");
+  let email = null;
+  try { email = localStorage.getItem("cbFreeEmail"); } catch (_) {}
+  if (email) {
+    try { await finishSignIn(email); return; } catch (err) { console.error(err); }
+  }
+  // Different device/browser: ask for the email on the page (no pop-up)
+  const box = document.getElementById("cb-free-confirm");
+  if (!box) return;
+  box.style.display = "block";
+  const form = box.querySelector("form");
+  const msg = box.querySelector(".cb-free-msg");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    msg.textContent = "Opening...";
+    try {
+      await finishSignIn(form.querySelector("input[type=email]").value);
+      box.style.display = "none";
+    } catch (err) {
+      console.error(err);
+      msg.textContent = "That link has expired or doesn't match this email. Enter your email below to get a new link.";
+    }
+  });
 })();
 
 // 3. What the Free module tab shows

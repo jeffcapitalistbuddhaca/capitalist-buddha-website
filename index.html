@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=20261108fm">
+    <link rel="stylesheet" href="css/style.css?v=20261108fmf">
 </head>
 <body>
 
@@ -91,8 +91,17 @@
         <!-- FREE MODULE TAB -->
         <section id="free" class="tab-content free-section">
             <h2>Try a module for free</h2>
+            <div id="cb-free-confirm" class="cb-free-box" style="display:none;">
+                <p>Please confirm your email address to open your free module on this device.</p>
+                <form>
+                    <input type="email" required placeholder="Your email" autocomplete="email" aria-label="Email">
+                    <button type="submit">Open my free module</button>
+                    <p class="cb-free-msg" aria-live="polite"></p>
+                </form>
+            </div>
             <div id="cb-free-signup" class="cb-free-box">
-                <p>Get 30 days of free access to Module 7, Finding your passion.</p>
+                <p>Get 30 days of free access to Module 7, Finding your passion.
+                Already signed up? Enter the same email to get a link for this device.</p>
                 <form class="cb-free-form">
                     <input type="email" required placeholder="Your email" autocomplete="email" aria-label="Email">
                     <input type="text" class="cb-free-trap" tabindex="-1" autocomplete="off" aria-hidden="true">
