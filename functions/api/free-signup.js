@@ -36,9 +36,10 @@ export async function onRequestPost({ request, env }) {
   }
 
   // Add to the Brevo "Free module" list (new or existing contacts)
-  if (env["Brevo API Key"] && env.FREE_LIST_ID) {
+  const brevoKey = env.BREVO_CONTACTS_KEY || env["Brevo API Key"];
+  if (brevoKey && env.FREE_LIST_ID) {
     const headers = {
-      "api-key": env["Brevo API Key"],
+      "api-key": brevoKey,
       "content-type": "application/json",
       accept: "application/json",
     };
