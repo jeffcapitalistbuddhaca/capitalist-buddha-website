@@ -169,6 +169,7 @@
         import {
             createUserWithEmailAndPassword,
             sendEmailVerification,
+            sendPasswordResetEmail,
         } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 
         const errorDiv = document.getElementById("error-message");
@@ -245,7 +246,8 @@
             } catch (err) {
                 console.error("Account creation error:", err.code, err.message);
                 if (err.code === "auth/email-already-in-use") {
-                    showError('An account already exists for this email. Please log in, or use "Forgot password?" on the login page.');
+                    try { await sendPasswordResetEmail(auth, email); } catch (e) {}
+                    showError("You already have a free-trial account with this email. We've just emailed you a link to set your password - then log in to see the full course.");
                 } else if (err.code === "auth/weak-password") {
                     showError("That password is too weak. Please choose a longer one.");
                 } else {
