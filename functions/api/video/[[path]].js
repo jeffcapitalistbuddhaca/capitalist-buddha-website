@@ -37,6 +37,20 @@ export async function onRequestGet(context) {
     return new Response("This account has no email address.", { status: 403 });
   }
 
+  // ---- Status check used by the Free module tab: /api/video/_status ----
+  if (url.pathname === "/api/video/_status") {
+    let paid = isGuestEmail(user.email, env.GUEST_EMAILS);
+    if (!paid && user.email_verified === true) {
+      try { paid = await hasActivePurchase(user.email, env.STRIPE_RESTRICTED_KEY); } catch (e) { paid = false; }
+    }
+    const free = paid ? null : await freeAccess(user.email, env);
+    return new Response(JSON.stringify({
+      paid,
+      free: !!(free && free.ok),
+      daysLeft: free ? free.daysLeft : 0,
+    }), { headers: { "content-type": "application/json", "cache-control": "no-store" } });
+  }
+
   // ---- 3. Partner guest list (GUEST_EMAILS variable in Cloudflare) ----
   // Emails on this list skip steps 4 and 5. Only add an email AFTER you have
   // created that account yourself in the Firebase console.
@@ -56,7 +70,15 @@ export async function onRequestGet(context) {
     }
 
     if (!paid) {
-      return new Response("No active purchase found for this email address.", { status: 403 });
+      // Free trial: Module 7 only, for 30 days from sign-up
+      let requested = "";
+      try {
+        requested = url.pathname.slice("/api/video/".length).split("/").map(decodeURIComponent).join("/");
+      } catch (e) { requested = ""; }
+      const free = await freeAccess(user.email, env);
+      if (!(free.ok && requested.startsWith(FREE_MODULE_FOLDER + "/"))) {
+        return new Response("No active purchase found for this email address.", { status: 403 });
+      }
     }
   }
 
@@ -210,4 +232,24 @@ async function hasActivePurchase(email, stripeKey) {
   }
 
   return false;
+}
+
+// ---- Free module (Module 7) for 30 days after sign-up ----
+const FREE_MODULE_FOLDER = "Module 7. Finding your passion";
+const FREE_DAYS = 30;
+
+async function freeAccess(email, env) {
+  try {
+    const bytes = new TextEncoder().encode(String(email).trim().toLowerCase());
+    const hash = await crypto.subtle.digest("SHA-256", bytes);
+    const hex = [...new Uint8Array(hash)].map((b) => b.toString(16).padStart(2, "0")).join("");
+    const obj = await env.COURSE_VIDEOS.get(`_free-access/${hex}.json`);
+    if (!obj) return { ok: false, daysLeft: 0 };
+    const rec = await obj.json();
+    const used = (Date.now() - Date.parse(rec.started)) / 86400000;
+    const daysLeft = Math.max(0, Math.ceil(FREE_DAYS - used));
+    return { ok: daysLeft > 0, daysLeft };
+  } catch (e) {
+    return { ok: false, daysLeft: 0 };
+  }
 }

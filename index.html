@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=20261108gn">
+    <link rel="stylesheet" href="css/style.css?v=20261108fm">
 </head>
 <body>
 
@@ -30,6 +30,7 @@
     <nav class="tabs">
         <button class="cb-menu-toggle" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
         <button class="tab-btn active" data-tab="home">Home</button>
+        <button class="tab-btn" data-tab="free">Free module</button>
         <button class="tab-btn" data-tab="courses">Courses</button>
         <button class="tab-btn" data-tab="professor">The Professor</button>
         <button class="tab-btn" data-tab="login">Login to Course</button>
@@ -72,6 +73,40 @@
                 </div>
                 <button type="button" class="cb-car-arrow cb-car-next" aria-label="Next">&#8250;</button>
                 <div class="cb-car-dots"></div>
+            </div>
+
+            <div class="cb-free-box">
+                <h3>Try a module for free</h3>
+                <p>Get 30 days of free access to Module 7, Finding your passion.</p>
+                <form class="cb-free-form">
+                    <input type="email" required placeholder="Your email" autocomplete="email" aria-label="Email">
+                    <input type="text" class="cb-free-trap" tabindex="-1" autocomplete="off" aria-hidden="true">
+                    <label class="cb-free-consent"><input type="checkbox" required> Yes, send me the free module and emails about the course. I can unsubscribe at any time.</label>
+                    <button type="submit">Send me the free module</button>
+                    <p class="cb-free-msg" aria-live="polite"></p>
+                </form>
+            </div>
+        </section>
+
+        <!-- FREE MODULE TAB -->
+        <section id="free" class="tab-content free-section">
+            <h2>Try a module for free</h2>
+            <div id="cb-free-signup" class="cb-free-box">
+                <p>Get 30 days of free access to Module 7, Finding your passion.</p>
+                <form class="cb-free-form">
+                    <input type="email" required placeholder="Your email" autocomplete="email" aria-label="Email">
+                    <input type="text" class="cb-free-trap" tabindex="-1" autocomplete="off" aria-hidden="true">
+                    <label class="cb-free-consent"><input type="checkbox" required> Yes, send me the free module and emails about the course. I can unsubscribe at any time.</label>
+                    <button type="submit">Send me the free module</button>
+                    <p class="cb-free-msg" aria-live="polite"></p>
+                </form>
+            </div>
+            <div id="cb-free-content"></div>
+            <div class="course-purchase cb-free-price">
+                <h3>$199 USD</h3>
+                <p>Start Date: January 2027</p>
+                <p>Get all 16 modules, 12 live sessions and 6 months' access.</p>
+                <button type="button" class="tab-btn cb-free-enrol" data-tab="courses">Enrol in the full course</button>
             </div>
         </section>
 
@@ -291,6 +326,7 @@
     <script src="https://js.stripe.com/v3/"></script>
     <script src="js/main.js?v=20261108gn"></script>
     <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/free.js"></script>
     <script>
     (function () {
         var nav = document.querySelector('nav.tabs');

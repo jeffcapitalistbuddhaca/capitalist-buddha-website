@@ -62,6 +62,19 @@ onAuthStateChanged(auth, async (user) => {
     } catch (err) {
       console.error("Could not refresh login:", err);
     }
+    let paid = true;
+    try {
+      const t = await user.getIdToken();
+      const r = await fetch(`/api/video/_status?token=${encodeURIComponent(t)}`);
+      if (r.ok) paid = (await r.json()).paid;
+    } catch (e) {}
+    if (!paid) {
+      courseOverview.style.display = "none";
+      loginContainer.style.display = "block";
+      if (loginMessage) loginMessage.textContent =
+        "You're signed in with free access. Open the Free module tab, or enrol to unlock the full course.";
+      return;
+    }
     loginContainer.style.display = "none";
     courseOverview.style.display = "block";
     await window.loadModules();
