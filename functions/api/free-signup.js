@@ -24,6 +24,9 @@ export async function onRequestPost({ request, env }) {
     return json({ ok: false, error: "Please tick the box to receive the free module." }, 400);
   }
 
+  // Where the visitor came from (letters, numbers, - and _ only)
+  const source = String(data.source || "direct").toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 40) || "direct";
+
   // Start the 30 days only once per email (signing up again doesn't reset it).
   const key = await freeKey(email);
   const existing = await env.COURSE_VIDEOS.head(key);
@@ -49,7 +52,7 @@ export async function onRequestPost({ request, env }) {
       await fetch("https://api.brevo.com/v3/contacts", {
         method: "POST",
         headers,
-        body: JSON.stringify({ email, listIds: [listId], updateEnabled: true }),
+        body: JSON.stringify({ email, listIds: [listId], updateEnabled: true, attributes: { SOURCE: source } }),
       });
       // Make sure an existing contact is also added to the list
       const r = await fetch(`https://api.brevo.com/v3/contacts/lists/${listId}/contacts/add`, {
