@@ -2299,3 +2299,43 @@ footer .cb-foot-links a { color: inherit; text-decoration: underline; }
 /* Free module tab: note for returning users */
 .cb-free-box .cb-free-note { font-size: 15px !important; margin-top: 6px !important; }
 /* ===== END FOLLOW-UP ===== */
+
+/* ===== STICKY ENROL BAR - PHONES ONLY (Nov 2026) ===== */
+.cb-sticky-enrol { display: none; }
+@media (max-width: 768px) {
+    .cb-sticky-enrol {
+        display: block;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1000;
+        padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)) 16px;
+        background: rgba(45, 107, 107, 0.96);
+        box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.15);
+        transition: transform 0.25s ease;
+    }
+    .cb-sticky-enrol.cb-sticky-hidden { transform: translateY(110%); }
+    .cb-sticky-enrol .cb-sticky-btn {
+        display: block !important;
+        width: 100% !important;
+        max-width: none !important;
+        flex: none !important;
+        margin: 0 !important;
+        background: #c9a46a !important;
+        color: #2f2a2c !important;
+        font-family: 'Crimson Pro', Georgia, serif !important;
+        font-weight: 600 !important;
+        font-size: 21px !important;
+        padding: 13px 20px !important;
+        border: none !important;
+        border-radius: 999px !important;
+        cursor: pointer;
+    }
+    body { padding-bottom: 76px; }
+    .cb-enrol-cta { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .cb-sticky-enrol { transition: none; }
+}
+/* ===== END STICKY ENROL BAR ===== */

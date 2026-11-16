@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=20261116b">
+    <link rel="stylesheet" href="css/style.css?v=20261116c">
 </head>
 <body>
 
@@ -393,6 +393,24 @@
         <p class="cb-foot-links"><a href="terms.html">Terms &amp; refund policy</a> &middot; <a href="privacy.html">Privacy policy</a> &middot; <a href="/#contact">Contact</a></p>
         <p>&copy; 2026 The Professor Inc. All rights reserved.</p>
     </footer>
+
+    <!-- STICKY ENROL BAR (phones only) -->
+    <div class="cb-sticky-enrol">
+        <button type="button" class="tab-btn cb-free-enrol cb-sticky-btn" data-tab="courses">Enrol in the full course</button>
+    </div>
+    <script>
+    // Hide the sticky bar while a price box is on screen
+    (function () {
+        var bar = document.querySelector('.cb-sticky-enrol');
+        if (!bar || !('IntersectionObserver' in window)) return;
+        var seen = new Set();
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) { if (e.isIntersecting) { seen.add(e.target); } else { seen.delete(e.target); } });
+            bar.classList.toggle('cb-sticky-hidden', seen.size > 0);
+        });
+        document.querySelectorAll('.course-purchase').forEach(function (b) { io.observe(b); });
+    })();
+    </script>
 
     <script src="https://js.stripe.com/v3/"></script>
     <script src="js/main.js?v=20261108gn"></script>
