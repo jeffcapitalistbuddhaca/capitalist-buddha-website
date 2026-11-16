@@ -2366,7 +2366,7 @@ footer .cb-foot-links a { color: inherit; text-decoration: underline; }
 .cb-social-inline { display: inline-flex !important; margin: 12px 0 0 0 !important; }
 /* Contact tab (desktop): icons centred under the badge */
 @media (min-width: 769px) {
-    #contact.active > .cb-social { grid-column: 2; grid-row: 4; justify-self: center; margin: 0 0 20px 0; }
+    #contact.active > .cb-social { grid-column: 2; grid-row: 2 / span 2; align-self: end; justify-self: center; margin: 0 0 40px 0; }
 }
 /* Phones */
 @media (max-width: 768px) {
