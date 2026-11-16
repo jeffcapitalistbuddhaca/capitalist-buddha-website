@@ -12,6 +12,15 @@ import {
 const FREE_MODULE_ID = 7;
 const area = document.getElementById("cb-free-content");
 
+// 0. Remember where the visitor first came from (?src=tiktok, or utm_source=...)
+(() => {
+  try {
+    const p = new URLSearchParams(location.search);
+    const s = (p.get("src") || p.get("utm_source") || "").toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 40);
+    if (s && !localStorage.getItem("cbSource")) localStorage.setItem("cbSource", s);
+  } catch (_) {}
+})();
+
 // 1. Sign-up forms (Home page + Free module tab)
 document.querySelectorAll(".cb-free-form").forEach((form) => {
   form.addEventListener("submit", async (e) => {
@@ -27,7 +36,7 @@ document.querySelectorAll(".cb-free-form").forEach((form) => {
       const r = await fetch("/api/free-signup", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email, consent, website }),
+        body: JSON.stringify({ email, consent, website, source: (() => { try { return localStorage.getItem("cbSource") || "direct"; } catch (_) { return "direct"; } })() }),
       });
       const d = await r.json();
       if (!d.ok) throw new Error(d.error || "Something went wrong.");

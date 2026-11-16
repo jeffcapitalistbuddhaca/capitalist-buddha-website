@@ -2339,3 +2339,50 @@ footer .cb-foot-links a { color: inherit; text-decoration: underline; }
     .cb-sticky-enrol { transition: none; }
 }
 /* ===== END STICKY ENROL BAR ===== */
+
+/* ===== SHORT-TERM ROUND (Nov 2026) ===== */
+/* FAQ */
+.cb-faq { max-width: 760px; margin: 30px auto; text-align: left; }
+.cb-faq h3 { text-align: center; color: #3d696a !important; font-family: 'Playfair Display', Georgia, serif !important; font-size: 30px !important; }
+.cb-faq details { background: #f4ecf1; border-radius: 12px; margin: 8px 0; padding: 12px 18px; }
+.cb-faq summary { cursor: pointer; font-weight: 600; color: #3d696a; font-size: 19px; }
+.cb-faq details p { margin: 8px 0 0 0 !important; }
+/* Graphic-novel panels + background line */
+.cb-proof { max-width: 860px; margin: 10px auto 30px auto; text-align: center; }
+.cb-panels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.cb-panels a { display: block; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+.cb-panels img { display: block; width: 100%; height: auto; transition: transform 0.25s ease; }
+.cb-panels a:hover img { transform: scale(1.03); }
+.cb-panels-cap { font-style: italic; margin: 10px 0 18px 0 !important; font-size: 17px !important; }
+.cb-background { background: #f4ecf1; border-radius: 12px; padding: 14px 18px; font-size: 18px; }
+.cb-background span { display: block; color: #3d696a; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
+/* Social icons */
+.cb-social { display: flex; justify-content: center; align-items: center; gap: 14px; flex-wrap: wrap; margin: 6px 0 10px 0; }
+.cb-social a { display: inline-flex; border-radius: 8px; transition: transform 0.2s ease, opacity 0.2s ease; }
+.cb-social a:hover { transform: translateY(-2px); opacity: 0.85; }
+.cb-social img { display: block; }
+.cb-social-light { margin: 10px auto 20px auto; }
+/* Professor tab: icons on the line under the consulting sentence */
+.cb-social-inline { display: inline-flex !important; margin: 12px 0 0 0 !important; }
+/* Contact tab (desktop): icons centred under the badge */
+@media (min-width: 769px) {
+    #contact.active > .cb-social { grid-column: 2; grid-row: 2 / span 2; align-self: end; justify-self: center; margin: 0 0 40px 0; }
+}
+/* Phones */
+@media (max-width: 768px) {
+    .cb-panels { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .cb-bg-emblem { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) { .cb-panels img, .cb-social a { transition: none; } }
+/* ===== END SHORT-TERM ROUND ===== */
+
+/* ===== PANEL LIGHTBOX (Nov 2026) ===== */
+.cb-lightbox { position: fixed; inset: 0; z-index: 2000; background: rgba(20, 18, 20, 0.82); display: flex; align-items: center; justify-content: center; padding: 24px; animation: cbLbFade 0.2s ease; }
+.cb-lightbox[hidden] { display: none; }
+.cb-lb-img { max-width: min(92vw, 1100px); max-height: 86vh; width: auto; height: auto; border-radius: 14px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5); }
+.cb-lb-close { position: absolute; top: 18px; right: 18px; width: 52px; height: 52px; border-radius: 50%; border: none; background: #c9a46a; color: #2f2a2c; font-size: 32px; line-height: 1; cursor: pointer; box-shadow: 0 0 0 4px rgba(201, 164, 106, 0.35); }
+body.cb-lb-open { overflow: hidden; }
+body.cb-lb-open .cb-sticky-enrol { display: none !important; }
+@keyframes cbLbFade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .cb-lightbox { animation: none; } }
+/* ===== END PANEL LIGHTBOX ===== */
