@@ -2375,3 +2375,14 @@ footer .cb-foot-links a { color: inherit; text-decoration: underline; }
 }
 @media (prefers-reduced-motion: reduce) { .cb-panels img, .cb-social a { transition: none; } }
 /* ===== END SHORT-TERM ROUND ===== */
+
+/* ===== PANEL LIGHTBOX (Nov 2026) ===== */
+.cb-lightbox { position: fixed; inset: 0; z-index: 2000; background: rgba(20, 18, 20, 0.82); display: flex; align-items: center; justify-content: center; padding: 24px; animation: cbLbFade 0.2s ease; }
+.cb-lightbox[hidden] { display: none; }
+.cb-lb-img { max-width: min(92vw, 1100px); max-height: 86vh; width: auto; height: auto; border-radius: 14px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5); }
+.cb-lb-close { position: absolute; top: 18px; right: 18px; width: 52px; height: 52px; border-radius: 50%; border: none; background: #c9a46a; color: #2f2a2c; font-size: 32px; line-height: 1; cursor: pointer; box-shadow: 0 0 0 4px rgba(201, 164, 106, 0.35); }
+body.cb-lb-open { overflow: hidden; }
+body.cb-lb-open .cb-sticky-enrol { display: none !important; }
+@keyframes cbLbFade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .cb-lightbox { animation: none; } }
+/* ===== END PANEL LIGHTBOX ===== */
