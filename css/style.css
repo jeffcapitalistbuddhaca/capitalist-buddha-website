@@ -2222,3 +2222,120 @@ footer {
     font: inherit;
     margin: 8px 0 12px 0;
 }
+
+/* ===== IMMEDIATE-STAGE CHANGES (Nov 2026) ===== */
+/* Hero: 40% slide */
+.cb-car-slide .cb-stat-num {
+    font-family: 'Playfair Display', Georgia, serif !important;
+    font-size: 54px !important;
+    line-height: 1 !important;
+    color: #967ca0 !important;
+    margin: 0 0 8px 0 !important;
+}
+.cb-car-slide .cb-stat-src {
+    font-size: 15px !important;
+    font-style: italic;
+    opacity: 0.8;
+    margin-top: 8px !important;
+}
+/* Free module box list */
+.cb-free-box .cb-free-lead { margin-bottom: 4px !important; }
+.cb-free-box .cb-free-list {
+    display: inline-block;
+    text-align: left;
+    margin: 0 auto 10px auto;
+    padding-left: 22px;
+    line-height: 1.6;
+}
+.cb-free-box .cb-free-result { font-style: italic; }
+/* Curriculum path */
+.cb-path { max-width: 760px; margin: 18px auto 0 auto; text-align: left; }
+.cb-path > div {
+    border-left: 4px solid #967ca0;
+    padding: 4px 0 14px 18px;
+    line-height: 1.6;
+}
+.cb-path b { color: #3d696a; }
+/* Footnote */
+.cb-footnote { font-size: 14px !important; line-height: 1.5 !important; opacity: 0.85; }
+.cb-fn-mark { font-size: 0.7em; }
+/* Footer links */
+footer .cb-foot-links { font-size: 15px; margin-bottom: 4px; }
+footer .cb-foot-links a { color: inherit; text-decoration: underline; }
+/* Phone: headline and button above the book cover */
+@media (max-width: 768px) {
+    .cb-home { flex-direction: column !important; }
+    .cb-home-cover { margin-top: 8px; }
+    .cb-car-slide .cb-stat-num { font-size: 44px !important; }
+}
+/* ===== END IMMEDIATE-STAGE CHANGES ===== */
+
+/* ===== IMMEDIATE-STAGE FOLLOW-UP (Nov 2026) ===== */
+/* Zaltman footnote under the Courses price box */
+#courses .cb-footnote-bottom {
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+    text-align: center;
+    max-width: 760px;
+    margin: 8px auto 0 auto !important;
+    opacity: 0.8;
+}
+/* "Enrol in the full course" button at the bottom of tabs */
+.cb-enrol-cta { text-align: center; margin: 40px auto 20px auto; }
+.cb-enrol-cta .cb-enrol-btn {
+    flex: none !important;
+    max-width: none !important;
+    display: inline-block !important;
+    background: #c9a46a !important;
+    color: #2f2a2c !important;
+    font-family: 'Crimson Pro', Georgia, serif !important;
+    font-weight: 600 !important;
+    font-size: 20px !important;
+    padding: 12px 30px !important;
+    border: none !important;
+    border-radius: 999px !important;
+    cursor: pointer;
+}
+/* Free module tab: note for returning users */
+.cb-free-box .cb-free-note { font-size: 15px !important; margin-top: 6px !important; }
+/* ===== END FOLLOW-UP ===== */
+
+/* ===== STICKY ENROL BAR - PHONES ONLY (Nov 2026) ===== */
+.cb-sticky-enrol { display: none; }
+@media (max-width: 768px) {
+    .cb-sticky-enrol {
+        display: block;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1000;
+        padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)) 16px;
+        background: rgba(45, 107, 107, 0.96);
+        box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.15);
+        transition: transform 0.25s ease;
+    }
+    .cb-sticky-enrol.cb-sticky-hidden { transform: translateY(110%); }
+    .cb-sticky-enrol .cb-sticky-btn {
+        display: block !important;
+        width: 100% !important;
+        max-width: none !important;
+        flex: none !important;
+        margin: 0 !important;
+        background: #c9a46a !important;
+        color: #2f2a2c !important;
+        font-family: 'Crimson Pro', Georgia, serif !important;
+        font-weight: 600 !important;
+        font-size: 21px !important;
+        padding: 13px 20px !important;
+        border: none !important;
+        border-radius: 999px !important;
+        cursor: pointer;
+    }
+    body { padding-bottom: 76px; }
+    .cb-enrol-cta { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .cb-sticky-enrol { transition: none; }
+}
+/* ===== END STICKY ENROL BAR ===== */
