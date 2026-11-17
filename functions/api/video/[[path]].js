@@ -42,7 +42,7 @@ export async function onRequestGet(context) {
 
   // ---- Status check used by the Free module tab: /api/video/_status ----
   if (url.pathname === "/api/video/_status") {
-    let paid = isGuestEmail(user.email, env.GUEST_EMAILS);
+    let paid = isGuestEmail(user.email, [env.GUEST_EMAILS, env.GUEST_EMAILS_2].filter(Boolean).join(","));
     let courseAccessObj = null;
     if (!paid && user.email_verified === true) {
       try { courseAccessObj = await hasActivePurchase(user.email, env.STRIPE_RESTRICTED_KEY); } catch (e) { courseAccessObj = { access: false }; }
@@ -60,7 +60,7 @@ export async function onRequestGet(context) {
   // ---- 3. Partner guest list (GUEST_EMAILS variable in Cloudflare) ----
   // Emails on this list skip steps 4 and 5. Only add an email AFTER you have
   // created that account yourself in the Firebase console.
-  const isGuest = isGuestEmail(user.email, env.GUEST_EMAILS);
+  const isGuest = isGuestEmail(user.email, [env.GUEST_EMAILS, env.GUEST_EMAILS_2].filter(Boolean).join(","));
   if (!isGuest) {
     // ---- 4. Require a verified email address ----
     if (user.email_verified !== true) {
