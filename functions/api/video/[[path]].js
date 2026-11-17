@@ -51,6 +51,7 @@ export async function onRequestGet(context) {
     const free = paid ? null : await freeAccess(user.email, env);
     return new Response(JSON.stringify({
       paid,
+      opensOn: (courseAccessObj && courseAccessObj.opensOn) || null,
       free: !!(free && free.ok),
       daysLeft: free ? free.daysLeft : 0,
     }), { headers: { "content-type": "application/json", "cache-control": "no-store" } });
@@ -75,18 +76,6 @@ export async function onRequestGet(context) {
     }
 
     if (!courseAccessObj.access) {
-      if (courseAccessObj.opensOn) {
-        return new Response(JSON.stringify({ error: "not_started", opensOn: courseAccessObj.opensOn }), {
-          status: 403,
-          headers: {
-            "content-type": "application/json",
-            "X-Access": "not_started",
-            "X-Opens-On": courseAccessObj.opensOn,
-            "Access-Control-Expose-Headers": "X-Access, X-Opens-On"
-          }
-        });
-      }
-
       // Free trial: Module 7 only, for 30 days from sign-up
       let requested = "";
       try {
@@ -94,6 +83,12 @@ export async function onRequestGet(context) {
       } catch (e) { requested = ""; }
       const free = await freeAccess(user.email, env);
       if (!(free.ok && requested.startsWith(FREE_MODULE_FOLDER + "/"))) {
+        if (courseAccessObj.opensOn) {
+          return new Response(JSON.stringify({ error: "not_started", opensOn: courseAccessObj.opensOn }), {
+            status: 403,
+            headers: { "content-type": "application/json" },
+          });
+        }
         return new Response("No active purchase found for this email address.", { status: 403 });
       }
     }
@@ -221,7 +216,7 @@ async function hasActivePurchase(email, stripeKey) {
   const cutoff = now - (ACCESS_DAYS + 400) * 24 * 60 * 60; // Extended window to catch old purchases before new sessions
 
   let startingAfter = null;
-  let earliestOpening = null;
+  let earliestStart = null;
 
   // Up to 10 pages of 100 = the last 1,000 completed checkouts.
   for (let page = 0; page < 10; page++) {
@@ -255,25 +250,15 @@ async function hasActivePurchase(email, stripeKey) {
         continue;
       }
 
-      // Session is valid: compute access window
-      const paid = s.created; // Unix timestamp in seconds
-      const accessStart = getAccessStart(paid);
+      // Session is valid: access runs ACCESS_DAYS from the session start
+      const accessStart = getAccessStart(s.created);
       const accessEnd = accessStart + ACCESS_DAYS * 24 * 60 * 60;
 
       if (now >= accessStart && now < accessEnd) {
         return { access: true };
       }
-
-      if (now < accessStart) {
-        const startDate = new Date(accessStart * 1000);
-        const dateStr = startDate.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
-        if (!earliestOpening || accessStart < new Date(earliestOpening).getTime() / 1000) {
-          earliestOpening = dateStr;
-        }
+      if (now < accessStart && (earliestStart === null || accessStart < earliestStart)) {
+        earliestStart = accessStart;
       }
     }
 
@@ -281,66 +266,40 @@ async function hasActivePurchase(email, stripeKey) {
     startingAfter = sessions[sessions.length - 1].id;
   }
 
-  if (earliestOpening) {
-    return { access: false, opensOn: earliestOpening };
+  if (earliestStart !== null) {
+    return { access: false, opensOn: torontoDate(earliestStart) };
   }
 
   return { access: false };
 }
 
-// Helper: determine when access starts for a purchase
-function getAccessStart(paidSeconds) {
-  // paidSeconds is the Unix timestamp when the payment was made
-  const paidDate = new Date(paidSeconds * 1000);
-
-  // Convert to Toronto time (UTC-5 or UTC-4 depending on DST)
-  // getUTCDate() is the date in UTC; adjust to Toronto 00:00
-  const torontoOffset = getTorontoOffset(paidDate);
-  const torontoMs = paidDate.getTime() + torontoOffset * 60 * 1000;
-  const torontoDate = new Date(torontoMs);
-
-  // Get the date at 00:00 Toronto time
-  const paymentDateInToronto = new Date(torontoDate.getFullYear(), torontoDate.getMonth(), torontoDate.getDate());
-  const paymentDateMs = paymentDateInToronto.getTime();
-
-  // Find the first SESSION_STARTS date that is >= payment date
-  for (const dateStr of SESSION_STARTS) {
-    const [year, month, day] = dateStr.split("-").map(Number);
-    const sessionDate = new Date(year, month - 1, day); // month is 0-indexed in Date
-
-    if (sessionDate.getTime() >= paymentDateMs) {
-      return Math.floor(sessionDate.getTime() / 1000);
-    }
-  }
-
-  // No future session found; use payment date
-  return Math.floor(paymentDateMs / 1000);
+// Date in Toronto as "YYYY-MM-DD" for a Unix time in seconds.
+function torontoDate(seconds) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Toronto", year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(new Date(seconds * 1000));
 }
 
-// Helper: get Toronto timezone offset in minutes (from UTC)
-function getTorontoOffset(date) {
-  // Create a date in US/Eastern timezone
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Toronto",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  });
+// Unix time (seconds) of midnight in Toronto on a "YYYY-MM-DD" date.
+function torontoMidnight(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  // Try 05:00 UTC (winter) and 04:00 UTC (summer); keep the one that is midnight in Toronto.
+  for (const h of [5, 4]) {
+    const t = Date.UTC(y, m - 1, d, h) / 1000;
+    const hour = new Intl.DateTimeFormat("en-US", { timeZone: "America/Toronto", hour: "numeric", hourCycle: "h23" }).format(new Date(t * 1000));
+    if (Number(hour) === 0) return t;
+  }
+  return Date.UTC(y, m - 1, d, 5) / 1000;
+}
 
-  const parts = formatter.formatToParts(date);
-  const torontoTimeStr = parts
-    .filter((p) => p.type !== "literal")
-    .map((p) => p.value)
-    .join("");
-
-  const [year, month, day, hour, min, sec] = torontoTimeStr.match(/\d+/g).map(Number);
-  const torontoDate = new Date(year, month - 1, day, hour, min, sec);
-
-  return Math.round((date.getTime() - torontoDate.getTime()) / 60000);
+// Access starts on the first session start on or after the payment date (Toronto).
+// If there is no later session in SESSION_STARTS, access starts at payment.
+function getAccessStart(paidSeconds) {
+  const paidDay = torontoDate(paidSeconds);
+  for (const start of SESSION_STARTS) {
+    if (start >= paidDay) return torontoMidnight(start);
+  }
+  return paidSeconds;
 }
 
 // ---- Free module (Module 7) for 30 days after sign-up ----
