@@ -1,7 +1,7 @@
 // js/assess.js - Full assessment: after payment, sign in, then the questionnaire (saved as you go).
 // Answers are saved to the server (/api/assess/save) and scored there when submitted.
-import { SECTIONS, INTRO, INSTRUCTIONS, RELATIONSHIP_QUESTION, LETTER } from "./assess-data.js?v=20261117c";
-import { $, show, message, esc, api, startGate, logout } from "./assess-auth.js?v=20261117c";
+import { SECTIONS, INTRO, INSTRUCTIONS, RELATIONSHIP_QUESTION, LETTER } from "./assess-data.js?v=20261117d";
+import { $, show, message, esc, api, startGate, logout } from "./assess-auth.js?v=20261117d";
 
 const STEPS = SECTIONS.length + 3; // 0 intro, 1 about you, 2..14 sections, 15 letter + consent
 let user = null, id = null, rec = null, saveTimer = null;
@@ -11,7 +11,10 @@ const params = new URLSearchParams(location.search);
 const sessionId = params.get("session_id");
 
 (async function init() {
-  let wantEmail = "";
+  // A link from one of our emails names the account it is for (?for=email), so a browser
+  // signed in as someone else is asked to sign in with the right email.
+  let wantEmail = params.get("for") || "";
+  if (params.get("for") && !sessionId) history.replaceState(null, "", "/assessment-start.html");
   if (sessionId) {
     try {
       const r = await fetch("/api/assess/session?id=" + encodeURIComponent(sessionId));
