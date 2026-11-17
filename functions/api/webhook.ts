@@ -56,11 +56,21 @@ export async function onRequest(context: any): Promise<Response> {
     // Handle checkout.session.completed event
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
+
+      // Skip Payment Link sessions (these are for products other than the course, e.g., assessments)
+      if (session.payment_link) {
+        console.log('Skipping Payment Link session:', session.id);
+        return new Response(
+          JSON.stringify({ received: true, event: event.type }),
+          { status: 200, headers: corsHeaders }
+        );
+      }
+
       console.log('Checkout session completed:', session.id);
       console.log('Customer email:', session.customer_email);
       console.log('Payment status:', session.payment_status);
 
-      // Log the event for audit trail
+      // Log the event for audit trail (course sessions only)
       if (session.customer_email) {
         try {
           await fetch('https://capitalistbuddha.ca/api/email-log', {

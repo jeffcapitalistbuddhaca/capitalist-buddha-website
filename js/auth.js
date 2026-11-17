@@ -63,16 +63,18 @@ onAuthStateChanged(auth, async (user) => {
       console.error("Could not refresh login:", err);
     }
     let paid = true;
+    let opensOn = null;
     try {
       const t = await user.getIdToken();
       const r = await fetch(`/api/video/_status?token=${encodeURIComponent(t)}`);
-      if (r.ok) paid = (await r.json()).paid;
+      if (r.ok) { const st = await r.json(); paid = st.paid; opensOn = st.opensOn || null; }
     } catch (e) {}
     if (!paid) {
       courseOverview.style.display = "none";
       loginContainer.style.display = "block";
-      if (loginMessage) loginMessage.textContent =
-        "You're signed in with free access. Open the Free module tab, or enrol to unlock the full course.";
+      if (loginMessage) loginMessage.textContent = opensOn
+        ? "Thank you for enrolling. Your course opens on " + formatOpenDate(opensOn) + ". You will be able to watch the lessons from that day."
+        : "You're signed in with free access. Open the Free module tab, or enrol to unlock the full course.";
       return;
     }
     loginContainer.style.display = "none";
@@ -85,3 +87,9 @@ onAuthStateChanged(auth, async (user) => {
     if (list) list.innerHTML = "";
   }
 });
+
+// "2027-02-01" -> "February 1, 2027"
+function formatOpenDate(d) {
+  const [y, m, day] = d.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, day)).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
+}
