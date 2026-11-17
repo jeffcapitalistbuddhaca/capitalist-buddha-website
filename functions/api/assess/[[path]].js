@@ -31,7 +31,7 @@ export async function onRequest(context) {
   const url = new URL(request.url);
   const route = url.pathname.replace(/^\/api\/assess\/?/, "").replace(/\/$/, "");
   try {
-    if (route === "session" && request.method === "GET") return await sessionEmail(url, env);
+    if (route === "session" && request.method === "GET") return await sessionEmail(url, env, context);
 
     const user = await currentUser(request, env);
     if (!user) return json({ error: "login" }, 401);
@@ -49,12 +49,29 @@ export async function onRequest(context) {
 
 // ---------- Routes ----------
 
-async function sessionEmail(url, env) {
+// Called when the buyer comes back from Stripe. Also sends them, once per purchase,
+// an email with the link to start or continue their assessment at any time.
+async function sessionEmail(url, env, context) {
   const id = String(url.searchParams.get("id") || "");
   if (!/^cs_[A-Za-z0-9_]+$/.test(id)) return json({}, 400);
   const res = await stripe(env, "/v1/checkout/sessions/" + id);
   if (!res || !isAssessmentPaid(res)) return json({}, 404);
-  return json({ email: (res.customer_details && res.customer_details.email) || "" });
+  const email = (res.customer_details && res.customer_details.email) || "";
+  const name = (res.customer_details && res.customer_details.name) || "";
+  const marker = PREFIX + "welcome/" + id;
+  if (email && !(await env.COURSE_VIDEOS.head(marker))) {
+    await env.COURSE_VIDEOS.put(marker, "sent");
+    const link = SITE + "/assessment-start.html";
+    context.waitUntil(sendEmail(env, email, name, "Your Consciousness Destabilization Risk Assessment: start or continue any time",
+      `<p>${name ? "Dear " + esc(name.split(" ")[0]) + "," : "Hello,"}</p>` +
+      `<p>Thank you for purchasing the full Consciousness Destabilization Risk Assessment.</p>` +
+      `<p>You can start, or continue where you left off, at any time and on any device:</p>` +
+      `<p><a href="${link}" style="display:inline-block;background:#c9a46a;color:#2f2a2c;padding:12px 26px;border-radius:999px;text-decoration:none;font-weight:bold">Start or continue my assessment</a></p>` +
+      `<p>Sign in with this email address (${esc(email)}). We will send you a one-time sign-in link. Your answers are saved as you go, and every question needs an answer. It takes about 15 to 20 minutes.</p>` +
+      `<p>When you submit, your personal report is ready straight away, and you can book your results review with Dr. Overall from the report.</p>` +
+      `<p>Warmly,<br>Dr. Jeffrey Overall</p>`).catch((e) => console.log("welcome email:", e && e.message)));
+  }
+  return json({ email });
 }
 
 async function state(user, env) {
