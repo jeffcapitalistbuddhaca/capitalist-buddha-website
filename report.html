@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=20261117">
     <style>
         * { box-sizing: border-box; }
         html, body { margin: 0; background: #f6f1ec; color: #2f2a2c; font-family: 'Crimson Pro', Georgia, serif; }
@@ -32,6 +33,9 @@
         .gate label { display: flex; gap: 8px; align-items: flex-start; text-align: left; font-size: 16px; margin: 12px 0; }
         .gate .go { background: #c9a46a; color: #2f2a2c; border: none; border-radius: 999px; padding: 12px 28px; font-size: 19px; font-weight: 600; font-family: inherit; cursor: pointer; }
         .gate .go:disabled { opacity: 0.6; }
+        .gate form { background: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
+        .gate label { font-weight: 400 !important; justify-content: flex-start !important; }
+        .gate label input { width: auto !important; margin: 5px 0 0 0 !important; flex: none !important; }
         .gate .trap { position: absolute; left: -9999px; }
         .gate .msg { margin-top: 12px; font-style: italic; }
         .gate .small { font-size: 15px; opacity: 0.8; margin-top: 12px; }
@@ -46,6 +50,12 @@
     </style>
 </head>
 <body oncontextmenu="return false;">
+    <div class="cb-bg" aria-hidden="true">
+        <img src="images/prayer-flags.png" alt="" class="cb-bg-flags">
+        <span class="cb-bg-emblem"></span>
+        <img src="images/botanical-left.png" alt="" class="cb-bg-leaf cb-bg-leaf-l">
+        <img src="images/botanical-right-2.png" alt="" class="cb-bg-leaf cb-bg-leaf-r">
+    </div>
     <main class="rp">
         <h1>The Psychedelic Renaissance 2026: Mental Health, Market Evolution, and the Next Frontier of the Global Psychedelic Industry</h1>
         <p class="by">Dr. Jeffrey Overall &middot; The Professor Inc.</p>
@@ -78,8 +88,21 @@
         <div class="prog"><div id="prog"></div></div>
         <p class="hint">Use the arrows or your keyboard. On a phone, swipe, and turn it sideways for a larger view.</p>
         </section>
-        <p class="foot">&copy; 2026 The Professor Inc. All rights reserved. &middot; <a href="/">capitalistbuddha.ca</a></p>
     </main>
-    <script type="module" src="js/report.js?v=20261116"></script>
+    <footer>
+        <img src="images/prayer-flags.png" alt="Prayer Flags" class="footer-prayer-flags">
+        <img src="images/botanical-footer-left.png" alt="Botanical" class="footer-botanical-left">
+        <img src="images/botanical-footer-right.png" alt="Botanical" class="footer-botanical-right">
+        <img src="images/emblem.png" alt="Capitalist Buddha" class="footer-emblem">
+        <div class="cb-social">
+            <a href="https://www.tiktok.com/@dr.jeffreyoverall" target="_blank" rel="noopener" aria-label="TikTok"><img src="images/social/tiktok.webp" alt="TikTok" width="32" height="32"></a>
+            <a href="https://www.instagram.com/dr.jeffreyoverall" target="_blank" rel="noopener" aria-label="Instagram"><img src="images/social/instagram.webp" alt="Instagram" width="32" height="32"></a>
+            <a href="https://www.linkedin.com/in/dr-jeffrey-overall-47a99b124/" target="_blank" rel="noopener" aria-label="LinkedIn"><img src="images/social/linkedin.webp" alt="LinkedIn" width="32" height="32"></a>
+            <a href="https://scholar.google.com/citations?user=VmGJH40AAAAJ&amp;hl=en" target="_blank" rel="noopener" aria-label="Google Scholar"><img src="images/social/scholar.webp" alt="Google Scholar" width="32" height="32"></a>
+        </div>
+        <p class="cb-foot-links"><a href="research.html">Research</a> &middot; <a href="terms.html">Terms &amp; refund policy</a> &middot; <a href="privacy.html">Privacy policy</a> &middot; <a href="/#contact">Contact</a></p>
+        <p>&copy; 2026 The Professor Inc. All rights reserved.</p>
+    </footer>
+    <script type="module" src="js/report.js?v=20261117"></script>
 </body>
 </html>
