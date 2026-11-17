@@ -10,6 +10,9 @@ import { jwtVerify, importX509 } from "jose";
 // Course access length after purchase (6 months, same as the website text).
 const ACCESS_DAYS = 180;
 
+// Course session start dates (YYYY-MM-DD), oldest first. Add each new session here.
+const SESSION_STARTS = ["2027-02-01"];
+
 // Google's public certificates for Firebase ID tokens (from Firebase's
 // "Verify ID tokens using a third-party JWT library" instructions).
 const GOOGLE_CERTS_URL =
@@ -40,8 +43,10 @@ export async function onRequestGet(context) {
   // ---- Status check used by the Free module tab: /api/video/_status ----
   if (url.pathname === "/api/video/_status") {
     let paid = isGuestEmail(user.email, env.GUEST_EMAILS);
+    let courseAccessObj = null;
     if (!paid && user.email_verified === true) {
-      try { paid = await hasActivePurchase(user.email, env.STRIPE_RESTRICTED_KEY); } catch (e) { paid = false; }
+      try { courseAccessObj = await hasActivePurchase(user.email, env.STRIPE_RESTRICTED_KEY); } catch (e) { courseAccessObj = { access: false }; }
+      paid = courseAccessObj.access;
     }
     const free = paid ? null : await freeAccess(user.email, env);
     return new Response(JSON.stringify({
@@ -62,14 +67,21 @@ export async function onRequestGet(context) {
     }
 
     // ---- 5. Check Stripe for a paid purchase in the last ACCESS_DAYS days ----
-    let paid;
+    let courseAccessObj;
     try {
-      paid = await hasActivePurchase(user.email, env.STRIPE_RESTRICTED_KEY);
+      courseAccessObj = await hasActivePurchase(user.email, env.STRIPE_RESTRICTED_KEY);
     } catch (err) {
       return new Response("Could not confirm your purchase. Please try again.", { status: 502 });
     }
 
-    if (!paid) {
+    if (!courseAccessObj.access) {
+      if (courseAccessObj.opensOn) {
+        return new Response(JSON.stringify({ error: "not_started", opensOn: courseAccessObj.opensOn }), {
+          status: 403,
+          headers: { "content-type": "application/json" }
+        });
+      }
+
       // Free trial: Module 7 only, for 30 days from sign-up
       let requested = "";
       try {
@@ -193,15 +205,19 @@ function isGuestEmail(email, guestList) {
     .includes(wanted);
 }
 
-// Returns true if Stripe has a completed, paid Checkout Session for this
-// email created in the last ACCESS_DAYS days. The email comparison ignores
-// capital letters, so "Jane@Example.com" at checkout matches "jane@example.com".
+// Returns an access object for Stripe Checkout Sessions matching this email.
+// Course access is 6 months (ACCESS_DAYS) starting from the session start date.
+// Payment Link sessions are skipped (they are for other products, not the course).
+// The email comparison ignores capital letters, so "Jane@Example.com" matches "jane@example.com".
 async function hasActivePurchase(email, stripeKey) {
   if (!stripeKey) throw new Error("STRIPE_RESTRICTED_KEY is not set");
   const wanted = email.trim().toLowerCase();
-  const cutoff = Math.floor(Date.now() / 1000) - ACCESS_DAYS * 24 * 60 * 60;
+  const now = Math.floor(Date.now() / 1000);
+  const cutoff = now - (ACCESS_DAYS + 400) * 24 * 60 * 60; // Extended window to catch old purchases before new sessions
 
   let startingAfter = null;
+  let earliestOpening = null;
+
   // Up to 10 pages of 100 = the last 1,000 completed checkouts.
   for (let page = 0; page < 10; page++) {
     const url = new URL("https://api.stripe.com/v1/checkout/sessions");
@@ -218,20 +234,108 @@ async function hasActivePurchase(email, stripeKey) {
     const list = await res.json();
     const sessions = Array.isArray(list.data) ? list.data : [];
 
-    const found = sessions.some(
-      (s) =>
-        s.payment_status === "paid" &&
-        typeof s.created === "number" &&
-        s.created >= cutoff &&
-        ((s.customer_details && s.customer_details.email) || "").trim().toLowerCase() === wanted
-    );
+    for (const s of sessions) {
+      // Skip if not paid, has payment_link (assessment, not course), or wrong mode
+      if (
+        s.payment_status !== "paid" ||
+        s.payment_link ||
+        (s.mode !== "payment" && s.mode !== "subscription")
+      ) {
+        continue;
+      }
 
-    if (found) return true;
-    if (!list.has_more || sessions.length === 0) return false;
+      // Check email match
+      const sessionEmail = ((s.customer_details && s.customer_details.email) || "").trim().toLowerCase();
+      if (sessionEmail !== wanted) {
+        continue;
+      }
+
+      // Session is valid: compute access window
+      const paid = s.created; // Unix timestamp in seconds
+      const accessStart = getAccessStart(paid);
+      const accessEnd = accessStart + ACCESS_DAYS * 24 * 60 * 60;
+
+      if (now >= accessStart && now < accessEnd) {
+        return { access: true };
+      }
+
+      if (now < accessStart) {
+        const startDate = new Date(accessStart * 1000);
+        const dateStr = startDate.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+        if (!earliestOpening || accessStart < new Date(earliestOpening).getTime() / 1000) {
+          earliestOpening = dateStr;
+        }
+      }
+    }
+
+    if (!list.has_more || sessions.length === 0) break;
     startingAfter = sessions[sessions.length - 1].id;
   }
 
-  return false;
+  if (earliestOpening) {
+    return { access: false, opensOn: earliestOpening };
+  }
+
+  return { access: false };
+}
+
+// Helper: determine when access starts for a purchase
+function getAccessStart(paidSeconds) {
+  // paidSeconds is the Unix timestamp when the payment was made
+  const paidDate = new Date(paidSeconds * 1000);
+
+  // Convert to Toronto time (UTC-5 or UTC-4 depending on DST)
+  // getUTCDate() is the date in UTC; adjust to Toronto 00:00
+  const torontoOffset = getTorontoOffset(paidDate);
+  const torontoMs = paidDate.getTime() + torontoOffset * 60 * 1000;
+  const torontoDate = new Date(torontoMs);
+
+  // Get the date at 00:00 Toronto time
+  const paymentDateInToronto = new Date(torontoDate.getFullYear(), torontoDate.getMonth(), torontoDate.getDate());
+  const paymentDateMs = paymentDateInToronto.getTime();
+
+  // Find the first SESSION_STARTS date that is >= payment date
+  for (const dateStr of SESSION_STARTS) {
+    const [year, month, day] = dateStr.split("-").map(Number);
+    const sessionDate = new Date(year, month - 1, day); // month is 0-indexed in Date
+
+    if (sessionDate.getTime() >= paymentDateMs) {
+      return Math.floor(sessionDate.getTime() / 1000);
+    }
+  }
+
+  // No future session found; use payment date
+  return Math.floor(paymentDateMs / 1000);
+}
+
+// Helper: get Toronto timezone offset in minutes (from UTC)
+function getTorontoOffset(date) {
+  // Create a date in US/Eastern timezone
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Toronto",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+
+  const parts = formatter.formatToParts(date);
+  const torontoTimeStr = parts
+    .filter((p) => p.type !== "literal")
+    .map((p) => p.value)
+    .join("");
+
+  const [year, month, day, hour, min, sec] = torontoTimeStr.match(/\d+/g).map(Number);
+  const torontoDate = new Date(year, month - 1, day, hour, min, sec);
+
+  return Math.round((date.getTime() - torontoDate.getTime()) / 60000);
 }
 
 // ---- Free module (Module 7) for 30 days after sign-up ----

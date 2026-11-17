@@ -144,7 +144,31 @@ function videoBlock(title, path) {
 function attachVideoSources(container, token) {
     container.querySelectorAll('video[data-video]').forEach((video) => {
         const errorText = video.parentElement.querySelector('.video-error');
-        video.src = videoUrl(video.dataset.video, token);
+        const url = videoUrl(video.dataset.video, token);
+
+        // First, check if the video is accessible (handle not_started, etc.)
+        fetch(url, { method: 'HEAD' }).then(async (res) => {
+            if (res.status === 403) {
+                try {
+                    const json = await res.json();
+                    if (json.error === 'not_started' && json.opensOn) {
+                        const dateStr = formatCourseOpenDate(json.opensOn);
+                        if (errorText) {
+                            errorText.innerHTML = `Thank you for enrolling. Your course opens on ${dateStr}. You will be able to watch the lessons from that day.`;
+                            errorText.style.display = 'block';
+                        }
+                        video.style.display = 'none';
+                        return;
+                    }
+                } catch (e) {}
+            }
+            // Otherwise, set the video normally
+            video.src = url;
+        }).catch(() => {
+            // If HEAD fails, fall back to setting src normally
+            video.src = url;
+        });
+
         let retried = false;
         video.addEventListener('error', async () => {
             if (retried) {
@@ -167,6 +191,14 @@ function attachVideoSources(container, token) {
             video.play().catch(() => {});
         });
     });
+}
+
+// Format opensOn date string (YYYY-MM-DD format from API) to display format
+function formatCourseOpenDate(dateStr) {
+    if (!dateStr) return 'soon';
+    const [year, month, day] = dateStr.split('-');
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
 // Build the module list. Called by js/auth.js after a successful login.
