@@ -78,7 +78,12 @@ export async function onRequestGet(context) {
       if (courseAccessObj.opensOn) {
         return new Response(JSON.stringify({ error: "not_started", opensOn: courseAccessObj.opensOn }), {
           status: 403,
-          headers: { "content-type": "application/json" }
+          headers: {
+            "content-type": "application/json",
+            "X-Access": "not_started",
+            "X-Opens-On": courseAccessObj.opensOn,
+            "Access-Control-Expose-Headers": "X-Access, X-Opens-On"
+          }
         });
       }
 

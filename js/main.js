@@ -147,8 +147,26 @@ function attachVideoSources(container, token) {
         const url = videoUrl(video.dataset.video, token);
 
         // First, check if the video is accessible (handle not_started, etc.)
-        fetch(url, { method: 'HEAD' }).then(async (res) => {
+        fetch(url, { method: 'GET', headers: { 'Range': 'bytes=0-0' } }).then(async (res) => {
+            // 200 or 206 (Partial Content) means access is granted
+            if (res.status === 200 || res.status === 206) {
+                video.src = url;
+                return;
+            }
             if (res.status === 403) {
+                // Check for not_started signal in headers or JSON body
+                const accessHeader = res.headers.get('X-Access');
+                const opensOnHeader = res.headers.get('X-Opens-On');
+                if (accessHeader === 'not_started' && opensOnHeader) {
+                    const dateStr = formatCourseOpenDate(opensOnHeader);
+                    if (errorText) {
+                        errorText.innerHTML = `Thank you for enrolling. Your course opens on ${dateStr}. You will be able to watch the lessons from that day.`;
+                        errorText.style.display = 'block';
+                    }
+                    video.style.display = 'none';
+                    return;
+                }
+                // Fall back to reading JSON body if headers not present
                 try {
                     const json = await res.json();
                     if (json.error === 'not_started' && json.opensOn) {
@@ -165,7 +183,7 @@ function attachVideoSources(container, token) {
             // Otherwise, set the video normally
             video.src = url;
         }).catch(() => {
-            // If HEAD fails, fall back to setting src normally
+            // If request fails, fall back to setting src normally
             video.src = url;
         });
 
