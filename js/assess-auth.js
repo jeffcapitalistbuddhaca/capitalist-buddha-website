@@ -75,11 +75,13 @@ export function startGate({ returnPath, wantEmail, onReady }) {
       await signInWithEmailLink(auth, email, location.href);
       store("cbAssessEmail", null);
       history.replaceState(null, "", returnPath);
+      return true;
     } catch (err) {
       show("s-signin");
       const msg = $("si-msg");
       msg.textContent = "This link has expired or was already used. Enter your email again for a new one.";
       msg.hidden = false;
+      return false;
     }
   }
 
@@ -87,17 +89,21 @@ export function startGate({ returnPath, wantEmail, onReady }) {
   if (isSignInWithEmailLink(auth, location.href)) {
     linking = true;
     const saved = read("cbAssessEmail");
-    if (saved) finish(saved).then(() => { linking = false; });
+    const done = (ok) => { linking = false; if (!ok) return; const u = auth.currentUser; if (u && u.emailVerified && !ready) { ready = true; onReady(u); } };
+    if (saved) finish(saved).then(done);
     else {
       show("s-confirm");
       $("cf-btn").addEventListener("click", () => {
         const v = $("cf-email").value.trim();
-        if (v) finish(v).then(() => { linking = false; });
+        if (v) finish(v).then(done);
       });
     }
   }
 
   onAuthStateChanged(auth, async (user) => {
+    // While an email sign-in link is being completed, ignore whoever was signed in before
+    // (for example someone else on a shared computer); continue once the link has signed in.
+    if (linking) return;
     if (user && user.emailVerified) {
       if (wanted && (user.email || "").toLowerCase() !== wanted) { await signOut(auth); return; }
       if (!ready) { ready = true; onReady(user); }
