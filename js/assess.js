@@ -39,6 +39,7 @@ async function load(u) {
     rec = Object.assign({ about: {}, answers: {}, rel: null, consent: null, step: 0 }, open.data || {});
     rec.about = rec.about || {}; rec.answers = rec.answers || {};
     render();
+    trapBack();
   } else if (done.length) {
     message("Your report is ready", "<p>You have completed your assessment.</p>" +
       done.map((a) => '<p><a class="go" href="assessment-report.html?id=' + encodeURIComponent(a.id) + '">See my report</a> <span class="fine">completed ' + esc(a.submittedOn || "") + "</span></p>").join(""));
@@ -51,6 +52,21 @@ async function load(u) {
   }
 }
 
+// The phone or browser Back button goes to the previous part instead of leaving the page.
+// (Leaves the page only from the first page.)
+function trapBack() {
+  try { history.replaceState({ fa: 0 }, ""); history.pushState({ fa: 1 }, ""); } catch (_) { return; }
+  window.addEventListener("popstate", (e) => {
+    if (!e.state || e.state.fa !== 0) return;
+    if (rec && rec.step > 0) {
+      rec.step--; save(true); render();
+      try { history.pushState({ fa: 1 }, ""); } catch (_) {}
+    } else {
+      history.back();
+    }
+  });
+}
+
 // ---------- 3. Saving as they go ----------
 function save(now) {
   clearTimeout(saveTimer);
@@ -59,7 +75,7 @@ function save(now) {
   saveTimer = setTimeout(go, 1200);
 }
 
-// ---------- 4. Screens ----------
+// ---------- 4. Pages of the questionnaire ----------
 const SAVE_NOTE = "Your answers are saved as you go, so you can stop at any time and pick up where you left off, on any device. Every question needs an answer before you can continue.";
 
 function bar() {

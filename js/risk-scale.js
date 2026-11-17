@@ -1,4 +1,4 @@
-// js/risk-scale.js - free short Consciousness Destabilization Risk Screen.
+// js/risk-scale.js - free short Consciousness Destabilization Risk Assessment.
 // Scoring runs in the browser (js/risk-data.js). Only the name, email, band, top areas, segment and source are sent
 // to /api/risk-signup (Brevo and the result email). Individual answers are never sent or stored.
 import { Q, D, BANDS, scoreRisk } from "./risk-data.js";
@@ -21,7 +21,7 @@ import { Q, D, BANDS, scoreRisk } from "./risk-data.js";
     $("q-area").innerHTML = '<div class="card"><div class="qnum">Question ' + (idx + 1) + " of " + Q.length + '</div><div class="qtext">' + q.t + "</div>" +
       (q.note ? '<p class="fine" style="margin-top:-6px">' + q.note + "</p>" : "") + scaleHtml(idx) +
       '<div class="nav"><button type="button" class="linkbtn" id="qback"' + (idx === 0 ? " hidden" : "") + '>&larr; Back</button><span></span></div></div>';
-    if ($("qback")) $("qback").onclick = function () { idx--; renderOne(); };
+    if ($("qback")) $("qback").onclick = function () { history.back(); };
   }
   function renderAll() {
     var h = '<div class="card q-all">';
@@ -35,13 +35,28 @@ import { Q, D, BANDS, scoreRisk } from "./risk-data.js";
     var i = +b.getAttribute("data-q"); answers[i] = +b.getAttribute("data-v"); progress();
     if (MODE === "one") {
       renderOne();
-      setTimeout(function () { if (idx < Q.length - 1) { idx++; renderOne(); } else { show("s-email"); } }, 250);
+      setTimeout(function () { if (idx < Q.length - 1) { go({ s: "q", i: idx + 1 }); } else { go({ s: "email" }); } }, 250);
     } else {
       b.parentNode.querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x === b); });
       $("qnext").disabled = done() < Q.length;
     }
   });
-  $("start").onclick = function () { show("s-questions"); MODE === "one" ? renderOne() : renderAll(); progress(); };
+  $("start").onclick = function () {
+    if (MODE === "one") { go({ s: "q", i: 0 }); } else { show("s-questions"); renderAll(); progress(); }
+  };
+
+  // The phone or browser Back button moves back one step inside the assessment instead of leaving the page.
+  var lastResult = null;
+  function apply(st) {
+    st = st || { s: "intro" };
+    if (st.s === "q") { idx = Math.max(0, Math.min(Q.length - 1, st.i || 0)); show("s-questions"); renderOne(); progress(); }
+    else if (st.s === "email") { show("s-email"); }
+    else if (st.s === "result" && lastResult) { renderResult(lastResult); }
+    else { show("s-intro"); }
+  }
+  function go(st) { try { history.pushState(st, ""); } catch (_) {} apply(st); }
+  try { history.replaceState({ s: "intro" }, ""); } catch (_) {}
+  window.addEventListener("popstate", function (e) { apply(e.state); });
 
   function score() { return scoreRisk(answers); }
   function source() {
@@ -72,6 +87,6 @@ import { Q, D, BANDS, scoreRisk } from "./risk-data.js";
     fetch("/api/risk-signup", {
       method: "POST", headers: { "content-type": "application/json" },
       body: JSON.stringify({ name: name, email: email, consent: true, band: r.band, tops: r.tops, segment: $("rk-seg").value, source: source(), website: "" })
-    }).catch(function () {}).then(function () { renderResult(r); });
+    }).catch(function () {}).then(function () { lastResult = r; try { history.replaceState({ s: "result" }, ""); } catch (_) {} renderResult(r); });
   });
 })();

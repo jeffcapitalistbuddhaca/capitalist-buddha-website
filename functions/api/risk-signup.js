@@ -1,4 +1,4 @@
-// functions/api/risk-signup.js - free Risk Screen: adds the person to Brevo and emails them their result.
+// functions/api/risk-signup.js - free Risk Assessment: adds the person to Brevo and emails them their result.
 // POST /api/risk-signup  JSON: { name, email, consent: true, band, tops: [area keys], segment, source, website }
 //   "website" is a hidden trap field: real people leave it empty, spam bots fill it.
 // Individual answers are never sent here or stored.
@@ -57,7 +57,7 @@ export async function onRequestPost(context) {
   return json({ ok: true });
 }
 
-// The result email matches the result screen.
+// The result email matches the result page.
 async function sendResult(env, email, name, band, tops) {
   const key = env["Brevo API Key"], sender = env.CONTACT_SENDER_EMAIL;
   if (!key || !sender) { console.log("risk-signup: Brevo API Key or CONTACT_SENDER_EMAIL missing"); return; }
@@ -69,7 +69,7 @@ async function sendResult(env, email, name, band, tops) {
   const html =
     `<div style="max-width:600px;margin:0 auto;font-family:Georgia,'Times New Roman',serif;background:#f7f2ee;padding:24px">` +
     `<p style="${p}">${name ? "Dear " + esc(name) + "," : "Hello,"}</p>` +
-    `<p style="${p}">Thank you for taking the free Consciousness Destabilization Risk Screen. Here is your result.</p>` +
+    `<p style="${p}">Thank you for taking the free Consciousness Destabilization Risk Assessment. Here is your result.</p>` +
     `<div style="background:${colour};color:#fff;border-radius:14px;padding:22px;text-align:center;margin:16px 0">` +
     `<div style="font-size:13px;letter-spacing:2px;text-transform:uppercase">Your overall result</div>` +
     `<div style="font-size:30px;font-weight:bold;margin-top:4px">${esc(B[0])}</div></div>` +
@@ -79,12 +79,12 @@ async function sendResult(env, email, name, band, tops) {
     `<div style="${card}"><div style="${h2}">What this suggests</div><p style="${p};margin:0">${esc(B[2])}</p></div>` +
     `<p style="text-align:center;margin:24px 0"><a href="${SITE}/assessment.html?src=risk-email" style="display:inline-block;background:#c9a46a;color:#2f2a2c;padding:13px 28px;border-radius:999px;text-decoration:none;font-weight:bold;font-size:18px">Take the full assessment ($150)</a></p>` +
     `<p style="${p};text-align:center;font-size:15px">The full assessment covers each area in depth and includes a personal report and a results review with Dr. Overall.</p>` +
-    `<p style="font-size:13px;line-height:1.5;color:#6d5a6a">This screen is not diagnostic and does not predict outcomes with certainty. It is a short version of the full scale. It is not medical, psychological or legal advice.</p>` +
+    `<p style="font-size:13px;line-height:1.5;color:#6d5a6a">This free assessment is not diagnostic and does not predict outcomes with certainty. It is a short version of the full scale. It is not medical, psychological or legal advice.</p>` +
     `<p style="font-size:13px;line-height:1.5;color:#6d5a6a">Dr. Jeffrey Overall &middot; The Professor Inc. &middot; <a href="${SITE}/privacy.html" style="color:#6d5a6a">Privacy policy</a></p></div>`;
   const r = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: { "api-key": key, "content-type": "application/json", accept: "application/json" },
-    body: JSON.stringify({ sender: { name: "Dr. Jeffrey Overall", email: sender }, to: [{ email, name: name || email }], subject: "Your Consciousness Destabilization Risk Screen result", htmlContent: html }),
+    body: JSON.stringify({ sender: { name: "Dr. Jeffrey Overall", email: sender }, to: [{ email, name: name || email }], subject: "Your free Consciousness Destabilization Risk Assessment result", htmlContent: html }),
   });
   if (!r.ok) console.log("Brevo risk email:", r.status, await r.text());
 }

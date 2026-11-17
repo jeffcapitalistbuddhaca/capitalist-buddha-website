@@ -1,5 +1,5 @@
-// js/risk-data.js - free 12-item Consciousness Destabilization Risk Screen: items, result text and scoring.
-// Used by the screen (js/risk-scale.js) and by the result email (functions/api/risk-signup.js).
+// js/risk-data.js - free 12-item Consciousness Destabilization Risk Assessment: items, result text and scoring.
+// Used by the free assessment (js/risk-scale.js) and by the result email (functions/api/risk-signup.js).
 export const Q = [
   { d: "rigidity",  t: "There is more than one valid way to understand life.", r: true },
   { d: "structure", t: "Uncertain situations make me uneasy." },
