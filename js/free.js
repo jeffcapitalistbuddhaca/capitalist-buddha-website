@@ -105,6 +105,13 @@ onAuthStateChanged(auth, async (user) => {
     area.innerHTML = `<p class="cb-free-note">You're enrolled in the full course. Open <strong>Login to Course</strong> to see all modules.</p>`;
     return;
   }
+  // Signed in (e.g. from the course, report or assessment) but never started the free module:
+  // offer the sign-up form instead of saying the free days have ended.
+  if (!status.free && !status.started) {
+    signup.style.display = "block";
+    area.innerHTML = `<p class="cb-free-note">You haven't started your 30 free days yet. Enter your email below to begin.</p>`;
+    return;
+  }
   if (!status.free) {
     signup.style.display = "none";
     area.innerHTML = `<p class="cb-free-note">Your 30 days of free access have ended. We'd love to have you in the full course.</p>`;

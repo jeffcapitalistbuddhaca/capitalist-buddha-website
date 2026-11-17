@@ -54,6 +54,7 @@ export async function onRequestGet(context) {
       opensOn: (courseAccessObj && courseAccessObj.opensOn) || null,
       free: !!(free && free.ok),
       daysLeft: free ? free.daysLeft : 0,
+      started: !!(free && free.started),
     }), { headers: { "content-type": "application/json", "cache-control": "no-store" } });
   }
 
@@ -317,11 +318,11 @@ async function freeAccess(email, env) {
     const hash = await crypto.subtle.digest("SHA-256", bytes);
     const hex = [...new Uint8Array(hash)].map((b) => b.toString(16).padStart(2, "0")).join("");
     const obj = await env.COURSE_VIDEOS.get(`_free-access/${hex}.json`);
-    if (!obj) return { ok: false, daysLeft: 0 };
+    if (!obj) return { ok: false, daysLeft: 0, started: false };
     const rec = await obj.json();
     const used = (Date.now() - Date.parse(rec.started)) / 86400000;
     const daysLeft = Math.max(0, Math.ceil(FREE_DAYS - used));
-    return { ok: daysLeft > 0, daysLeft };
+    return { ok: daysLeft > 0, daysLeft, started: true };
   } catch (e) {
     return { ok: false, daysLeft: 0 };
   }
