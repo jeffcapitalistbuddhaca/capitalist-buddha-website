@@ -5,7 +5,7 @@
 //
 // Cloudflare settings used (all already exist): BREVO_CONTACTS_KEY (or "Brevo API Key"), "Brevo API Key", CONTACT_SENDER_EMAIL.
 
-import { D, BANDS } from "../../js/risk-data.js";
+import { D, BANDS, FULL_ADDS, HIGH_NOTE } from "../../js/risk-data.js";
 
 const RISK_LIST_ID = 5;   // Brevo list "Risk screen"
 const SITE = "https://capitalistbuddha.ca";
@@ -74,11 +74,11 @@ async function sendResult(env, email, name, band, tops) {
     `<div style="font-size:13px;letter-spacing:2px;text-transform:uppercase">Your overall result</div>` +
     `<div style="font-size:30px;font-weight:bold;margin-top:4px">${esc(B[0])}</div></div>` +
     `<p style="${p}">${esc(B[1])}</p>` +
-    (tops.length ? `<div style="${card}"><div style="${h2}">The areas that stood out</div>` +
-      tops.map((k) => `<p style="${p}"><b style="color:#3d696a">${esc(D[k][0])}</b><br>${esc(D[k][1])}</p>`).join("") + `</div>` : "") +
-    `<div style="${card}"><div style="${h2}">What this suggests</div><p style="${p};margin:0">${esc(B[2])}</p></div>` +
-    `<p style="text-align:center;margin:24px 0"><a href="${SITE}/assessment.html?src=risk-email" style="display:inline-block;background:#c9a46a;color:#2f2a2c;padding:13px 28px;border-radius:999px;text-decoration:none;font-weight:bold;font-size:18px">Take the full assessment ($150)</a></p>` +
-    `<p style="${p};text-align:center;font-size:15px">The full assessment covers each area in depth and includes a personal report and a results review with Dr. Overall.</p>` +
+    `<p style="${p};font-size:15px;font-style:italic;color:#6d5a6a">This is a first indication based on 12 questions. Your result on the full assessment may be different.</p>` +
+    (band === "high" ? `<p style="${p}">${esc(HIGH_NOTE)}</p>` : "") +
+    `<div style="${card}"><div style="${h2}">What the full assessment adds</div><ul style="margin:0;padding-left:20px">` +
+      FULL_ADDS.map((t) => `<li style="margin:0 0 6px;font-size:17px;line-height:1.5;color:#2f2a2c">${esc(t)}</li>`).join("") + `</ul></div>` +
+    `<p style="text-align:center;margin:24px 0"><a href="${SITE}/assessment.html?src=risk-email" style="display:inline-block;background:#c9a46a;color:#2f2a2c;padding:13px 28px;border-radius:999px;text-decoration:none;font-weight:bold;font-size:18px">Take the full assessment ($150 USD)</a></p>` +
     `<p style="font-size:13px;line-height:1.5;color:#6d5a6a">This free assessment is not diagnostic and does not predict outcomes with certainty. It is a short version of the full scale. It is not medical, psychological or legal advice.</p>` +
     `<p style="font-size:13px;line-height:1.5;color:#6d5a6a">Dr. Jeffrey Overall &middot; The Professor Inc. &middot; <a href="${SITE}/privacy.html" style="color:#6d5a6a">Privacy policy</a></p></div>`;
   const r = await fetch("https://api.brevo.com/v3/smtp/email", {

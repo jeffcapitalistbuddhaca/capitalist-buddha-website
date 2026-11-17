@@ -27,6 +27,16 @@ export const D = {
   trust:     ["Difficulty letting go", "Letting go of control is hard for you, and intense inner experiences often ask for exactly that."],
   support:   ["Limited support", "You have few people to talk with about unusual inner experiences, which can make integration harder and lonelier."]
 };
+// What the full assessment adds (shown on the free result page and in the result email)
+export const FULL_ADDS = [
+  "A far more accurate result, from every question in the scale, across all thirteen areas of your life",
+  "Which areas are driving your result, and what each one means for you",
+  "Practice guidance matched to your result",
+  "A personal report to keep, and a one-on-one results review with Dr. Overall"
+];
+// Shown only with a Higher result
+export const HIGH_NOTE = "Go gently, and consider talking with a qualified professional before intense practices.";
+
 export const BANDS = {
   low: ["Lower likelihood", "Your answers suggest a relatively low likelihood of destabilization in response to consciousness-expanding practices. This does not make any practice risk-free, but it widens the range of approaches you could reasonably consider.",
     "Mindfulness, yoga and structured breathwork are the most evidence-supported starting points. More intensive approaches, including psychedelics, may also be appropriate, but only in properly screened and supported settings that include preparation and integration."],

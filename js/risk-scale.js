@@ -1,7 +1,7 @@
 // js/risk-scale.js - free short Consciousness Destabilization Risk Assessment.
 // Scoring runs in the browser (js/risk-data.js). Only the name, email, band, top areas, segment and source are sent
 // to /api/risk-signup (Brevo and the result email). Individual answers are never sent or stored.
-import { Q, D, BANDS, scoreRisk } from "./risk-data.js?v=20261117e";
+import { Q, D, BANDS, FULL_ADDS, HIGH_NOTE, scoreRisk } from "./risk-data.js?v=20261117g";
 (function () {
   var MODE = document.body.getAttribute("data-mode") || "one"; // "one" = one question per screen; "all" = all on one page
   // r: true = reverse-scored (agreeing means LOWER risk)
@@ -69,11 +69,10 @@ import { Q, D, BANDS, scoreRisk } from "./risk-data.js?v=20261117e";
   function renderResult(r) {
     var B = BANDS[r.band];
     $("band").className = "band " + r.band; $("band-name").textContent = B[0];
-    $("band-text").textContent = B[1]; $("guide").textContent = B[2];
-    if (r.tops.length) {
-      $("tops").innerHTML = r.tops.map(function (d) { return "<li><b>" + D[d][0] + "</b>" + D[d][1] + "</li>"; }).join("");
-      $("tops-card").hidden = false;
-    } else { $("tops-card").hidden = true; }
+    $("band-text").textContent = B[1];
+    $("safety").textContent = r.band === "high" ? HIGH_NOTE : "";
+    $("safety").hidden = r.band !== "high";
+    $("adds").innerHTML = FULL_ADDS.map(function (t) { return "<li>" + t + "</li>"; }).join("");
     show("s-result");
   }
   $("rk-form").addEventListener("submit", function (e) {
