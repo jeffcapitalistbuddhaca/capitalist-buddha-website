@@ -1,7 +1,7 @@
 // js/assess.js - Full assessment: after payment, sign in, then the questionnaire (saved as you go).
 // Answers are saved to the server (/api/assess/save) and scored there when submitted.
-import { SECTIONS, INTRO, INSTRUCTIONS, RELATIONSHIP_QUESTION, LETTER } from "./assess-data.js?v=20261117d";
-import { $, show, message, esc, api, startGate, logout } from "./assess-auth.js?v=20261117d";
+import { SECTIONS, INTRO, INSTRUCTIONS, RELATIONSHIP_QUESTION, LETTER } from "./assess-data.js?v=20261117e";
+import { $, show, message, esc, api, startGate, logout } from "./assess-auth.js?v=20261117e";
 
 const STEPS = SECTIONS.length + 3; // 0 intro, 1 about you, 2..14 sections, 15 letter + consent
 let user = null, id = null, rec = null, saveTimer = null;
@@ -16,6 +16,9 @@ const sessionId = params.get("session_id");
   let wantEmail = params.get("for") || "";
   if (params.get("for") && !sessionId) history.replaceState(null, "", "/assessment-start.html");
   if (sessionId) {
+    // Just paid: thank them on the sign-in step
+    document.getElementById("si-title").textContent = "Thank you. One more step.";
+    document.getElementById("si-text").textContent = "To keep your answers and report private, we\u2019ll send a one-time sign-in link to the email you paid with. Open it on this device to start your assessment. You can use the same link method any time to come back.";
     try {
       const r = await fetch("/api/assess/session?id=" + encodeURIComponent(sessionId));
       if (r.ok) wantEmail = (await r.json()).email || "";

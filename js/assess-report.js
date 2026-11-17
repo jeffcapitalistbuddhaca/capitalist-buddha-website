@@ -1,6 +1,6 @@
 // js/assess-report.js - shows a completed Full Assessment report to its owner (or to Dr. Overall).
-import { SECTIONS, DOMAIN_TEXT, OVERALL_TEXT, GUIDANCE, REFERENCES, NOTICE, BAND_LABEL } from "./assess-data.js?v=20261117d";
-import { $, show, message, esc, api, startGate } from "./assess-auth.js?v=20261117d";
+import { SECTIONS, DOMAIN_TEXT, OVERALL_TEXT, GUIDANCE, REFERENCES, NOTICE, BAND_LABEL } from "./assess-data.js?v=20261117e";
+import { $, show, message, esc, api, startGate } from "./assess-auth.js?v=20261117e";
 
 const CALENDLY = "https://calendly.com/jeff-capitalistbuddha/30min";
 const qs = new URLSearchParams(location.search);
