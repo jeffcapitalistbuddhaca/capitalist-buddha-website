@@ -17,8 +17,8 @@ import { jwtVerify, importX509 } from "jose";
 import { SECTIONS, scoreAssessment, BAND_LABEL } from "../../../js/assess-data.js";
 
 // ---- Settings (not secret) ----
-const PAYMENT_LINK_ID = "plink_REPLACE_ME";   // the assessment Payment Link in Stripe
-const BUYERS_LIST_ID = 0;                     // Brevo list "Assessment buyers" (0 = skip)
+const PAYMENT_LINK_ID = "plink_1Ucq6GKLvdoBDUk6Mz2ujDZ1";   // the assessment Payment Link in Stripe
+const BUYERS_LIST_ID = 6;                     // Brevo list "Assessment buyers"
 const ADMIN_EMAIL = "jeff@capitalistbuddha.ca"; // can open every report; gets an email for each one
 const SITE = "https://capitalistbuddha.ca";
 

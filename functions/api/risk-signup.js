@@ -7,7 +7,7 @@
 
 import { D, BANDS } from "../../js/risk-data.js";
 
-const RISK_LIST_ID = 0;   // Brevo list "Risk screen" (0 = skip adding to a list)
+const RISK_LIST_ID = 5;   // Brevo list "Risk screen"
 const SITE = "https://capitalistbuddha.ca";
 const SEGMENTS = ["exploring", "upheaval", "rebuilding"];
 
@@ -33,12 +33,18 @@ export async function onRequestPost(context) {
     const attributes = { RISK_BAND: band, TOP_AREAS: tops.map((k) => D[k][0]).join(", "), SOURCE: source };
     if (segment) attributes.SEGMENT = segment;
     if (name) attributes.FIRSTNAME = name;
-    work.push(fetch("https://api.brevo.com/v3/contacts", {
-      method: "POST",
-      headers: { "api-key": ckey, "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify({ email, listIds: [RISK_LIST_ID], updateEnabled: true, attributes }),
-    }).then(async (r) => {
-      if (!r.ok) console.log("Brevo risk contact:", r.status, await r.text());
+    const headers = { "api-key": ckey, "content-type": "application/json", accept: "application/json" };
+    const create = (attrs) => fetch("https://api.brevo.com/v3/contacts", {
+      method: "POST", headers,
+      body: JSON.stringify({ email, listIds: [RISK_LIST_ID], updateEnabled: true, attributes: attrs }),
+    });
+    work.push(create(attributes).then(async (r) => {
+      if (!r.ok) {
+        console.log("Brevo risk contact:", r.status, await r.text());
+        // If the RISK_BAND / TOP_AREAS / SEGMENT fields do not exist in Brevo, save the contact without them.
+        const r2 = await create({ SOURCE: source });
+        if (!r2.ok) console.log("Brevo risk contact retry:", r2.status, await r2.text());
+      }
       // Make sure an existing contact is also added to the list
       await fetch(`https://api.brevo.com/v3/contacts/lists/${RISK_LIST_ID}/contacts/add`, {
         method: "POST",

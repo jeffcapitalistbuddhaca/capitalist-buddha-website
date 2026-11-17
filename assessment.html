@@ -28,7 +28,7 @@
                 <li>Your personal report: your overall likelihood, a profile of all thirteen areas, and practice guidance for your result</li>
                 <li>A results review with Dr. Overall</li>
             </ul>
-            <p style="text-align:center;margin:18px 0 6px"><a class="go" id="fa-buy" href="https://buy.stripe.com/REPLACE_ME">Get the full assessment</a></p>
+            <p style="text-align:center;margin:18px 0 6px"><a class="go" id="fa-buy" href="https://buy.stripe.com/7sYeVefnw7pD8lFdDt9Zm00">Get the full assessment</a></p>
             <p class="fine" style="text-align:center">$150 USD plus applicable tax, paid securely with Stripe.</p>
         </div>
         <div class="card fine"><strong>Please read first.</strong> This assessment is not diagnostic, does not predict outcomes with certainty, and does not determine whether any practice is safe or suitable for you. It is not medical, psychological or legal advice. See our <a href="terms.html">terms and refund policy</a>.</div>
@@ -52,7 +52,7 @@
 (function () {
   try {
     var e = localStorage.getItem("cbRiskEmail"), a = document.getElementById("fa-buy");
-    if (e && a.href.indexOf("REPLACE_ME") < 0) a.href += (a.href.indexOf("?") < 0 ? "?" : "&") + "prefilled_email=" + encodeURIComponent(e);
+    if (e && a.href.indexOf("buy.stripe.com") >= 0) a.href += (a.href.indexOf("?") < 0 ? "?" : "&") + "prefilled_email=" + encodeURIComponent(e);
   } catch (_) {}
 })();
 </script>
