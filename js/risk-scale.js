@@ -1,7 +1,7 @@
 // js/risk-scale.js - free short Consciousness Destabilization Risk Assessment.
 // Scoring runs in the browser (js/risk-data.js). Only the name, email, band, top areas, segment and source are sent
 // to /api/risk-signup (Brevo and the result email). Individual answers are never sent or stored.
-import { Q, D, BANDS, scoreRisk } from "./risk-data.js?v=20261117c";
+import { Q, D, BANDS, scoreRisk } from "./risk-data.js?v=20261117d";
 (function () {
   var MODE = document.body.getAttribute("data-mode") || "one"; // "one" = one question per screen; "all" = all on one page
   // r: true = reverse-scored (agreeing means LOWER risk)

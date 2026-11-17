@@ -1,12 +1,16 @@
 // js/assess-report.js - shows a completed Full Assessment report to its owner (or to Dr. Overall).
-import { SECTIONS, DOMAIN_TEXT, OVERALL_TEXT, GUIDANCE, REFERENCES, NOTICE, BAND_LABEL } from "./assess-data.js?v=20261117c";
-import { $, show, message, esc, api, startGate } from "./assess-auth.js?v=20261117c";
+import { SECTIONS, DOMAIN_TEXT, OVERALL_TEXT, GUIDANCE, REFERENCES, NOTICE, BAND_LABEL } from "./assess-data.js?v=20261117d";
+import { $, show, message, esc, api, startGate } from "./assess-auth.js?v=20261117d";
 
 const CALENDLY = "https://calendly.com/jeff-capitalistbuddha/30min";
-const id = new URLSearchParams(location.search).get("id") || "";
+const qs = new URLSearchParams(location.search);
+const id = qs.get("id") || "";
 const here = "/assessment-report.html" + (id ? "?id=" + encodeURIComponent(id) : "");
+// Links in our emails name the account (?for=email). Dr. Overall's admin link has no "for".
+const wantEmail = qs.get("for") || "";
+if (wantEmail) history.replaceState(null, "", here);
 
-startGate({ returnPath: here, onReady: load });
+startGate({ returnPath: here, wantEmail, onReady: load });
 
 async function load(user) {
   message("One moment…", "<p>Loading your report.</p>");

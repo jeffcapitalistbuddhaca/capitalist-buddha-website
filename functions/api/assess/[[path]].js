@@ -61,7 +61,7 @@ async function sessionEmail(url, env, context) {
   const marker = PREFIX + "welcome/" + id;
   if (email && !(await env.COURSE_VIDEOS.head(marker))) {
     await env.COURSE_VIDEOS.put(marker, "sent");
-    const link = SITE + "/assessment-start.html";
+    const link = SITE + "/assessment-start.html?for=" + encodeURIComponent(email);
     context.waitUntil(sendEmail(env, email, name, "Your Consciousness Destabilization Risk Assessment: start or continue any time",
       `<p>${name ? "Dear " + esc(name.split(" ")[0]) + "," : "Hello,"}</p>` +
       `<p>Thank you for purchasing the full Consciousness Destabilization Risk Assessment.</p>` +
@@ -125,11 +125,12 @@ async function submit(user, b, env, context) {
   await putRecord(env, rec);
 
   const link = SITE + "/assessment-report.html?id=" + encodeURIComponent(rec.id);
+  const userLink = link + "&for=" + encodeURIComponent(rec.email);
   const band = BAND_LABEL[rec.report.overall.band];
   context.waitUntil(Promise.all([
     sendEmail(env, rec.email, a.name, "Your Consciousness Destabilization Risk report is ready",
       `<p>Dear ${esc(a.name)},</p><p>Thank you for completing the full Consciousness Destabilization Risk Assessment. Your personal report is ready.</p>` +
-      `<p><a href="${link}" style="display:inline-block;background:#c9a46a;color:#2f2a2c;padding:12px 26px;border-radius:999px;text-decoration:none;font-weight:bold">See my report</a></p>` +
+      `<p><a href="${userLink}" style="display:inline-block;background:#c9a46a;color:#2f2a2c;padding:12px 26px;border-radius:999px;text-decoration:none;font-weight:bold">See my report</a></p>` +
       `<p>At the end of your report you can book your results review with Dr. Overall.</p>` +
       `<p>To open the report, sign in with this email address (${esc(rec.email)}). We will send you a one-time sign-in link.</p>` +
       `<p>Warmly,<br>Dr. Jeffrey Overall</p><p style="font-size:12px;color:#777">This report is not diagnostic and is not medical, psychological or legal advice.</p>`),
