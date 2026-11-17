@@ -1,7 +1,7 @@
 // js/assess.js - Full assessment: after payment, sign in, then the questionnaire (saved as you go).
 // Answers are saved to the server (/api/assess/save) and scored there when submitted.
-import { SECTIONS, INTRO, INSTRUCTIONS, RELATIONSHIP_QUESTION, LETTER } from "./assess-data.js";
-import { $, show, message, esc, api, startGate, logout } from "./assess-auth.js";
+import { SECTIONS, INTRO, INSTRUCTIONS, RELATIONSHIP_QUESTION, LETTER } from "./assess-data.js?v=20261117c";
+import { $, show, message, esc, api, startGate, logout } from "./assess-auth.js?v=20261117c";
 
 const STEPS = SECTIONS.length + 3; // 0 intro, 1 about you, 2..14 sections, 15 letter + consent
 let user = null, id = null, rec = null, saveTimer = null;
