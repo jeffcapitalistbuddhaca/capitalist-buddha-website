@@ -1,0 +1,33 @@
+/* css/assess.css - full assessment pages (assessment, assessment-start, assessment-report) */
+
+.fa{max-width:820px;margin:0 auto;padding:12vh 18px 30px;position:relative;z-index:1;font-size:19px;line-height:1.6}
+.fa h1{font-family:'Playfair Display',Georgia,serif;color:#967ca0;font-size:36px;line-height:1.2;margin:0 0 10px}
+.fa h2{font-family:'Playfair Display',Georgia,serif;color:#3d696a;font-size:25px;margin:0 0 10px}
+.card{background:#f4ecf1;border-radius:16px;padding:22px;margin:18px 0}
+.go{display:inline-block;background:#c9a46a;color:#2f2a2c!important;border:none;border-radius:999px;padding:13px 30px;font-size:20px;font-weight:600;text-decoration:none;font-family:inherit}
+.ghost{display:inline-block;border:2px solid #967ca0;color:#967ca0!important;border-radius:999px;padding:10px 24px;font-size:18px;font-weight:600;text-decoration:none}
+.fine{font-size:15px;opacity:.85;line-height:1.5}
+.list li{margin-bottom:6px}
+.prog{height:6px;background:#e6dbe3;border-radius:6px;overflow:hidden;margin:6px 0 4px}.prog div{height:100%;background:#967ca0}
+.q{border-bottom:1px solid #e6dbe3;padding:14px 0}.q p{margin:0 0 10px;font-weight:600}
+.scale{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;max-width:460px}.scale button{aspect-ratio:1;border-radius:50%;border:2px solid #967ca0;background:#fff;color:#2f2a2c;font-size:19px;font-weight:600;font-family:inherit;cursor:pointer;padding:0}.scale button.on{background:#967ca0;color:#fff}
+.ends{max-width:460px;display:flex;justify-content:space-between;font-size:14px;opacity:.8;margin-top:4px}
+.band{text-align:center;padding:24px;border-radius:16px;color:#fff;background:#967ca0}.band small{display:block;font-size:14px;letter-spacing:2px;text-transform:uppercase}.band b{display:block;font-family:'Playfair Display',Georgia,serif;font-size:32px}
+table.pr{width:100%;border-collapse:collapse;font-size:17px;background:#fff;border-radius:12px;overflow:hidden}table.pr td,table.pr th{padding:8px 12px;border-bottom:1px solid #eee;text-align:left}table.pr th{background:#eadfe7}
+.lv{white-space:nowrap;border-radius:999px;padding:2px 10px;font-size:14px;color:#fff}.L{background:#3d696a}.M{background:#967ca0}.H{background:#8a5a6e}.NA{background:#aaa}
+.dom{border-left:4px solid #967ca0;padding:4px 0 4px 14px;margin:12px 0}.dom b{color:#3d696a}
+.calendly-inline-widget{min-width:300px;height:700px}
+@media(max-width:768px){.fa h1{font-size:28px}.fa{padding-top:8vh}}
+.fa a{color:#3d696a}
+.go:disabled{opacity:.5;cursor:default}
+button.go,button.ghost{cursor:pointer;background-clip:padding-box}
+button.ghost{background:transparent;font-family:inherit}
+.field{margin:12px 0;text-align:left}.field label{display:block;font-weight:600;margin-bottom:4px}
+.field input,.field select{width:100%;box-sizing:border-box;padding:12px 14px;font-size:18px;border:1px solid #d9cbd8;border-radius:10px;font-family:inherit;background:#fff}
+.yn{display:flex;gap:10px;flex-wrap:wrap}.yn button{border:2px solid #967ca0;background:#fff;border-radius:999px;padding:8px 26px;font-size:18px;font-weight:600;font-family:inherit;cursor:pointer;color:#2f2a2c}.yn button.on{background:#967ca0;color:#fff}
+.q.miss p{color:#8a5a6e}.q.miss .scale button{border-color:#8a5a6e}
+.msg{font-style:italic;color:#8a5a6e}
+.navb{display:flex;justify-content:space-between;gap:12px;margin-top:18px;flex-wrap:wrap}
+.trap{position:absolute;left:-9999px}
+.refs{font-size:15px;line-height:1.5;padding-left:20px}.refs li{margin-bottom:6px}
+@media print{.cb-bg,footer,.noprint,.calendly-inline-widget{display:none!important}.fa{padding-top:0;font-size:13pt}.card{break-inside:avoid;background:#fff;border:1px solid #ddd}.band,.lv{-webkit-print-color-adjust:exact;print-color-adjust:exact}}

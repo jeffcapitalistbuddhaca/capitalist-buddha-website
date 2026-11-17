@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Full Assessment | Dr. Jeffrey Overall</title>
+    <meta name="description" content="Your Consciousness Destabilization Risk Assessment.">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=20261117">
+    <link rel="stylesheet" href="css/assess.css?v=20261117a">
+    <meta name="robots" content="noindex">
+</head>
+<body>
+    <div class="cb-bg" aria-hidden="true">
+        <img src="images/prayer-flags.png" alt="" class="cb-bg-flags">
+        <span class="cb-bg-emblem"></span>
+        <img src="images/botanical-left.png" alt="" class="cb-bg-leaf cb-bg-leaf-l">
+        <img src="images/botanical-right-2.png" alt="" class="cb-bg-leaf cb-bg-leaf-r">
+    </div>
+    <main class="fa" id="fa">
+        <!-- 1. Confirm email (sign-in link) -->
+        <section id="s-signin" hidden>
+            <h1>Thank you. One more step.</h1>
+            <p>To keep your answers and report private, we&rsquo;ll send a one-time sign-in link to the email you paid with. Open it on this device to start your assessment. You can use the same link method any time to come back.</p>
+            <div class="card">
+                <form id="si-form" novalidate>
+                    <div class="field"><label for="si-email">Email</label><input type="email" id="si-email" autocomplete="email"></div>
+                    <input type="text" id="si-website" class="trap" tabindex="-1" autocomplete="off" aria-hidden="true">
+                    <p class="msg" id="si-msg" hidden></p>
+                    <p style="text-align:center"><button type="submit" class="go" id="si-send">Send my sign-in link</button></p>
+                </form>
+            </div>
+        </section>
+        <section id="s-confirm" hidden>
+            <h1>Confirm your email</h1>
+            <p>You opened the link on a different device or browser. Please type your email again to finish signing in.</p>
+            <div class="card"><div class="field"><label for="cf-email">Email</label><input type="email" id="cf-email" autocomplete="email"></div>
+            <p style="text-align:center"><button type="button" class="go" id="cf-btn">Continue</button></p></div>
+        </section>
+        <!-- 2. Messages (loading, not paid, already submitted) -->
+        <section id="s-msg" hidden><h1 id="m-title">One moment&hellip;</h1><div id="m-body"></div></section>
+        <!-- 3. The questionnaire -->
+        <section id="s-quest" hidden><div id="q-area"></div></section>
+        <p class="fine noprint" id="whoami" hidden></p>
+    </main>
+    <footer>
+        <img src="images/prayer-flags.png" alt="Prayer Flags" class="footer-prayer-flags">
+        <img src="images/botanical-footer-left.png" alt="Botanical" class="footer-botanical-left">
+        <img src="images/botanical-footer-right.png" alt="Botanical" class="footer-botanical-right">
+        <img src="images/emblem.png" alt="Capitalist Buddha" class="footer-emblem">
+        <div class="cb-social">
+            <a href="https://www.tiktok.com/@dr.jeffreyoverall" target="_blank" rel="noopener" aria-label="TikTok"><img src="images/social/tiktok.webp" alt="TikTok" width="32" height="32"></a>
+            <a href="https://www.instagram.com/dr.jeffreyoverall" target="_blank" rel="noopener" aria-label="Instagram"><img src="images/social/instagram.webp" alt="Instagram" width="32" height="32"></a>
+            <a href="https://www.linkedin.com/in/dr-jeffrey-overall-47a99b124/" target="_blank" rel="noopener" aria-label="LinkedIn"><img src="images/social/linkedin.webp" alt="LinkedIn" width="32" height="32"></a>
+            <a href="https://scholar.google.com/citations?user=VmGJH40AAAAJ&amp;hl=en" target="_blank" rel="noopener" aria-label="Google Scholar"><img src="images/social/scholar.webp" alt="Google Scholar" width="32" height="32"></a>
+        </div>
+        <p class="cb-foot-links"><a href="research.html">Research</a> &middot; <a href="terms.html">Terms &amp; refund policy</a> &middot; <a href="privacy.html">Privacy policy</a> &middot; <a href="/#contact">Contact</a></p>
+        <p>&copy; 2026 The Professor Inc. All rights reserved.</p>
+    </footer>
+<script type="module" src="js/assess.js?v=20261117a"></script>
+</body>
+</html>

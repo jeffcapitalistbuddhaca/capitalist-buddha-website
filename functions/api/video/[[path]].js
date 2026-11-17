@@ -115,6 +115,11 @@ export async function onRequestGet(context) {
     return new Response("No video name given.", { status: 400 });
   }
 
+  // Assessment answers and reports live in the same bucket; never serve them here.
+  if (key.startsWith("assessments/")) {
+    return new Response("Not found.", { status: 404 });
+  }
+
   let object;
   try {
     object = await env.COURSE_VIDEOS.get(key, { range: request.headers });
