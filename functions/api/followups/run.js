@@ -3,9 +3,11 @@
 import { runDue } from "../../../lib/followups.js";
 
 export async function onRequestPost({ request, env }) {
-  if (!env.FOLLOWUP_SECRET || request.headers.get("x-run-secret") !== env.FOLLOWUP_SECRET) {
-    return new Response("Forbidden", { status: 403 });
-  }
+  const expected = String(env.FOLLOWUP_SECRET || "").trim();
+  if (!expected) return new Response("Not configured: FOLLOWUP_SECRET is not available to the live site", { status: 503 });
+  const given = String(request.headers.get("x-run-secret") || "").trim();
+  if (!given) return new Response("Forbidden: no secret was sent (check the GitHub secret)", { status: 403 });
+  if (given !== expected) return new Response(`Forbidden: secrets do not match (GitHub ${given.length} characters, Cloudflare ${expected.length} characters)`, { status: 403 });
   const sum = await runDue(env);
   return new Response(JSON.stringify(sum), { headers: { "content-type": "application/json" } });
 }
