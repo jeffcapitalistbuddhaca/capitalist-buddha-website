@@ -1,7 +1,7 @@
 // js/assess.js - Full assessment: after payment, sign in, then the questionnaire (saved as you go).
 // Answers are saved to the server (/api/assess/save) and scored there when submitted.
-import { SECTIONS, INTRO, INSTRUCTIONS, RELATIONSHIP_QUESTION, LETTER } from "./assess-data.js?v=20261117e";
-import { $, show, message, esc, api, startGate, logout } from "./assess-auth.js?v=20261117e";
+import { SECTIONS, INTRO, INSTRUCTIONS, RELATIONSHIP_QUESTION, LETTER } from "./assess-data.js?v=20261117h";
+import { $, show, message, esc, api, startGate, logout } from "./assess-auth.js?v=20261117h";
 
 const STEPS = SECTIONS.length + 3; // 0 intro, 1 about you, 2..14 sections, 15 letter + consent
 let user = null, id = null, rec = null, saveTimer = null;
@@ -119,9 +119,10 @@ function render() {
       "</div>" + nav("Next");
   } else if (s < STEPS - 1) {
     const sec = SECTIONS[s - 2];
-    h = "<h1>Part " + (s - 1) + " of " + SECTIONS.length + "</h1>" + bar() +
+    h = "<h1>Part " + (s - 1) + " of " + SECTIONS.length + "</h1>" +
+      (sec.note ? '<p class="qnote">' + esc(sec.note) + "</p>" : "") + bar() +
       "<p>" + esc(INSTRUCTIONS[0]) + ' <span class="fine">' + esc(INSTRUCTIONS[1]) + "</span></p>" +
-      (sec.note ? "<p><em>" + esc(sec.note) + "</em></p>" : "") + '<p class="fine">' + SAVE_NOTE + "</p>" + '<div class="card">';
+      '<p class="fine">' + SAVE_NOTE + "</p>" + '<div class="card">';
     if (sec.key === "reldis") {
       h += '<div class="q" data-q="rel"><p>' + esc(RELATIONSHIP_QUESTION) + "</p>" + yesNo("rel", rec.rel) + "</div>";
     }
