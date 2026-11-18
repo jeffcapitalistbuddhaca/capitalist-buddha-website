@@ -34,11 +34,25 @@
         .rs-acc[open] summary { margin-bottom: 8px; }
         .rs-fund { list-style: none; padding: 0; font-size: 17px; }
         .rs-fund li { border-left: 4px solid #967ca0; padding: 2px 0 2px 14px; margin-bottom: 12px; }
+        .rs-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0 6px; }
+        .rs-two div { background: #fff; border-radius: 12px; padding: 14px 16px; font-size: 17px; line-height: 1.5; }
+        .rs-two b { display: block; font-family: 'Playfair Display', Georgia, serif; color: #967ca0; font-size: 20px; margin-bottom: 4px; }
+        .rs-go { display: inline-block; background: #c9a46a; color: #2f2a2c !important; font-weight: 600; font-size: 20px; padding: 12px 30px; border-radius: 999px; text-decoration: none; }
+        .rs-assess .rs-fn a { color: #3d696a; }
+        .rs-note { margin: 12px 0 0; }
+        .rs-report { margin: 10px 0 26px; }
+        .rs-report h2 { margin-top: 10px; }
+        .rs-report p { margin: 0 0 10px; }
+        .rs-inside { padding-left: 22px; margin: 0 0 12px; }
+        .rs-inside li { margin-bottom: 8px; }
+        .rs-ghost { display: inline-block; border: 2px solid #967ca0; color: #967ca0 !important; font-weight: 600; font-size: 18px; padding: 9px 24px; border-radius: 999px; text-decoration: none; }
         .rs-cta { text-align: center; margin: 40px 0 20px; }
         .rs-cta a { display: inline-block; background: #c9a46a; color: #2f2a2c; font-weight: 600; font-size: 20px; padding: 12px 30px; border-radius: 999px; text-decoration: none; }
         @media (max-width: 768px) {
             .rs h1 { font-size: 32px; }
             .rs-stats { grid-template-columns: repeat(2, 1fr); }
+            .rs-two { grid-template-columns: 1fr; }
+            .rs-inside li, .rs-two div { font-size: 15.2px; }
         }
     </style>
 </head>
@@ -59,14 +73,39 @@
             <div class="rs-stats">
                 <div><b>248</b>retreat centres</div>
                 <div><b>165</b>psychedelic companies</div>
-                <div><b>8</b>countries of fieldwork</div>
+                <div><b>9</b>countries of fieldwork</div>
                 <div><b>80+</b>in-depth interviews</div>
             </div>
-            <p>Dr. Overall spent eight years studying how psychedelic retreats and companies operate around the world. He analyzed 248 retreat centres and 165 psychedelic companies.</p><p>He carried out fieldwork at 11 retreat centres in eight countries and spent time inside three psychedelic communities. He interviewed more than 30 retreat owners and more than 50 people who had high-dose experiences.</p><p>The study covered nine medicines and protocols: iboga, 5-MeO-DMT, sassafras, ayahuasca, psilocybin, cannabis, Himalayan mad honey, MDMA and LSD.</p>
+            <p>Dr. Overall spent eight years studying how psychedelic retreats and companies operate around the world. He analyzed 248 retreat centres and 165 psychedelic companies.</p><p>He carried out fieldwork at 11 retreat centres in nine countries and spent time inside three psychedelic communities. He interviewed more than 30 retreat owners and more than 50 people who had high-dose experiences.</p><p>The study covered nine medicines and protocols: iboga, 5-MeO-DMT, sassafras, ayahuasca, psilocybin, cannabis, Himalayan mad honey, MDMA and LSD.</p>
             <p class="rs-find">One finding stood out. About 40% of people who have a peak consciousness-expanding experience go on to face destabilizing events in their lives: leaving careers, relationships or the places they lived. Many describe years of struggle.<sup>1</sup></p>
             <p>The study also found that screening at most retreats is one-size-fits-all: the same intake for every participant. That gap led Dr. Overall to develop the Consciousness Destabilization Risk Scale, designed for consciousness-expansion providers, and a screening and support framework for Psychedelic-Assisted Care that addresses non-clinical outcomes, such as: work, career, life, spirituality, and relationships.</p>
             <p>He has also done advisory work on S. 4220 for the US Senate.</p>
-            <p style="text-align:center; margin-top:18px;"><a href="report.html" style="display:inline-block; background:#c9a46a; color:#2f2a2c; font-weight:600; font-size:19px; padding:12px 28px; border-radius:999px; text-decoration:none;">Read the full industry report</a></p>
+        </section>
+
+        <section class="rs-study rs-assess" id="assessment">
+            <h2>Where do you stand?</h2>
+            <p>From this research, Dr. Overall built the Consciousness Destabilization Risk Scale. It measures factors that may influence how a person responds to consciousness-expanding practices such as meditation, breathwork and psychedelics. You can take it in two ways:</p>
+            <div class="rs-two">
+                <div><b>Free risk assessment (short version)</b>A quick first look: 12 questions taken from the full scale. It gives a rough indication of your risk level only. Because it uses so few questions, it is far less precise, and your result on the full assessment may be different.</div>
+                <div><b>Full assessment &middot; $150 USD</b>The complete scale: every question, across all 13 areas of your life. It gives you a far more accurate overall result, shows which areas are driving it and what each one means for you, and gives you practice guidance matched to your result. You get a personal report to keep, and a one-on-one results review with Dr. Overall.</div>
+            </div>
+            <p class="rs-note"><em>The free version is a starting point, not a substitute. Only the full assessment measures all thirteen areas, so its result is the one to rely on.</em></p>
+            <p style="text-align:center; margin:18px 0 6px;"><a class="rs-go" href="risk-scale.html">Take the free risk assessment</a></p>
+            <p class="rs-fn" style="text-align:center;">Want the full one straight away? <a href="assessment.html">Get the full assessment</a>. Neither is diagnostic or medical advice.</p>
+        </section>
+
+        <section class="rs-report" id="industry-report">
+            <h2>The industry report: The Psychedelic Renaissance 2026</h2>
+            <p>This report brings together what Dr. Overall found in his 8-year study of the global psychedelic industry. He analyzed all 248 psychedelic retreat centres in active operation worldwide and 165 psychedelic companies, line by line, alongside fieldwork at retreat centres and interviews with retreat owners and people who had high-dose experiences.</p>
+            <p><strong>Inside:</strong></p>
+            <ul class="rs-inside">
+                <li><strong>Where the industry stands:</strong> a fragmented, fast-growing market forecast to grow from about $3.5 billion in 2024 to $10 billion by 2032.</li>
+                <li><strong>The gaps:</strong> only 8% of retreats offer programs for organizations, and only 3% serve professionals facing burnout, the largest and least-served market.</li>
+                <li><strong>The next 5 to 10 years:</strong> why the sector is at a &ldquo;legitimacy inflection point&rdquo;, and what separates the operators who will reach the mainstream from those who could trigger tighter regulation.</li>
+                <li><strong>Strategic recommendations</strong> for retreat owners, psychedelic companies, investors and policymakers.</li>
+            </ul>
+            <p>Free to read online. Enter your email to open it.</p>
+            <p style="text-align:center; margin:0;"><a class="rs-ghost" href="report.html">Read the free industry report</a></p>
         </section>
 
         <h2>Publications</h2>

@@ -42,6 +42,7 @@
         .band { text-align: center; padding: 26px 20px; border-radius: 16px; color: #fff; margin: 10px 0 18px; }
         .band small { display: block; font-size: 15px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.9; }
         .band b { display: block; font-family: 'Playfair Display', Georgia, serif; font-size: 34px; margin-top: 4px; }
+        #s-result > p { margin: 0 0 12px; }
         .band.low { background: #3d696a; } .band.medium { background: #967ca0; } .band.high { background: #8a5a6e; }
         .tops { list-style: none; padding: 0; margin: 0; }
         .tops li { border-left: 4px solid #967ca0; padding: 4px 0 4px 14px; margin-bottom: 12px; }
@@ -73,13 +74,13 @@
     <section id="s-intro">
         <h1>Are you ready for what consciousness-expanding practices can stir up?</h1>
         <p>Psychedelics, meditation, breathwork and energy work can open people up in ways they don&rsquo;t expect. In Dr. Overall&rsquo;s 8-year study, about 40% of people who had a peak consciousness-expanding experience went on to face destabilizing events in their lives.</p>
-        <p>This free short assessment draws on the Consciousness Destabilization Risk Scale he developed from that research. It looks at eleven areas of your life and suggests which approaches suit you best right now.</p>
+        <p>This free short assessment draws on the Consciousness Destabilization Risk Scale he developed from that research. It gives you a rough first indication of your overall risk level. It is a short version of the full assessment, which measures all thirteen areas of your life.</p>
         <div class="meta"><span>12 questions</span><span>About 2 minutes</span><span>Free</span></div>
         <div class="card fine">
             <strong>Please read first.</strong> This assessment is not diagnostic. It does not predict outcomes with certainty and does not determine whether any practice is safe or suitable for you. It is not medical, psychological or legal advice, and it is not a substitute for a qualified health or mental health professional. Your individual answers are not stored. By starting the assessment, you acknowledge this.
         </div>
         <p style="text-align:center"><button type="button" class="go" id="start">Start the free assessment</button></p>
-        <p class="fine" style="text-align:center;margin-top:14px">Want the full assessment straight away? <a href="assessment.html" style="color:#3d696a">Get the full assessment ($150)</a><br>Already purchased? <a href="assessment-start.html" style="color:#3d696a">Continue your assessment</a></p>
+        <p class="fine" style="text-align:center;margin-top:14px">Want the full assessment straight away? <a href="assessment.html" style="color:#3d696a">Get the full assessment ($150 USD)</a><br>Already purchased? <a href="assessment-start.html" style="color:#3d696a">Continue your assessment</a></p>
     </section>
 
     <!-- STEP 2: QUESTIONS -->
@@ -117,17 +118,14 @@
     <section id="s-result" hidden>
         <div class="band" id="band"><small>Your overall result</small><b id="band-name"></b></div>
         <p id="band-text"></p>
-        <div class="card" id="tops-card">
-            <h2>The areas that stood out</h2>
-            <ul class="tops" id="tops"></ul>
-        </div>
+        <p class="fine"><em>This is a first indication based on 12 questions. Your result on the full assessment may be different.</em></p>
+        <p id="safety" hidden></p>
         <div class="card">
-            <h2>What this suggests</h2>
-            <p id="guide" style="margin:0"></p>
+            <h2>What the full assessment adds</h2>
+            <ul class="tops" id="adds"></ul>
         </div>
         <div class="ctas">
-            <a class="go" href="assessment.html">Take the full assessment ($150)</a>
-            <span class="ext">The full assessment covers each area in depth and includes a personal report and a results review with Dr. Overall.</span>
+            <a class="go" href="assessment.html">Take the full assessment ($150 USD)</a>
         </div>
         <p class="fine">This assessment is not diagnostic and does not predict outcomes with certainty. It is a short version of the full scale.</p>
     </section>
@@ -146,6 +144,6 @@
         <p class="cb-foot-links"><a href="research.html">Research</a> &middot; <a href="terms.html">Terms &amp; refund policy</a> &middot; <a href="privacy.html">Privacy policy</a> &middot; <a href="/#contact">Contact</a></p>
         <p>&copy; 2026 The Professor Inc. All rights reserved.</p>
     </footer>
-<script type="module" src="js/risk-scale.js?v=20261117e"></script>
+<script type="module" src="js/risk-scale.js?v=20261117g"></script>
 </body>
 </html>
