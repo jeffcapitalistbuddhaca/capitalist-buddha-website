@@ -1,6 +1,7 @@
 // js/free.js - "Try a module for free" (Module 7) with a Firebase email sign-in link.
 // Loaded with <script type="module" src="js/free.js"></script> after js/auth.js.
 
+import { sendBrandedAuthEmail } from "./auth-mail.js";
 import { auth } from "./firebase-init.js";
 import {
   sendSignInLinkToEmail,
@@ -40,10 +41,9 @@ document.querySelectorAll(".cb-free-form").forEach((form) => {
       });
       const d = await r.json();
       if (!d.ok) throw new Error(d.error || "Something went wrong.");
-      await sendSignInLinkToEmail(auth, email, {
-        url: window.location.origin + "/#free",
-        handleCodeInApp: true,
-      });
+      if (!(await sendBrandedAuthEmail("signin", email, window.location.origin + "/#free"))) {
+        await sendSignInLinkToEmail(auth, email, { url: window.location.origin + "/#free", handleCodeInApp: true });
+      }
       try { localStorage.setItem("cbFreeEmail", email); } catch (_) {}
       form.reset();
       msg.textContent = "Check your inbox for your link to the free module (and your spam folder, just in case).";

@@ -1,5 +1,6 @@
 // js/report.js - Industry report: verified-email gate + slide viewer.
 // The slides are private (R2) and are only served to a signed-in user with a verified email.
+import { sendBrandedAuthEmail } from "./auth-mail.js";
 import { auth } from "./firebase-init.js";
 import {
   sendSignInLinkToEmail,
@@ -32,10 +33,9 @@ $("rp-form").addEventListener("submit", async (e) => {
   if (!$("rp-consent").checked) { say("Please tick the box to agree to receive emails."); return; }
   const btn = $("rp-send"); btn.disabled = true; say("Sending...");
   try {
-    await sendSignInLinkToEmail(auth, email, {
-      url: location.origin + "/report.html",
-      handleCodeInApp: true,
-    });
+    if (!(await sendBrandedAuthEmail("signin", email, location.origin + "/report.html"))) {
+      await sendSignInLinkToEmail(auth, email, { url: location.origin + "/report.html", handleCodeInApp: true });
+    }
     store("cbReportEmail", email);
     store("cbReportConsent", "1");
     say("Check your inbox (and spam folder) for an email with a sign-in link. Open it on this device to read the report.");

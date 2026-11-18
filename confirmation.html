@@ -165,6 +165,7 @@
 
     <script src="https://js.stripe.com/v3/"></script>
     <script type="module">
+        import { sendBrandedAuthEmail } from "/js/auth-mail.js?v=20261118a";
         import { auth } from "./js/firebase-init.js";
         import {
             createUserWithEmailAndPassword,
@@ -236,7 +237,7 @@
             createButton.disabled = true;
             try {
                 const { user } = await createUserWithEmailAndPassword(auth, email, password);
-                await sendEmailVerification(user);
+                if (!(await sendBrandedAuthEmail("verify", email, location.origin + "/?tab=login"))) await sendEmailVerification(user);
                 form.style.display = "none";
                 successDiv.innerHTML =
                     "Your account is ready. We sent a verification email to <strong></strong>. " +
@@ -248,7 +249,7 @@
             } catch (err) {
                 console.error("Account creation error:", err.code, err.message);
                 if (err.code === "auth/email-already-in-use") {
-                    try { await sendPasswordResetEmail(auth, email); } catch (e) {}
+                    try { if (!(await sendBrandedAuthEmail("reset", email, location.origin + "/?tab=login"))) await sendPasswordResetEmail(auth, email); } catch (e) {}
                     showError("You already have a free-trial account with this email. We've just emailed you a link to set your password - then log in to see the full course.");
                 } else if (err.code === "auth/weak-password") {
                     showError("That password is too weak. Please choose a longer one.");
