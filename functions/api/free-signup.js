@@ -3,6 +3,7 @@
 // if the visitor ticked the box, adds them to the Brevo "Free module" list.
 // The sign-in email itself is sent by Firebase from the browser.
 
+import { queue, inDays } from "../../lib/followups.js";
 import { addToLists } from "../../lib/email.js";
 export async function onRequestPost({ request, env }) {
   let data;
@@ -37,6 +38,11 @@ export async function onRequestPost({ request, env }) {
       JSON.stringify({ email, started: new Date().toISOString() }),
       { httpMetadata: { contentType: "application/json" } }
     );
+    // Follow-ups on day 15 and day 29 (skipped if they buy the course)
+    try {
+      await queue(env, "B", email, "", inDays(15));
+      await queue(env, "C", email, "", inDays(29));
+    } catch (e) { console.log("followup queue:", e && e.message); }
   }
 
   // Add to the Brevo "Free module" list (new or existing contacts)

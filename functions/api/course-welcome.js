@@ -8,6 +8,7 @@
 //
 // Cloudflare settings used (all already exist): STRIPE_RESTRICTED_KEY, "Brevo API Key", BREVO_CONTACTS_KEY, CONTACT_SENDER_EMAIL.
 
+import { queue, courseFollowupDate } from "../../lib/followups.js";
 import { SITE, wrap, p, ul, box, btn, SIGN, hello, sendEmail, addToLists } from "../../lib/email.js";
 
 export async function onRequestPost(context) {
@@ -44,6 +45,7 @@ export async function onRequestPost(context) {
           btn("Go to the course", SITE + "/#courses") + SIGN,
       }) }),
       addToLists(env, email, [], { SOURCE: "course" }),
+      queue(env, "D", email, name, courseFollowupDate((s.created || 0) * 1000)), // 30 days after the session starts
     ]).catch((e) => console.log("course-welcome:", e && e.message)));
     return json({ ok: true });
   } catch (e) {
