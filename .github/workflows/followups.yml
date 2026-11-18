@@ -10,4 +10,4 @@ jobs:
     steps:
       - name: Send due follow-ups
         run: |
-          curl -sS -X POST "https://capitalistbuddha.ca/api/followups/run" -H "x-run-secret: ${{ secrets.FOLLOWUP_PASS }}" -w "\nHTTP %{http_code}\n" | head -c 600
+          curl -sS -X POST "https://capitalistbuddha.ca/api/followups/run" -H "x-run-secret: ${{ secrets.FOLLOWUP_CODE }}" -w "\nHTTP %{http_code}\n" | head -c 600
