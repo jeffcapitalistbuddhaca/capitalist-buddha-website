@@ -1,9 +1,10 @@
 // functions/api/followups/run.js - sends the follow-up emails that are due.
 // Called once a day by GitHub (.github/workflows/followups.yml) with the FOLLOWUP_PASS password.
-// Spaces, line breaks and quote marks around the password are ignored. The password itself is never shown.
+// The password itself is never shown.
 import { runDue } from "../../../lib/followups.js";
 
-const clean = (v) => String(v || "").replace(/\s+/g, "").replace(/^["']+|["']+$/g, "");
+// Only letters and numbers are compared, so hidden characters picked up when pasting do not matter.
+const clean = (v) => String(v || "").replace(/[^A-Za-z0-9]/g, "");
 
 export async function onRequestPost({ request, env }) {
   const expected = clean(env.FOLLOWUP_PASS);
