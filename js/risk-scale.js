@@ -1,7 +1,7 @@
 // js/risk-scale.js - free short Consciousness Destabilization Risk Assessment.
 // Scoring runs in the browser (js/risk-data.js). Only the name, email, band, top areas, segment and source are sent
 // to /api/risk-signup (Brevo and the result email). Individual answers are never sent or stored.
-import { Q, D, BANDS, FULL_ADDS, HIGH_NOTE, scoreRisk } from "./risk-data.js?v=20261117g";
+import { Q, D, BANDS, FULL_ADDS, HIGH_NOTE, scoreRisk } from "./risk-data.js?v=20261117h";
 (function () {
   var MODE = document.body.getAttribute("data-mode") || "one"; // "one" = one question per screen; "all" = all on one page
   // r: true = reverse-scored (agreeing means LOWER risk)
@@ -18,14 +18,14 @@ import { Q, D, BANDS, FULL_ADDS, HIGH_NOTE, scoreRisk } from "./risk-data.js?v=2
   }
   function renderOne() {
     var q = Q[idx];
-    $("q-area").innerHTML = '<div class="card"><div class="qnum">Question ' + (idx + 1) + " of " + Q.length + '</div><div class="qtext">' + q.t + "</div>" +
-      (q.note ? '<p class="fine" style="margin-top:-6px">' + q.note + "</p>" : "") + scaleHtml(idx) +
+    $("q-area").innerHTML = '<div class="card"><div class="qnum">Question ' + (idx + 1) + " of " + Q.length + "</div>" +
+      (q.note ? '<p class="qnote">' + q.note + "</p>" : "") + '<div class="qtext">' + q.t + "</div>" + scaleHtml(idx) +
       '<div class="nav"><button type="button" class="linkbtn" id="qback"' + (idx === 0 ? " hidden" : "") + '>&larr; Back</button><span></span></div></div>';
     if ($("qback")) $("qback").onclick = function () { history.back(); };
   }
   function renderAll() {
     var h = '<div class="card q-all">';
-    Q.forEach(function (q, i) { h += '<div class="qitem"><div class="qnum">' + (i + 1) + " of " + Q.length + '</div><div class="qtext">' + q.t + "</div>" + (q.note ? '<p class="fine">' + q.note + "</p>" : "") + scaleHtml(i) + "</div>"; });
+    Q.forEach(function (q, i) { h += '<div class="qitem"><div class="qnum">' + (i + 1) + " of " + Q.length + '</div>' + (q.note ? '<p class="qnote">' + q.note + "</p>" : "") + '<div class="qtext">' + q.t + "</div>" + scaleHtml(i) + "</div>"; });
     h += '<p style="text-align:center;margin-top:18px"><button type="button" class="go" id="qnext" disabled>Continue</button></p></div>';
     $("q-area").innerHTML = h;
     $("qnext").onclick = function () { show("s-email"); };

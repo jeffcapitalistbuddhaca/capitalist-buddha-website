@@ -4,13 +4,13 @@ export const Q = [
   { d: "rigidity",  t: "There is more than one valid way to understand life.", r: true },
   { d: "structure", t: "Uncertain situations make me uneasy." },
   { d: "trauma",    t: "Painful memories from my past still upset me." },
-  { d: "distress",  t: "I have trouble relaxing.", note: "Think about the past two weeks." },
-  { d: "career",    t: "My career is progressing toward my goals.", r: true, note: "If you are not working now, think about your most recent work." },
+  { d: "distress",  t: "I have trouble relaxing.", note: "For the following question, think about the past two weeks." },
+  { d: "career",    t: "My career is progressing toward my goals.", r: true, note: "For the following question, if you are not working now, think about your most recent work." },
   { d: "attach",    t: "I fear that the people closest to me will leave me." },
-  { d: "attach",    t: "I keep my deepest feelings from my partner.", note: "If you are not in a relationship now, think about past relationships." },
+  { d: "attach",    t: "I keep my deepest feelings from my partner.", note: "For the following question, if you are not in a relationship now, think about your past relationships." },
   { d: "authentic", t: "I feel disconnected from my full authentic expression." },
-  { d: "values",    t: "My personal values align with my workplace.", r: true, note: "If you are not working now, think about your most recent workplace." },
-  { d: "fusion",    t: "At my core, I am the same as my group.", note: "\u201cGroup\u201d means your main professional, organizational or achievement identity." },
+  { d: "values",    t: "My personal values align with my workplace.", r: true, note: "For the following question, if you are not working now, think about your most recent workplace." },
+  { d: "fusion",    t: "At my core, I am the same as my group.", note: "For the following question, \u201cgroup\u201d means your main professional, organizational or achievement identity." },
   { d: "trust",     t: "Letting go of control is hard for me." },
   { d: "support",   t: "I have people I can talk to about unusual inner experiences.", r: true }
 ];

@@ -6,7 +6,7 @@ export const SECTIONS = [
  {
   "key": "trauma",
   "name": "Lifetime trauma exposure",
-  "note": "Rate how much you agree that each statement describes your life so far.",
+  "note": "For the following statements, rate how much you agree that each one describes your life so far.",
   "items": [
    {
     "id": "trauma1",
@@ -93,7 +93,7 @@ export const SECTIONS = [
  {
   "key": "impact",
   "name": "Unresolved impact of past events",
-  "note": "Answer for the past month.",
+  "note": "For the following statements, think about the past month.",
   "items": [
    {
     "id": "impact1",
@@ -110,7 +110,7 @@ export const SECTIONS = [
  {
   "key": "distress",
   "name": "Current psychological distress",
-  "note": "Answer for the past two weeks.",
+  "note": "For the following statements, think about the past two weeks.",
   "items": [
    {
     "id": "distress1",
@@ -455,7 +455,7 @@ export const SECTIONS = [
  {
   "key": "attach",
   "name": "Attachment insecurity",
-  "note": "These statements are about romantic partners. If you are not in a relationship now, think about your past relationships.",
+  "note": "The following statements are about romantic partners. If you are not in a relationship now, think about your past relationships.",
   "items": [
    {
     "id": "attach1",
@@ -576,7 +576,7 @@ export const SECTIONS = [
  {
   "key": "career",
   "name": "Career dissatisfaction",
-  "note": "Think about your current work. If you are not working now, think about your most recent work.",
+  "note": "For the following statements, think about your current work. If you are not working now, think about your most recent work.",
   "items": [
    {
     "id": "career1",
@@ -603,7 +603,7 @@ export const SECTIONS = [
  {
   "key": "values",
   "name": "Values misalignment",
-  "note": "Think about your current workplace. If you are not working now, think about your most recent workplace.",
+  "note": "For the following statements, think about your current workplace. If you are not working now, think about your most recent workplace.",
   "items": [
    {
     "id": "values1",
