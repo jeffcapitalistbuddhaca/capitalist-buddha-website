@@ -3,6 +3,7 @@
 // Checks the Firebase ID token, then adds the verified email to the Brevo list REPORT_LIST_ID.
 // Body (JSON): { token, consent: true, source }
 
+import { addToLists } from "../../lib/email.js";
 import { jwtVerify, importX509 } from "jose";
 
 const GOOGLE_CERTS_URL =
@@ -28,15 +29,10 @@ export async function onRequestPost(context) {
     const headers = { "api-key": brevoKey, "content-type": "application/json", accept: "application/json" };
     const listId = Number(env.REPORT_LIST_ID);
     try {
-      await fetch("https://api.brevo.com/v3/contacts", {
-        method: "POST", headers,
-        body: JSON.stringify({ email, listIds: [listId], updateEnabled: true, attributes: { SOURCE: source } }),
-      });
-      const r = await fetch(`https://api.brevo.com/v3/contacts/lists/${listId}/contacts/add`, {
-        method: "POST", headers, body: JSON.stringify({ emails: [email] }),
-      });
-      if (!r.ok) console.log("Brevo report list add:", r.status, await r.text());
-    } catch (e) { console.log("Brevo report error:", e && e.message); }
+      await addToLists(env, email, [listId], { SOURCE: source }); // also adds to the Newsletter list
+    } catch (e) {
+      console.log("Brevo error:", e && e.message); // never block the sign-up
+    }
   } else {
     console.log("Report signup: Brevo key or REPORT_LIST_ID missing");
   }
