@@ -1,0 +1,13 @@
+# Sends the follow-up emails that are due, once a day (about 9:15 am Toronto time).
+name: Daily follow-up emails
+on:
+  schedule:
+    - cron: "15 14 * * *"
+  workflow_dispatch: {}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send due follow-ups
+        run: |
+          curl -fsS -X POST "https://capitalistbuddha.ca/api/followups/run" -H "x-run-secret: ${{ secrets.FOLLOWUP_SECRET }}"
