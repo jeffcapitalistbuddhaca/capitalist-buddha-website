@@ -1,5 +1,6 @@
 // js/assess-auth.js - shared sign-in (one-time email link) for the full assessment pages.
 // Uses the same Firebase login as the course, the free module and the industry report.
+import { sendBrandedAuthEmail } from "./auth-mail.js?v=20261118a";
 import { auth } from "./firebase-init.js";
 import {
   sendSignInLinkToEmail,
@@ -61,7 +62,9 @@ export function startGate({ returnPath, wantEmail, onReady }) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = "Please enter a valid email address."; msg.hidden = false; return; }
     const btn = $("si-send"); btn.disabled = true; msg.textContent = "Sending..."; msg.hidden = false;
     try {
-      await sendSignInLinkToEmail(auth, email, { url: location.origin + returnPath, handleCodeInApp: true });
+      if (!(await sendBrandedAuthEmail("signin", email, location.origin + returnPath))) {
+        await sendSignInLinkToEmail(auth, email, { url: location.origin + returnPath, handleCodeInApp: true });
+      }
       store("cbAssessEmail", email);
       msg.textContent = "Check your inbox (and spam folder) for an email with a sign-in link. Open it on this device.";
     } catch (err) {

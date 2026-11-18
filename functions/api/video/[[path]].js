@@ -116,8 +116,8 @@ export async function onRequestGet(context) {
     return new Response("No video name given.", { status: 400 });
   }
 
-  // Assessment answers and reports live in the same bucket; never serve them here.
-  if (key.startsWith("assessments/")) {
+  // Private records (assessments, follow-ups, email limits, free-module starts) live in the same bucket; never serve them here.
+  if (/^(assessments|followups|authmail|_free-access)\//.test(key)) {
     return new Response("Not found.", { status: 404 });
   }
 
