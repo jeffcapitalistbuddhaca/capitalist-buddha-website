@@ -49,7 +49,7 @@ async function sendResult(env, email, name, band) {
       p("<i>This is a first indication based on 12 questions. Your result on the full assessment may be different.</i>", "; font-size:16px; color:#6d5a6a") +
       (band === "high" ? p(esc(HIGH_NOTE)) : "") +
       box("What the full assessment adds", ul(FULL_ADDS.map(esc))) +
-      btn("Take the full assessment ($150 USD)", SITE + "/assessment.html?src=risk-email") +
+      btn("Take the full assessment", SITE + "/assessment.html?src=risk-email") +
       SIGN,
     foot: "This free assessment is not diagnostic and does not predict outcomes with certainty. It is a short version of the full scale. It is not medical, psychological or legal advice.",
   });

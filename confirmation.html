@@ -192,6 +192,8 @@
                 const response = await fetch(`/api/session-status?session_id=${encodeURIComponent(sessionId)}`);
                 const data = await response.json();
                 if (data.status === "complete" && data.customer_email) {
+                    // Welcome email (separate, read-only endpoint; does not affect the payment or this page)
+                    fetch(`/api/course-welcome?session_id=${encodeURIComponent(sessionId)}`, { method: "POST" }).catch(() => {});
                     emailInput.value = data.customer_email;
                     form.style.display = "block";
                 } else {
