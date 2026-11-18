@@ -1,0 +1,11 @@
+# Search engines and AI answer tools are welcome to read the public pages.
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /checkout.html
+Disallow: /confirmation.html
+Disallow: /reset-password.html
+Disallow: /assessment-report.html
+Disallow: /book.html
+
+Sitemap: https://capitalistbuddha.ca/sitemap.xml
