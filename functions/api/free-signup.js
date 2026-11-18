@@ -3,6 +3,7 @@
 // if the visitor ticked the box, adds them to the Brevo "Free module" list.
 // The sign-in email itself is sent by Firebase from the browser.
 
+import { addToLists } from "../../lib/email.js";
 export async function onRequestPost({ request, env }) {
   let data;
   try {
@@ -48,22 +49,9 @@ export async function onRequestPost({ request, env }) {
     };
     const listId = Number(env.FREE_LIST_ID);
     try {
-      // Create the contact, or update it if it already exists
-      await fetch("https://api.brevo.com/v3/contacts", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ email, listIds: [listId], updateEnabled: true, attributes: { SOURCE: source } }),
-      });
-      // Make sure an existing contact is also added to the list
-      const r = await fetch(`https://api.brevo.com/v3/contacts/lists/${listId}/contacts/add`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ emails: [email] }),
-      });
-      if (!r.ok) console.log("Brevo list add:", r.status, await r.text());
+      await addToLists(env, email, [listId], { SOURCE: source }); // also adds to the Newsletter list
     } catch (e) {
-      console.log("Brevo error:", e && e.message);
-      // Don't block the free module if Brevo is unavailable.
+      console.log("Brevo error:", e && e.message); // never block the sign-up
     }
   }
 

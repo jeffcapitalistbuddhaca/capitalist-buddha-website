@@ -7,6 +7,7 @@
 //   "Brevo API Key"       (already exists)  - Brevo API key
 //   CONTACT_SENDER_EMAIL  (new, Text)       - a VERIFIED sender address in Brevo
 
+import { wrap, h, p, box, esc } from "../../lib/email.js";
 const CONTACT_TO_EMAIL = "jeff@capitalistbuddha.ca"; // where messages are delivered
 const BREVO_URL = "https://api.brevo.com/v3/smtp/email";
 
@@ -73,6 +74,13 @@ export async function onRequestPost(context) {
         `Email: ${email}\n\n` +
         `Message:\n${message}\n\n` +
         `(Click Reply to answer ${name} directly.)`,
+      htmlContent: wrap({
+        pre: "A new message from the website.",
+        body: h("New message from the website") +
+          p(`<b>Name:</b> ${esc(name)}<br><b>Email:</b> ${esc(email)}`) +
+          box("Message", p(esc(message).replace(/\n/g, "<br>"), "; margin:0")) +
+          p(`Click Reply to answer ${esc(name)} directly.`, "; font-size:16px"),
+      }),
     }),
   });
 

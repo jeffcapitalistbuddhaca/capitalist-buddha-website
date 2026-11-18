@@ -15,12 +15,12 @@
 
 import { jwtVerify, importX509 } from "jose";
 import { SECTIONS, scoreAssessment, BAND_LABEL } from "../../../js/assess-data.js";
+import { SITE, wrap, p, h, btn, SIGN, hello, esc, sendEmail as sendMail, addToLists } from "../../../lib/email.js";
 
 // ---- Settings (not secret) ----
 const PAYMENT_LINK_ID = "plink_1Ucq6GKLvdoBDUk6Mz2ujDZ1";   // the assessment Payment Link in Stripe
 const BUYERS_LIST_ID = 6;                     // Brevo list "Assessment buyers"
 const ADMIN_EMAIL = "jeff@capitalistbuddha.ca"; // can open every report; gets an email for each one
-const SITE = "https://capitalistbuddha.ca";
 
 const GOOGLE_CERTS_URL =
   "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com";
@@ -62,14 +62,18 @@ async function sessionEmail(url, env, context) {
   if (email && !(await env.COURSE_VIDEOS.head(marker))) {
     await env.COURSE_VIDEOS.put(marker, "sent");
     const link = SITE + "/assessment-start.html?for=" + encodeURIComponent(email);
-    context.waitUntil(sendEmail(env, email, name, "Your Consciousness Destabilization Risk Assessment: start or continue any time",
-      `<p>${name ? "Dear " + esc(name.split(" ")[0]) + "," : "Hello,"}</p>` +
-      `<p>Thank you for purchasing the full Consciousness Destabilization Risk Assessment.</p>` +
-      `<p>You can start, or continue where you left off, at any time and on any device:</p>` +
-      `<p><a href="${link}" style="display:inline-block;background:#c9a46a;color:#2f2a2c;padding:12px 26px;border-radius:999px;text-decoration:none;font-weight:bold">Start or continue my assessment</a></p>` +
-      `<p>Sign in with this email address (${esc(email)}). We will send you a one-time sign-in link. Your answers are saved as you go, and every question needs an answer. It takes about 15 to 20 minutes.</p>` +
-      `<p>When you submit, your personal report is ready straight away, and you can book your results review with Dr. Overall from the report.</p>` +
-      `<p>Warmly,<br>Dr. Jeffrey Overall</p>`).catch((e) => console.log("welcome email:", e && e.message)));
+    context.waitUntil(Promise.all([
+      sendMail(env, { to: email, name, subject: "Your Consciousness Destabilization Risk Assessment: start or continue any time", html: wrap({
+        pre: "Your link to start, or pick up where you left off.",
+        body: hello(name) +
+          p("Thank you for purchasing the full Consciousness Destabilization Risk Assessment.") +
+          p("You can start, or continue where you left off, at any time and on any device:") +
+          btn("Start or continue my assessment", link) +
+          p(`Sign in with this email address (${esc(email)}). We will send you a one-time sign-in link. Your answers are saved as you go, and every question needs an answer. It takes about 15 to 20 minutes.`) +
+          p("When you submit, your personal report is ready straight away, and you can book your results review with me from the report.") + SIGN,
+      }) }),
+      addToLists(env, email, [], { SOURCE: "assessment" }),
+    ]).catch((e) => console.log("welcome email:", e && e.message)));
   }
   return json({ email });
 }
@@ -128,15 +132,23 @@ async function submit(user, b, env, context) {
   const userLink = link + "&for=" + encodeURIComponent(rec.email);
   const band = BAND_LABEL[rec.report.overall.band];
   context.waitUntil(Promise.all([
-    sendEmail(env, rec.email, a.name, "Your Consciousness Destabilization Risk report is ready",
-      `<p>Dear ${esc(a.name)},</p><p>Thank you for completing the full Consciousness Destabilization Risk Assessment. Your personal report is ready.</p>` +
-      `<p><a href="${userLink}" style="display:inline-block;background:#c9a46a;color:#2f2a2c;padding:12px 26px;border-radius:999px;text-decoration:none;font-weight:bold">See my report</a></p>` +
-      `<p>At the end of your report you can book your results review with Dr. Overall.</p>` +
-      `<p>To open the report, sign in with this email address (${esc(rec.email)}). We will send you a one-time sign-in link.</p>` +
-      `<p>Warmly,<br>Dr. Jeffrey Overall</p><p style="font-size:12px;color:#777">This report is not diagnostic and is not medical, psychological or legal advice.</p>`),
-    sendEmail(env, ADMIN_EMAIL, "Jeff", `New full assessment: ${a.name} (${band})`,
-      `<p>${esc(a.name)} (${esc(rec.email)}) completed the full assessment.</p><p>Overall: <b>${band}</b> (${rec.report.overall.score.toFixed(2)})<br>` +
-      `Research consent: <b>${d.consent === "yes" ? "Yes" : "No"}</b></p><p><a href="${link}">Open the report</a> (sign in with ${ADMIN_EMAIL}).</p>`),
+    sendMail(env, { to: rec.email, name: a.name, subject: "Your Consciousness Destabilization Risk report is ready", html: wrap({
+      pre: "Your personal report, and booking your results review.",
+      body: hello(a.name) +
+        p("Thank you for completing the full Consciousness Destabilization Risk Assessment. Your personal report is ready.") +
+        btn("See my report", userLink) +
+        p("At the end of your report you can book your results review with me.") +
+        p(`To open the report, sign in with this email address (${esc(rec.email)}). We will send you a one-time sign-in link.`) + SIGN +
+        p(`P.S. If you are rebuilding your work after an awakening, my Conscious Business Course starts February 1, 2027. <a href="${SITE}/#courses" style="color:#3d696a">See the course</a>.`, "; font-size:16px"),
+      foot: "The assessment is not diagnostic and is not medical, psychological or legal advice.",
+    }) }),
+    sendMail(env, { to: ADMIN_EMAIL, name: "Jeff", subject: `New full assessment: ${a.name} (${band})`, html: wrap({
+      pre: "A new report is ready to review.",
+      body: h("New full assessment") +
+        p(`<b>${esc(a.name)}</b> (${esc(rec.email)}) completed the full assessment.`) +
+        p(`Overall: <b>${band}</b> (${rec.report.overall.score.toFixed(2)})<br>Research consent: <b>${d.consent === "yes" ? "Yes" : "No"}</b>`) +
+        btn("Open the report", link) + p(`Sign in with ${ADMIN_EMAIL} to open it.`, "; font-size:16px"),
+    }) }),
     addToBuyersList(env, rec.email, a.name),
   ]).catch((e) => console.log("assess email error:", e && e.message)));
 
@@ -240,31 +252,8 @@ async function paidSessions(email, env) {
 
 // ---------- Brevo ----------
 
-async function sendEmail(env, to, name, subject, html) {
-  const key = env["Brevo API Key"], sender = env.CONTACT_SENDER_EMAIL;
-  if (!key || !sender || !to) return;
-  const r = await fetch("https://api.brevo.com/v3/smtp/email", {
-    method: "POST",
-    headers: { "api-key": key, "content-type": "application/json", accept: "application/json" },
-    body: JSON.stringify({ sender: { name: "Dr. Jeffrey Overall", email: sender }, to: [{ email: to, name: name || to }], subject, htmlContent: html }),
-  });
-  if (!r.ok) console.log("Brevo email:", r.status, await r.text());
-}
-
 async function addToBuyersList(env, email, name) {
-  const key = env.BREVO_CONTACTS_KEY || env["Brevo API Key"];
-  if (!key || !BUYERS_LIST_ID) return;
-  const r = await fetch("https://api.brevo.com/v3/contacts", {
-    method: "POST",
-    headers: { "api-key": key, "content-type": "application/json", accept: "application/json" },
-    body: JSON.stringify({ email, listIds: [BUYERS_LIST_ID], updateEnabled: true, attributes: { FIRSTNAME: String(name || "").split(" ")[0], SOURCE: "assessment" } }),
-  });
-  if (!r.ok) console.log("Brevo buyers list:", r.status, await r.text());
-  await fetch(`https://api.brevo.com/v3/contacts/lists/${BUYERS_LIST_ID}/contacts/add`, {
-    method: "POST",
-    headers: { "api-key": key, "content-type": "application/json", accept: "application/json" },
-    body: JSON.stringify({ emails: [email] }),
-  });
+  await addToLists(env, email, [BUYERS_LIST_ID], { FIRSTNAME: String(name || "").split(" ")[0], SOURCE: "assessment" });
 }
 
 // ---------- Helpers ----------
@@ -275,9 +264,6 @@ function json(obj, status = 200) {
   return new Response(JSON.stringify(obj), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 }
 
-function esc(s) {
-  return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
 
 async function currentUser(request, env) {
   const h = request.headers.get("authorization") || "";
