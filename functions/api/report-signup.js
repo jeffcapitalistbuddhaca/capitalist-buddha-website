@@ -3,6 +3,7 @@
 // Checks the Firebase ID token, then adds the verified email to the Brevo list REPORT_LIST_ID.
 // Body (JSON): { token, consent: true, source }
 
+import { queue, inDays } from "../../lib/followups.js";
 import { addToLists } from "../../lib/email.js";
 import { jwtVerify, importX509 } from "jose";
 
@@ -36,6 +37,7 @@ export async function onRequestPost(context) {
   } else {
     console.log("Report signup: Brevo key or REPORT_LIST_ID missing");
   }
+  try { await queue(env, "F", email, "", inDays(3)); } catch (e) { console.log("followup queue:", e && e.message); }
   return json({ ok: true });
 }
 

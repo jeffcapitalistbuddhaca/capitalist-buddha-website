@@ -5,6 +5,7 @@
 //
 // Cloudflare settings used (all already exist): BREVO_CONTACTS_KEY (or "Brevo API Key"), "Brevo API Key", CONTACT_SENDER_EMAIL.
 
+import { queue, inDays } from "../../lib/followups.js";
 import { D, BANDS, FULL_ADDS, HIGH_NOTE } from "../../js/risk-data.js";
 import { SITE, wrap, p, ul, box, btn, bandBox, SIGN, hello, esc, sendEmail, addToLists } from "../../lib/email.js";
 
@@ -33,6 +34,7 @@ export async function onRequestPost(context) {
   context.waitUntil(Promise.all([
     sendResult(env, email, name, band),
     addToLists(env, email, [RISK_LIST_ID], attributes),
+    queue(env, "A", email, name, inDays(5)), // reminder to get the full assessment
   ]).catch((e) => console.log("risk-signup:", e && e.message)));
   return json({ ok: true });
 }
