@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book your session | Dr. Jeffrey Overall</title>
+    <meta name="robots" content="noindex">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=20261117">
+    <link rel="stylesheet" href="css/assess.css?v=20261117h">
+    <style>
+        .bk-list { list-style: none; padding: 0; margin: 18px 0; }
+        .bk-list li { margin: 0 0 12px; text-align: center; }
+        .calendly-inline-widget { min-width: 300px; height: 720px; }
+    </style>
+</head>
+<body>
+    <div class="cb-bg" aria-hidden="true">
+        <img src="images/prayer-flags.png" alt="" class="cb-bg-flags">
+        <span class="cb-bg-emblem"></span>
+        <img src="images/botanical-left.png" alt="" class="cb-bg-leaf cb-bg-leaf-l">
+        <img src="images/botanical-right-2.png" alt="" class="cb-bg-leaf cb-bg-leaf-r">
+    </div>
+    <main class="fa" id="bk">
+        <h1 id="bk-title">One moment&hellip;</h1>
+        <div id="bk-body"><p>Loading your booking links.</p></div>
+    </main>
+    <footer>
+        <img src="images/prayer-flags.png" alt="Prayer Flags" class="footer-prayer-flags">
+        <img src="images/botanical-footer-left.png" alt="Botanical" class="footer-botanical-left">
+        <img src="images/botanical-footer-right.png" alt="Botanical" class="footer-botanical-right">
+        <img src="images/emblem.png" alt="Capitalist Buddha" class="footer-emblem">
+        <div class="cb-social">
+            <a href="https://www.tiktok.com/@dr.jeffreyoverall" target="_blank" rel="noopener" aria-label="TikTok"><img src="images/social/tiktok.webp" alt="TikTok" width="32" height="32"></a>
+            <a href="https://www.instagram.com/dr.jeffreyoverall" target="_blank" rel="noopener" aria-label="Instagram"><img src="images/social/instagram.webp" alt="Instagram" width="32" height="32"></a>
+            <a href="https://www.linkedin.com/in/dr-jeffrey-overall-47a99b124/" target="_blank" rel="noopener" aria-label="LinkedIn"><img src="images/social/linkedin.webp" alt="LinkedIn" width="32" height="32"></a>
+            <a href="https://scholar.google.com/citations?user=VmGJH40AAAAJ&amp;hl=en" target="_blank" rel="noopener" aria-label="Google Scholar"><img src="images/social/scholar.webp" alt="Google Scholar" width="32" height="32"></a>
+        </div>
+        <p class="cb-foot-links"><a href="research.html">Research</a> &middot; <a href="terms.html">Terms &amp; refund policy</a> &middot; <a href="privacy.html">Privacy policy</a> &middot; <a href="/#contact">Contact</a></p>
+        <p>&copy; 2026 The Professor Inc. All rights reserved.</p>
+    </footer>
+<script>
+(function () {
+  var BUY = "https://buy.stripe.com/dRm28s1wGcJX9pJ8j99Zm01";
+  var title = document.getElementById("bk-title"), body = document.getElementById("bk-body");
+  var id = new URLSearchParams(location.search).get("session_id");
+  function esc(s) { return String(s || "").replace(/[&<>"']/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function noPurchase() {
+    title.textContent = "Work with me one-on-one";
+    body.innerHTML = '<p>One-on-one sessions with Dr. Jeffrey Overall are one hour each. After paying, you choose your time here.</p><p style="text-align:center"><a class="go" href="' + BUY + '">Work with me one-on-one</a></p>';
+  }
+  function calendly() {
+    if (document.getElementById("cal-js")) return;
+    var sc = document.createElement("script"); sc.id = "cal-js"; sc.async = true;
+    sc.src = "https://assets.calendly.com/assets/external/widget.js"; document.body.appendChild(sc);
+  }
+  function show(d) {
+    var pre = function (u) { return u + "?name=" + encodeURIComponent(d.name || "") + "&email=" + encodeURIComponent(d.email || "") + "&hide_gdpr_banner=1"; };
+    title.textContent = "Thank you. Book your session" + (d.qty > 1 ? "s." : ".");
+    var h = "<p>Your purchase includes " + d.qty + " session" + (d.qty > 1 ? "s" : "") + " of one hour. ";
+    if (d.qty > 1) {
+      h += "Below is one personal booking link for each session. Each link books one session and works only once.</p><ul class=\"bk-list\">";
+      d.links.forEach(function (u, i) { h += '<li><a class="go" href="' + esc(pre(u)) + '" target="_blank" rel="noopener">Book session ' + (i + 1) + "</a></li>"; });
+      h += "</ul>";
+    } else {
+      h += "Choose your time below. This personal booking link works only once.</p>" +
+        '<div class="calendly-inline-widget" data-url="' + esc(pre(d.links[0])) + '"></div>';
+      calendly();
+    }
+    h += '<p class="fine">We have also emailed these links to ' + esc(d.email) + ".</p>";
+    body.innerHTML = h;
+  }
+  function load(tries) {
+    fetch("/api/book?session_id=" + encodeURIComponent(id)).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (x) {
+        if (x.ok && x.d.links && x.d.links.length) return show(x.d);
+        if (x.ok && x.d.pending && tries < 10) return setTimeout(function () { load(tries + 1); }, 2000);
+        if (!x.ok && x.d.error === "not_found") return noPurchase();
+        title.textContent = "Something went wrong";
+        body.innerHTML = "<p>We could not load your booking links. Please refresh this page in a minute. If it keeps happening, contact us at jeff@capitalistbuddha.ca.</p>";
+      })
+      .catch(function () { title.textContent = "Something went wrong"; body.innerHTML = "<p>Please refresh this page.</p>"; });
+  }
+  if (!id) noPurchase(); else load(0);
+})();
+</script>
+</body>
+</html>
