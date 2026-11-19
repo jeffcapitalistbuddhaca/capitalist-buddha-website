@@ -12,8 +12,10 @@
     <link rel="stylesheet" href="css/style.css?v=20261117">
     <style>
         .st { max-width: 520px; margin: 0 auto; padding: 10vh 20px 40px; text-align: center; position: relative; z-index: 1; }
-        .logos { display: flex; justify-content: center; align-items: center; gap: 26px; margin: 0 0 18px; }
-        .logos img { height: 110px; width: auto; }
+        .logos { display: flex; flex-direction: column; align-items: center; gap: 22px; margin: 0 0 22px; }
+        .logos img.cb { height: 200px; width: auto; }
+        .logos img.prof { width: 260px; max-width: 80%; height: auto; }
+        @media (min-width: 768px) { .logos img.cb { height: 280px; } .logos img.prof { width: 360px; } }
         .st h1 { font-family: 'Playfair Display', Georgia, serif; color: #3d696a; font-size: 34px; margin: 0 0 10px; }
         .st p { font-size: 19px; line-height: 1.5; margin: 0 0 26px; }
         .st a.b { display: block; margin: 0 0 14px; padding: 15px 20px; border-radius: 999px; font-size: 20px; font-weight: 600; text-decoration: none; }
@@ -36,8 +38,7 @@
         <img src="images/botanical-right-2.png" alt="" class="cb-bg-leaf cb-bg-leaf-r">
     </div>
     <main class="st">
-        <div class="logos"><img src="images/start/professor-badge.png" alt="The Professor, Dr. Jeffrey Overall"><img src="images/start/cb-emblem-plum.png" alt="Capitalist Buddha"></div>
-        <h1>Dr. Jeffrey Overall</h1>
+        <div class="logos"><img class="cb" src="images/start/cb-emblem-pink.png" alt="Capitalist Buddha"><img class="prof" src="images/start/professor-wordmark.png" alt="The Professor, Dr. Jeffrey Overall"></div>
         <p>Research and content on the intersection of consciousness expansion and entrepreneurship.</p>
         <a class="b gold" href="risk-scale.html?src=start">Take the free consciousness destabilization risk assessment</a>
         <a class="b line" href="index.html?src=start#courses">See the courses</a>
