@@ -10,8 +10,8 @@ import { jwtVerify, importX509 } from "jose";
 // Course access length after purchase (6 months, same as the website text).
 const ACCESS_DAYS = 180;
 
-// Course session start dates (YYYY-MM-DD), oldest first. Add each new session here.
-const SESSION_STARTS = ["2027-02-01"];
+// Open enrolment: no session dates, so access starts at payment (see getAccessStart).
+const SESSION_STARTS = [];
 
 // Google's public certificates for Firebase ID tokens (from Firebase's
 // "Verify ID tokens using a third-party JWT library" instructions).
@@ -212,7 +212,7 @@ function isGuestEmail(email, guestList) {
 }
 
 // Returns an access object for Stripe Checkout Sessions matching this email.
-// Course access is 6 months (ACCESS_DAYS) starting from the session start date.
+// Course access is 6 months (ACCESS_DAYS) starting from payment.
 // Payment Link sessions are skipped (they are for other products, not the course).
 // The email comparison ignores capital letters, so "Jane@Example.com" matches "jane@example.com".
 async function hasActivePurchase(email, stripeKey) {
@@ -256,7 +256,7 @@ async function hasActivePurchase(email, stripeKey) {
         continue;
       }
 
-      // Session is valid: access runs ACCESS_DAYS from the session start
+      // Session is valid: access runs ACCESS_DAYS from payment
       const accessStart = getAccessStart(s.created);
       const accessEnd = accessStart + ACCESS_DAYS * 24 * 60 * 60;
 
@@ -298,8 +298,7 @@ function torontoMidnight(dateStr) {
   return Date.UTC(y, m - 1, d, 5) / 1000;
 }
 
-// Access starts on the first session start on or after the payment date (Toronto).
-// If there is no later session in SESSION_STARTS, access starts at payment.
+// Open enrolment: SESSION_STARTS is empty, so access starts at payment.
 function getAccessStart(paidSeconds) {
   const paidDay = torontoDate(paidSeconds);
   for (const start of SESSION_STARTS) {
