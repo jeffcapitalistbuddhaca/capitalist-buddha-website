@@ -2400,3 +2400,15 @@ body > main.rp { padding-top: 10vh !important; }
 body > main.rs, body > main.legal, body > main.rk { padding-top: 12vh !important; }
 @media (max-width: 768px) { body > main.rs, body > main.legal, body > main.rk { padding-top: 8vh !important; } }
 /* ===== END ARTWORK ON STANDALONE PAGES ===== */
+
+/* Contact tab: both logos side by side (matches /start) */
+.contact-logos { display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 40px; width: auto !important; right: 10px; filter: none; }
+.contact-logos img.cb { height: 290px; width: auto; flex: 0 0 auto; }
+.contact-logos img.prof { width: 340px; height: auto; flex: 0 1 auto; }
+@media (max-width: 768px) {
+    .contact-logos { max-width: none !important; gap: 16px; }
+    .contact-logos img.cb { margin-right: 16px; }
+    .contact-logos img.cb { height: 130px; }
+    .contact-logos img.prof { width: 200px; max-width: 55vw; }
+}
+#contact.active > .contact-badge.contact-logos { display: flex !important; flex-direction: row !important; justify-content: center !important; align-items: center !important; }
