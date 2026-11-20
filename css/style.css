@@ -2412,3 +2412,7 @@ body > main.rs, body > main.legal, body > main.rk { padding-top: 12vh !important
     .contact-logos img.prof { width: 200px; max-width: 55vw; }
 }
 #contact.active > .contact-badge.contact-logos { display: flex !important; flex-direction: row !important; justify-content: center !important; align-items: center !important; }
+/* Page titles: every tab title uses the same plum (#967ca0) */
+#home h1, #free > h2, #courses > h2, #professor h2, #login-form-container h3,
+#course-overview > h3:first-of-type, #book h3:first-of-type,
+#contact h2, .contact-section h2 { color: #967ca0 !important; }
