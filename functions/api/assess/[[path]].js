@@ -139,7 +139,7 @@ async function submit(user, b, env, context) {
         btn("See my report", userLink) +
         p("At the end of your report you can book your results review with me.") +
         p(`To open the report, sign in with this email address (${esc(rec.email)}). We will send you a one-time sign-in link.`) + SIGN +
-        p(`P.S. If you are rebuilding your work after an awakening, my Conscious Business Course starts February 1, 2027. <a href="${SITE}/#courses" style="color:#3d696a">See the course</a>.`, "; font-size:16px"),
+        p(`P.S. If you are rebuilding your work after an awakening, my Conscious Business Course is open for enrolment any time. <a href="${SITE}/#courses" style="color:#3d696a">See the course</a>.`, "; font-size:16px"),
       foot: "The assessment is not diagnostic and is not medical, psychological or legal advice.",
     }) }),
     sendMail(env, { to: ADMIN_EMAIL, name: "Jeff", subject: `New full assessment: ${a.name} (${band})`, html: wrap({

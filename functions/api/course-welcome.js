@@ -37,15 +37,15 @@ export async function onRequestPost(context) {
         body: hello(name) +
           p("Welcome to the Conscious Business Course. Thank you for enrolling.") +
           box("What happens next", ul([
-            "The course starts on <b>February 1, 2027</b>. Your 6 months of access count from that day.",
+            "Your course is open now. Your 6 months of access count from today.",
             "Log in on the course page with the email you paid with.",
-            "The 12 live weekly sessions are with me, and recordings are posted for you.",
-            "We will email you the dates and times of the live sessions closer to the start.",
+            "The live sessions are with me every two weeks, and recordings are posted for you.",
+            "We will email you the schedule for the live sessions.",
           ])) +
           btn("Go to the course", SITE + "/#courses") + SIGN,
       }) }),
       addToLists(env, email, [], { SOURCE: "course" }),
-      queue(env, "D", email, name, courseFollowupDate((s.created || 0) * 1000)), // 30 days after the session starts
+      queue(env, "D", email, name, courseFollowupDate((s.created || 0) * 1000)), // 30 days after purchase
     ]).catch((e) => console.log("course-welcome:", e && e.message)));
     return json({ ok: true });
   } catch (e) {
