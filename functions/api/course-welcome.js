@@ -39,7 +39,7 @@ export async function onRequestPost(context) {
           box("What happens next", ul([
             "Your course is open now. Your 6 months of access count from today.",
             "Log in on the course page with the email you paid with.",
-            "The live sessions are with me every two weeks, and recordings are posted for you.",
+            "The live sessions are with me every two weeks. They are not recorded, so you can speak freely.",
             "We will email you the schedule for the live sessions.",
           ])) +
           btn("Go to the course", SITE + "/#courses") + SIGN,
